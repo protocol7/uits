@@ -1,0 +1,72 @@
+README
+    Version: $Revision$
+    Date:    $Date$
+-------------------
+
+LICENSING
+   Licensing information for this project is contained in the file LICENSE included
+   in the same directory as this README file.
+
+INTRODUCTION
+
+    This README file describes the UITS_Tool version 1.0 distribution. 
+	
+	It is assumed that users of this tool have a familiarity with the Universal 
+	Music Group's Unique Identifier Technology Solution (UITS). This version of
+	the UITS_Tool supports the UITS Technical Specification, v1.1. For further 
+	information on UITS, contact Universal Music Group.
+
+    	UITS_Tool is a command-line tool that creates, validates, and extracts UITS
+	payloads. Version 0.01 works with only MP3 formatted audio files. 
+	
+	This distribution includes the following directories:
+	
+		uits/       The project root directory
+		  trunk/    The Subversion trunk
+			Source/       The source (.c) and header (.h) files used for both MacOS and Windows
+			uits-osx-make/
+				The Makefile, executable (UITS_Tool), libraries, shell script, and test files
+				for building and running the tool from the Unix command line.
+			uits-osx-code/
+				A Mac X-Code project for building and running the UITS_Tool.
+			uits-win-mingw/
+				The Makefile (windows.mak), executable (UITS_Tool.exe), libraries, scripts
+				and test files for building the tool using MinGW and running the tool
+				from a DOS command line.
+				
+RUNNING UITS_Tool
+	Under both Windows and MacOS, the tool is run from the command line. Open a terminal
+	or DOS command window, cd to the directory containing the executable for the environment.
+	For help:
+		UITS_Tool help	   (Unix)
+		UITS_Tool.exe help (DOS)
+		
+	The tool is also distributed with shell (or DOS command) scripts that make running the
+	tool easier. Under unix, type ./runUITS.sh. Under DOS, type runUITS_create.bat or
+	runUITS_verify.bat.
+
+BUILDING UITS_Tool
+
+   The UITS_Tool is written in C and has been compiled using the GNU C compiler on Mac
+   and Windows (MinGW). It uses three open source libraries. Compiled versions of those
+   libraries are distributed with the tool. To build in another environment, those
+   libraries must be re-compiled. The three libraries are:
+			OpenSSL -  (http://www.openssl.org/) Version 1.0 beta4 
+			Libxml2 -  (http://xmlsoft.org/) Distributed with MacOSX 
+			Mini-XML - (http://www.minixml.org/)
+			
+	To build under MacOSX using X-Code, use the xcode project,
+		uits-osx-xcode/uits-osx-xcode.xcodeproj
+		
+	To build under MacOSX from the command line:
+		1. open a terminal window
+		2. cd to uits-osx-make
+		3. make
+		
+	To build under Windows:
+		1. Install MinGW and Msys
+		2. Run MinGW 
+		3. cd to uits-win-mingw
+		4. make -f windows.mak
+	
+	

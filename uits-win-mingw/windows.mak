@@ -1,0 +1,57 @@
+#
+# Project: UMG Unique Identifier Technology Solution (UITS) Tool
+# File:    windows.mak
+#
+# This makefile will build a Windows version of the UITS Tool. This
+# file should be run under MinGW. This makefile resides in a sub-directory
+# of the project directory which contains all of the .c and .h files.
+#  
+#  $Date$
+#  $Revision$
+# 
+
+#
+# Compiler tools definitions...
+#
+
+CC      = gcc
+OPTIM   = -Os -g
+CFLAGS  = $(OPTIM) -I libxml2/include -I ssl/include
+LDFLAGS = $(OPTIM)
+OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsPayloadManager.o uitsOpenSSL.o
+RM = rm
+
+#
+# Rules...
+#
+#
+
+# the source files are up a directory
+vpath %.c ../source
+
+#
+# UITS_Tool Target
+#
+
+UITS_Tool.exe :$(OBJECTS)
+	$(CC) $(LDFLAGS) -o UITS_Tool.exe   $(OBJECTS) mxml/lib/libmxml.a libxml2/lib/libxml2.a -lwsock32 ssl/lib/libcrypto.a -lgdi32 ssl/lib/libssl.a  
+
+
+#
+# UITS_Tool objects
+#
+
+.o : %.c
+	$(CC) $(CFLAGS) -c $<
+
+
+#
+# Clean everything...
+#
+
+clean:
+	$(RM) $(OBJECTS)
+
+#
+# End 
+#

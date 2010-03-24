@@ -1,0 +1,273 @@
+// !$*UTF8*$!
+{
+	08FB7793FE84155DC02AAC07 /* Project object */ = {
+		activeArchitecturePreference = i386;
+		activeBuildConfigurationName = Debug;
+		activeExecutable = 83D0F524115AC465003129FF /* UITS_Tool */;
+		activeSDKPreference = macosx10.5;
+		activeTarget = 8DD76FA90486AB0100D96B5E /* UITS_Tool */;
+		addToTargets = (
+			8DD76FA90486AB0100D96B5E /* UITS_Tool */,
+		);
+		codeSenseManager = 83D0F52A115AC474003129FF /* Code sense */;
+		executables = (
+			83D0F524115AC465003129FF /* UITS_Tool */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXExecutablesDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXExecutablesDataSource_NameID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					22,
+					300,
+					228.58349609375,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXExecutablesDataSource_ActiveFlagID,
+					PBXExecutablesDataSource_NameID,
+					PBXExecutablesDataSource_CommentsID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					341,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					301,
+					60,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 291165370;
+			PBXWorkspaceStateSaveDate = 291165370;
+		};
+		perUserProjectItems = {
+			83EB93B1115AD1A4005F460F /* PBXTextBookmark */ = 83EB93B1115AD1A4005F460F /* PBXTextBookmark */;
+			83EB93BC115AD4C2005F460F /* PBXTextBookmark */ = 83EB93BC115AD4C2005F460F /* PBXTextBookmark */;
+		};
+		sourceControlManager = 83D0F529115AC474003129FF /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	83D0F524115AC465003129FF /* UITS_Tool */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			NO,
+			YES,
+			YES,
+			YES,
+			NO,
+			NO,
+			YES,
+			NO,
+			YES,
+			NO,
+			YES,
+			NO,
+			NO,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+			YES,
+		);
+		argumentStrings = (
+			version,
+			help,
+			"help create",
+			"help extract",
+			"help key",
+			"help hash",
+			"help verify",
+			extract,
+			"--verify",
+			"-b test/pubRSA2048.pem",
+			"-u test/extracted_payload.xml",
+			"-a test/test_audio.mp3",
+			key,
+			"--pub test/pubRSA2048.pem",
+			"--pub test/pubDSA2048.pem",
+			hash,
+			"--b64",
+			"--audio test_audio.mp3",
+			verify,
+			"--algorithm RSA2048",
+			"--pub test/pubRSA2048.pem",
+			"--hashfile test/test_audio_hash.xml",
+			"--hash \"E95987DF23D6C8A207FCD450D7DA072F784435360D9B7A424B395882D5236458\"",
+			"--uits test/test_payload.xml",
+			"--xsd test/uits.xsd",
+			"--audio test/test_audio.mp3",
+			create,
+			"--xsd test/uits.xsd",
+			"--pubID \"33dce5a4f8b67303a290dc5145037569ca38036d\"",
+			"--ml",
+			"--b64",
+			"--audio test/test_audio.mp3",
+			"--embed",
+			"--uits test/test_embed_payload.mp3",
+			"--algorithm RSA2048",
+			"--algorithm DSA2048",
+			"--pub test/pubRSA2048.pem",
+			"--priv test/privateRSA2048.pem",
+			"--priv test/privateDSA2048.pem",
+			"--pub test/pubDSA2048.pem",
+			"--nonce \"QgYnkgYS\"",
+			"--Distributor \"A Distributor\"",
+			"--ProductID \"My product\"",
+			"--AssetID \"ES1700800499\"",
+			"--AssetID_type \"ISRC\"",
+			"--TID \"Transaction ID\"",
+			"--UID \"User ID\"",
+			"--URL \"http://www.umusic.com\"",
+			"--PA \"explicit\"",
+			"--Copyright \"allrightsreserved\"",
+			"--Extra \"extra content\"",
+			"--Extra_type \"blah\"",
+			"--Time \"2008-08-30T13:15:04Z\"",
+			"--pad 1024",
+			"-v",
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = UITS_Tool;
+		savedGlobals = {
+		};
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	83D0F529115AC474003129FF /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+	};
+	83D0F52A115AC474003129FF /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	83EB938F115AD18C005F460F /* main.c */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {558, 12545}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 212}";
+		};
+	};
+	83EB93B1115AD1A4005F460F /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 83EB938F115AD18C005F460F /* main.c */;
+		name = "main.c: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 278;
+		vrLoc = 0;
+	};
+	83EB93BC115AD4C2005F460F /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 83EB938F115AD18C005F460F /* main.c */;
+		name = "main.c: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 212;
+		vrLoc = 0;
+	};
+	8DD76FA90486AB0100D96B5E /* UITS_Tool */ = {
+		activeExec = 0;
+		executables = (
+			83D0F524115AC465003129FF /* UITS_Tool */,
+		);
+	};
+}
