@@ -15,7 +15,7 @@
 
 CC      = gcc
 OPTIM   = -Os -g -arch i386
-CFLAGS  = $(OPTIM) -I /usr/include/libxml2 -I openssl/include
+CFLAGS  = $(OPTIM) -I /usr/include/libxml2 -I openssl/include -I mxml/include
 LDFLAGS = $(OPTIM)
 OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsPayloadManager.o uitsOpenSSL.o
 RM = rm
