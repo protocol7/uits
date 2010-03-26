@@ -5,8 +5,8 @@
  *  Created by Chris Angelli on 11/24/09.
  *  Copyright 2009 Universal Music Group. All rights reserved.
  *
- *  $Date: 2010/02/17 21:44:42 $
- *  $Revision: 1.10 $
+ *  $Date$
+ *  $Revision$
  *
  */
 
@@ -30,7 +30,7 @@
 #define LIBXML_SCHEMAS_ENABLED
 #include <libxml/xmlschemastypes.h>
 
-#include "mxml.h"
+#include <mxml.h>
 
 #include "uitsOpenSSL.h"
 #include "uitsPayloadManager.h"

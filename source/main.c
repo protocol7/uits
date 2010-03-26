@@ -7,8 +7,8 @@
  *  Created by Chris Angelli on 11/24/09.
  *  Copyright 2009 Universal Music Group. All rights reserved.
  *
- *  $Date: 2010/03/02 19:05:51 $
- *  $Revision: 1.24 $
+ *  $Date$
+ *  $Revision$
  */
 
 #include "uits.h"
