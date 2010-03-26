@@ -38,7 +38,6 @@
 		83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcrypto_1.0.0-beta4.a"; path = "openssl/lib/libcrypto_1.0.0-beta4.a"; sourceTree = SOURCE_ROOT; };
 		83D0F54D115AC6B4003129FF /* libmxml.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmxml.a; path = mxml/lib/libmxml.a; sourceTree = SOURCE_ROOT; };
 		83EB938F115AD18C005F460F /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../source/main.c; sourceTree = SOURCE_ROOT; };
-		83EB9390115AD18C005F460F /* mxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mxml.h; path = ../source/mxml.h; sourceTree = SOURCE_ROOT; };
 		83EB9391115AD18C005F460F /* uits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uits.h; path = ../source/uits.h; sourceTree = SOURCE_ROOT; };
 		83EB9392115AD18C005F460F /* uitsAudioFileManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsAudioFileManager.c; path = ../source/uitsAudioFileManager.c; sourceTree = SOURCE_ROOT; };
 		83EB9393115AD18C005F460F /* uitsAudioFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsAudioFileManager.h; path = ../source/uitsAudioFileManager.h; sourceTree = SOURCE_ROOT; };
@@ -85,7 +84,6 @@
 			isa = PBXGroup;
 			children = (
 				83EB938F115AD18C005F460F /* main.c */,
-				83EB9390115AD18C005F460F /* mxml.h */,
 				83EB9391115AD18C005F460F /* uits.h */,
 				83EB9392115AD18C005F460F /* uitsAudioFileManager.c */,
 				83EB9393115AD18C005F460F /* uitsAudioFileManager.h */,
@@ -179,6 +177,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = (
+					"./mxml/include/**",
 					"./openssl/include/**",
 					"/usr/include/libxml2/**",
 				);
