@@ -11,19 +11,19 @@
 
 # ./UITS_Tool verify \
 # --verbose \
-# --audio test/test_payload.mp3 \
-# --pub test/pubRSA2048.pem 
+# --audio ../test/test_payload.mp3 \
+# --pub ../test/pubRSA2048.pem 
 
 
 ./UITS_Tool create \
 --verbose \
---audio test/test_audio.mp3 \
---xsd test/uits.xsd \
---uits test/test_payload.mp3 \
+--audio ../test/test_audio.mp3 \
+--xsd ../test/uits.xsd \
+--uits ../test/test_payload.mp3 \
 --embed \
 --algorithm RSA2048 \
---priv  test/privateRSA2048.pem \
---pub test/pubRSA2048.pem \
+--priv  ../test/privateRSA2048.pem \
+--pub ../test/pubRSA2048.pem \
 --pubID "33dce5a4f8b67303a290dc5145037569ca38036d" \
 --nonce "QgYnkgYS" \
 --Distributor "A Distributor" \
