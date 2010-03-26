@@ -1,6 +1,7 @@
 README
-    Version: $Revision$
-    Date:    $Date$
+     $Author$
+     $Revision$
+     $Date$
 -------------------
 
 LICENSING
@@ -23,7 +24,10 @@ INTRODUCTION
 	
 		uits/       The project root directory
 		  trunk/    The Subversion trunk
-			Source/       The source (.c) and header (.h) files used for both MacOS and Windows
+                        doc/          UITS documentation
+			source/       The source (.c) and header (.h) files used for both MacOS and Windows
+			test/         Platform-independent test files that are used by scripts in each of the
+                                      platform-specific build directories.
 			uits-osx-make/
 				The Makefile, executable (UITS_Tool), libraries, shell script, and test files
 				for building and running the tool from the Unix command line.

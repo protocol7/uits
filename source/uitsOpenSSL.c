@@ -5,8 +5,8 @@
  *  Created by Chris Angelli on 11/24/09.
  *  Copyright 2009 Universal Music Group. All rights reserved.
  *
- *	$Date: 2010/03/02 19:05:51 $
- *	$Revision: 1.11 $
+ *  $Date$
+ *  $Revision$
  *
  *  This module calls the OpenSSL api to manage the hashing, signature creation and
  *  signature validation for the UITS tool.
