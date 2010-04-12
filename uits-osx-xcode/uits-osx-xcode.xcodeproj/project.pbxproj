@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8385F558116688CE00277C6E /* uitsMP4Manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */; };
 		83D0F548115AC66B003129FF /* libxml2.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F547115AC66B003129FF /* libxml2.2.dylib */; };
 		83D0F54A115AC6A7003129FF /* libssl_1.0.0-beta4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */; };
 		83D0F54C115AC6AD003129FF /* libcrypto_1.0.0-beta4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */; };
@@ -33,6 +34,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8385F4FE116684D300277C6E /* uitsMP4Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsMP4Manager.h; path = ../source/uitsMP4Manager.h; sourceTree = SOURCE_ROOT; };
+		8385F557116688CE00277C6E /* uitsMP4Manager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsMP4Manager.c; path = ../source/uitsMP4Manager.c; sourceTree = SOURCE_ROOT; };
 		83D0F547115AC66B003129FF /* libxml2.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.2.dylib; path = usr/lib/libxml2.2.dylib; sourceTree = SDKROOT; };
 		83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libssl_1.0.0-beta4.a"; path = "openssl/lib/libssl_1.0.0-beta4.a"; sourceTree = SOURCE_ROOT; };
 		83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcrypto_1.0.0-beta4.a"; path = "openssl/lib/libcrypto_1.0.0-beta4.a"; sourceTree = SOURCE_ROOT; };
@@ -83,6 +86,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				8385F557116688CE00277C6E /* uitsMP4Manager.c */,
+				8385F4FE116684D300277C6E /* uitsMP4Manager.h */,
 				83EB938F115AD18C005F460F /* main.c */,
 				83EB9391115AD18C005F460F /* uits.h */,
 				83EB9392115AD18C005F460F /* uitsAudioFileManager.c */,
@@ -161,6 +166,7 @@
 				83EB939C115AD18C005F460F /* uitsMP3Manager.c in Sources */,
 				83EB939D115AD18C005F460F /* uitsOpenSSL.c in Sources */,
 				83EB939E115AD18C005F460F /* uitsPayloadManager.c in Sources */,
+				8385F558116688CE00277C6E /* uitsMP4Manager.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

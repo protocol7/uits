@@ -453,10 +453,6 @@ void uitsCheckRequiredParams (char *command)
 	vprintf("uitsCheckRequiredParams command: %s\n", command);
 	
 	
-	/* for the first version of the tool, MP3 audio files must be ID3 version 2.3 */
-	if (audioFileName) {
-		mp3CheckFileVersion (audioFileName);
-	}
 
 	if (strcmp(command, "create") == 0) {
 		if (!audioFileName) {

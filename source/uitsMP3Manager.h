@@ -44,7 +44,6 @@
  */
 
 #define MP3_HEADER_SIZE 10
-#define MP3_IO_BUFFER_SIZE 500000
 
 /* 
  * Structures
@@ -75,16 +74,23 @@ typedef struct {
 	int vbrHeaderflag;	// 1= 'xing', 'Info', or 'VBR' frame		
 } MP3_AUDIO_FRAME_HEADER;
 
+/* 
 typedef struct {
 	unsigned char header[10];
 	unsigned int  size;
 	unsigned char *data;
 } MP3_PRIV_TAG;
-
+ */
 
 /*
  *  Function Declarations
  */ 
+
+/* 
+ * PUBLIC Functions 
+ */
+
+int mp3IsValidFile			(char *audioFileName); 
 
 int mp3EmbedPayload		    (char *audioFileName, 
 							 char *audioFileNameOut, 
@@ -95,8 +101,12 @@ char *mp3ExtractPayload		(char *audioFileName);
 
 char *mp3GetMediaHash		(char *audioFileName);
 
-int mp3ValidateMediaHash	(char *audioFileName, 
-							 char *mediaHashValue);
+// int mp3ValidateMediaHash	(char *audioFileName, 
+//							 char *mediaHashValue);
+
+/* 
+ * PRIVATE Functions 
+ */
 
 int mp3CheckFileVersion		(char *audioFileName);
 
@@ -112,7 +122,6 @@ int  mp3HandleID3Tag		(FILE *audioInFP, FILE *audioOutFP);
 int  mp3HandleID3Frame		(FILE *audioInFP, FILE *audioOutFP);
 int  mp3SkipPadBytes		(FILE *audioInFP);
 int  mp3WritePadBytes		(FILE *audioOutFP, int numPadBytes);
-int  mp3BufferedCopy		(FILE *audioInFP, FILE *audioOutFP, unsigned long numBytes);
 
 int  mp3WritePRIVFrame		(FILE *audioOutFP, char *uitsPayloadXML); 
 int	 mp3WriteID3Header		(FILE *audioOutFP, MP3_ID3_HEADER *mp3Header);

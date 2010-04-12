@@ -18,7 +18,7 @@ CC      = gcc
 OPTIM   = -Os -g
 CFLAGS  = $(OPTIM) -I libxml2/include -I ssl/include -I mxml/include
 LDFLAGS = $(OPTIM)
-OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsPayloadManager.o uitsOpenSSL.o
+OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsMP4Manager.o uitsPayloadManager.o uitsOpenSSL.o
 RM = rm
 
 #

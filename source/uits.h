@@ -36,6 +36,7 @@
 #include "uitsPayloadManager.h"
 #include "uitsAudioFileManager.h"
 #include "uitsMP3Manager.h"
+#include "uitsMP4Manager.h"
 
 
 #define OK 0
@@ -52,8 +53,8 @@ int verboseFlag;								// verbose message flag set via command line
 int debugFlag;									// debug message flag set via command line
 
 
-void uitsHandleErrorINT(char *uitsModuleName,  // name of uitsModule where error occured
-						char *functionName,	// name of calling function 
+void uitsHandleErrorINT(char *uitsModuleName,	// name of uitsModule where error occured
+						char *functionName,		// name of calling function 
 						int returnValue,		// return value to check
 						int sucessValue,		// success value, if isPtrFlag is FALSE
 						char *errorMessage);	// error message string, if any	

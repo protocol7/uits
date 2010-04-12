@@ -18,12 +18,31 @@
 #ifndef _uitsaudiofileManager_h
 #  define _uitsaudiofileManager_h
 
+#define AUDIO_IO_BUFFER_SIZE 500000
+
+
 /*
  * UITS Supported audio file types
  */ 
 enum uitsAudioFileTypes {
-	MP3
+	MP3,
+	MP4
 };
+
+/* The audio callbacks */
+
+typedef int  isValidFileCB		(char*);
+typedef char *getMediaHashCB	(char *);
+typedef int  embedPayloadCB		(char *, char *, char *, int);
+typedef char *extractPaylaodCB	(char *);
+
+typedef struct {
+	int					uitsAudioFileType;
+	isValidFileCB		*uitsAudioIsValidFile;
+	getMediaHashCB		*uitsAudioGetMediaHash;
+	embedPayloadCB		*uitsAudioEmbedPayload;
+	extractPaylaodCB	*uitsAudioExtractPayload;
+} UITS_AUDIO_CALLBACKS;
 
 /*
  * Functions
@@ -38,7 +57,11 @@ int		uitsAudioEmbedPayload		(char *audioFileName,
 									 int  numPadBytes);
 
 char	*uitsAudioGetMediaHash		(char *audioFileName); 
-int		uitsAudioGetAudioFileType	(char *audioFileName); 
+
+UITS_AUDIO_CALLBACKS *uitsAudioGetCB (char *audioFileName);
+int uitsAudioBufferedCopy			(FILE *audioInFP, 
+									 FILE *audioOutFP, 
+									 unsigned long numBytes);
 
 
 #endif

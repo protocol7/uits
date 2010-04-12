@@ -894,10 +894,10 @@ void uitsHandleErrorINT(char *uitsModuleName,  // name of uitsModule where error
  *
  */
 
-void uitsHandleErrorPTR (char *uitsModuleName,  // name of uitsModule where error occured
-							char *functionName,	// name of calling function 
+void uitsHandleErrorPTR (char *uitsModuleName,      // name of uitsModule where error occured
+							char *functionName,	    // name of calling function 
 							void *returnValue,		// return value to check
-							char *errorMessage)	// error message string, if any	
+							char *errorMessage)	    // error message string, if any	
 {
 	int gotError = FALSE;	// clear the global error flag
 	
@@ -945,7 +945,7 @@ unsigned char *uitsReadFile (char *filename)
 	}
 	
 	/* read the whole file into memory */
-	fseek(fp, 0L, SEEK_END);  /* Position to end of file */
+	fseeko(fp, 0L, SEEK_END);  /* Position to end of file */
 	fileLen = ftell(fp);      /* Get file length */
 	rewind(fp);               /* Back to start of file */
 	

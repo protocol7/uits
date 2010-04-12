@@ -17,7 +17,7 @@ char *mp3ModuleName = "uitsMP3Manager.c";
 
 int   id3v1TagSize = 128L;
 char *id3privFrameEmail = "mailto:uits-info@umusic.com";
-int	intelCPUFlag = 1;
+int	  intelCPUFlag = 1;
 
 // int   id3v22Flag; // version 1.0 of tool only supports MP3 ID3 v23
 
@@ -60,6 +60,123 @@ char *emphasis[] =			{	"     none",
 								" reserved", 
 								"CCIT J.17"};
 
+
+/*
+ *
+ * Function: mp3IsValidFile
+ * Purpose:	 Determine if an audio file is an MP3 file
+ *
+ * Returns:   TRUE if MP3, FALSE otherwise
+ */
+
+int mp3IsValidFile (char *audioFileName) 
+{
+	
+	FILE *audioFP;
+	MP3_ID3_HEADER		   *mp3ID3Header;
+	
+	audioFP = fopen(audioFileName, "rb");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3IsValidFile", audioFP, "Couldn't open audio file for reading\n");
+	
+	/* If this is an MP3 file, it will start with an ID3 tag header */
+	mp3ID3Header = mp3ReadID3Header(audioFP);
+	fclose (audioFP);
+	
+	if (mp3ID3Header) {
+		vprintf("Audio file is MP3\n");
+		
+		/* for the first version of the tool, MP3 audio files must be ID3 version 2.3 */
+		mp3CheckFileVersion (audioFileName);
+		return (TRUE);
+	} else {
+		return (FALSE);
+	}
+	
+}
+
+/*
+ *
+ * Function: mp3GetMediaHash
+ * Purpose:	 Calcluate the media hash for an MP3 file
+ *				1. Read the size of the ID3 tag and skip over it
+ *				2. If the first frame of audio is a xing, info or VBRI frame, skip it.
+ *				3. If there is a 128 byte ID3v1 tag at the end of the file, make sure skip it
+ *				4. Read and hash the audio frames until EOF or ID3v1 tag
+ *
+ * Returns:   Pointer to the hashed frame data
+ */
+
+char *mp3GetMediaHash (char *audioFileName) 
+{
+	FILE *audioFP;
+	MP3_ID3_HEADER		   *mp3ID3Header;
+	MP3_AUDIO_FRAME_HEADER *mp3AudioFrameHeader;
+	int audioFrameStart, audioFrameEnd, audioFrameLength;
+	UITS_digest *mediaHash;
+	char *mediaHashString;
+	int foundPadBytes;
+	
+
+	audioFP = fopen(audioFileName, "rb");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", audioFP, "Couldn't open audio file for reading\n");
+	
+	/* The file should start with an ID3 tag header */
+	mp3ID3Header = mp3ReadID3Header(audioFP);
+	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", audioFP, "Couldn't read ID3 Tag header\n");
+	
+	/* seek to the first audio frame, which will be after the MP3 ID3 tag header (10 bytes) */
+	audioFrameStart = MP3_HEADER_SIZE + mp3ID3Header->size;
+	fseeko(audioFP, audioFrameStart, SEEK_CUR);
+	
+	/* skip pad bytes if any */
+	mp3SkipPadBytes (audioFP);
+	
+	foundPadBytes = ftello(audioFP) - audioFrameStart;
+	
+	if (foundPadBytes) {
+		fprintf(stderr, "Warning: Illegal MP3 file. ID3 frame header size does not include pad bytes\n");
+	}
+	
+	
+	mp3AudioFrameHeader = mp3ReadAudioFrameHeader(audioFP);
+	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", mp3AudioFrameHeader, "Coudln't read Audio Frame Header\n");
+	// vprintf("Read first Audio Frame: \n");
+	// vprintf("\tframe length: %04ld bitrate: %06ld samplerate: %06ld \n", 
+	//		mp3AudioFrameHeader->frameLength, mp3AudioFrameHeader->bitrate, mp3AudioFrameHeader->samplerate);	
+	
+	/* if the first frame of audio is a VBR frame (XING, Info, VBR), skip it */
+	if (mp3AudioFrameHeader->vbrHeaderflag) {
+		vprintf("Skipping XING Frame\n");
+		fseeko(audioFP, mp3AudioFrameHeader->frameLength, SEEK_CUR);
+	}
+	
+	audioFrameStart = ftello(audioFP);
+	
+	/* calculate how long the audio frame data is by seeking to EOF and saving size  */
+	fseeko(audioFP, 0L, SEEK_END);
+	audioFrameEnd = ftello(audioFP);	
+	fseeko(audioFP, audioFrameStart, SEEK_SET);
+	
+	/* skip the 128 byte ID3v1 tag at the end of the file, if it's there */
+	if (mp3HasID3v1Tag(audioFP)) {
+		audioFrameEnd -= id3v1TagSize;
+	}
+	
+	audioFrameLength = audioFrameEnd - audioFrameStart;
+	
+	mediaHash = uitsCreateDigestBuffered (audioFP, audioFrameLength, "SHA256") ;
+	
+	mediaHashString = uitsDigestToString(mediaHash);
+	
+	/* cleanup */
+	fclose(audioFP);
+	
+	/* CMA: these two cleanup calls were coredumping under windows. need to investigate */
+	//	free(mp3AudioFrameHeader);
+	//	free(mp3ID3Header);
+	
+	return (mediaHashString);
+}
 
 /*
  *
@@ -125,7 +242,7 @@ int mp3EmbedPayload  (char *audioFileName,
 				break;
 				
 			default:
-				fprintf(stderr, "Unidentified frame at %ld\n", (ftell(audioInFP) - 4));
+				fprintf(stderr, "Unidentified frame at %ld\n", (ftello(audioInFP) - 4));
 				break;
 		}
 		
@@ -140,26 +257,26 @@ int mp3EmbedPayload  (char *audioFileName,
 	uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", err, OK, "Couldn't add pad bytes to ID3 tag\n");
 
 	/* Update the ID3V2 tag size */
-	id3TagSize = ftell(audioOutFP);
+	id3TagSize = ftello(audioOutFP);
 	id3Header->size = 	id3TagSize - 10;		/* size does not include 10 header bytes */
-	fseek(audioOutFP, 0, SEEK_SET);				/* seek to start of file for writing */
+	fseeko(audioOutFP, 0, SEEK_SET);				/* seek to start of file for writing */
 
 	err = mp3WriteID3Header(audioOutFP, id3Header); 
 	uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", err, OK, "Couldn't write MP3 ID3 header\n");
 	
 	/* reset file pointer to end of ID3 frames */
-	fseek(audioOutFP, id3TagSize, SEEK_SET);				/* seek to start of file for writing */
+	fseeko(audioOutFP, id3TagSize, SEEK_SET);				/* seek to start of file for writing */
 
 	/* copy the remaining audio frames from the input file to the output file */	
 	/* calculate how long the audio frame data is by seeking to EOF and saving size  */
-	audioFrameStart = ftell(audioInFP);
-	fseek(audioInFP, 0L, SEEK_END);
-	audioFrameEnd = ftell(audioInFP);		/* note that we're just going to pass the ID3V1TAG through */
+	audioFrameStart = ftello(audioInFP);
+	fseeko(audioInFP, 0L, SEEK_END);
+	audioFrameEnd = ftello(audioInFP);		/* note that we're just going to pass the ID3V1TAG through */
 	
-	fseek(audioInFP, audioFrameStart, SEEK_SET);
+	fseeko(audioInFP, audioFrameStart, SEEK_SET);
 	audioFrameLength = audioFrameEnd - audioFrameStart;
 	
-	mp3BufferedCopy(audioInFP, audioOutFP, audioFrameLength);
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, audioFrameLength);
 	
 	
 	/* cleanup */
@@ -223,7 +340,7 @@ char *mp3ExtractPayload (char *audioFileName)
 				break;
 				
 			default:
-				printf("Unidentified frame at %ld\n", (ftell(audioInFP) - 4));
+				printf("Unidentified frame at %ld\n", (ftello(audioInFP) - 4));
 				break;
 		}
 		
@@ -338,7 +455,7 @@ int mp3HandleID3Frame (FILE *audioInFP, FILE *audioOutFP)
 
 	/* write the frame to the output file */
 
-	err = mp3BufferedCopy (audioInFP, audioOutFP, size);
+	err = uitsAudioBufferedCopy (audioInFP, audioOutFP, size);
 	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Frame", err, size, 
 					"Error copying ID3 Frame from input audio file to output audio file\n");
 			
@@ -359,7 +476,7 @@ int mp3SkipPadBytes (FILE *audioInFP)
 	unsigned char c = 0;
 	int seekStart, padcount;
 	
-	seekStart = ftell(audioInFP);
+	seekStart = ftello(audioInFP);
 	
 	while (!c)
 	{
@@ -367,7 +484,7 @@ int mp3SkipPadBytes (FILE *audioInFP)
 		padcount++;
 	}
 	padcount--;
-	fseek(audioInFP, -1, SEEK_CUR);
+	fseeko(audioInFP, -1, SEEK_CUR);
 
 	/* dprintf("Zero-padding start: %ld, end: %ld, total: %ld, next non-zero byte %02x.\n", 
 	 seekStart, seekStart + padcount, padcount, c); */
@@ -529,126 +646,6 @@ char *mp3FindUITSPayload (FILE *audioInFP)
 	
 }
 
-/*
- *	Function: mp3BufferedCopy
- *	Purpose:  Copy data through a buffer directly from the audio input file to the audio output file.
- *			  Leaves input and output file pointers at end of copied bytes
- *	Returns:  Number of bytes copied
- *
- */
-
-int mp3BufferedCopy (FILE *audioInFP, FILE *audioOutFP, unsigned long numBytes)
-{
-	unsigned char *ioBuffer = calloc(MP3_IO_BUFFER_SIZE, 1);
-	unsigned long  bytesLeft;
-	unsigned long  bufferSize;		/* size of the buffer to write */
-	unsigned long  bytesRead;			/* number of bytes read from the input file */
-	unsigned long  bytesWritten;		/* number of bytes written to the output file */
-	unsigned long  totalBytesWritten = 0;
-	
-	// read and process the data in the file in  chunks 
-	bytesLeft = numBytes;
-	while (bytesLeft) {
-		bufferSize = (bytesLeft > MP3_IO_BUFFER_SIZE) ? MP3_IO_BUFFER_SIZE : bytesLeft;
-		bytesRead = fread(ioBuffer, 1, bufferSize, audioInFP);
-		if (bytesRead != bufferSize) {
-			uitsHandleErrorINT(mp3ModuleName, "mp3BufferedCopy", ERROR, OK, 
-							"Incorrect number of bytes read from audio input file\n");
-		}
-		bytesWritten = fwrite(ioBuffer, 1, bufferSize, audioOutFP);
-		uitsHandleErrorINT(mp3ModuleName, "mp3BufferedCopy",  bytesWritten, bufferSize, NULL);
-		totalBytesWritten += bytesWritten;
-		bytesLeft         -= bufferSize;
-	}
-	
-	fflush(audioOutFP);
-	free(ioBuffer);
-	
-	return (totalBytesWritten);
-}
-
-/*
- *
- * Function: mp3GetMediaHash
- * Purpose:	 Calcluate the media hash for an MP3 file
- *				1. Read the size of the ID3 tag and skip over it
- *				2. If the first frame of audio is a xing, info or VBRI frame, skip it.
- *				3. If there is a 128 byte ID3v1 tag at the end of the file, make sure skip it
- *				4. Read and hash the audio frames until EOF or ID3v1 tag
- *
- * Returns:   Pointer to the hashed frame data
- */
-
-char *mp3GetMediaHash (char *audioFileName) 
-{
-	FILE *audioFP;
-	MP3_ID3_HEADER		   *mp3ID3Header;
-	MP3_AUDIO_FRAME_HEADER *mp3AudioFrameHeader;
-	int audioFrameStart, audioFrameEnd, audioFrameLength;
-	UITS_digest *mediaHash;
-	char *mediaHashString;
-	int foundPadBytes;
-		
-	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", audioFP, "Couldn't open audio file for reading\n");
-	
-	/* The file should start with an ID3 tag header */
-	mp3ID3Header = mp3ReadID3Header(audioFP);
-	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", audioFP, "Couldn't read ID3 Tag header\n");
-
-	/* seek to the first audio frame, which will be after the MP3 ID3 tag header (10 bytes) */
-	audioFrameStart = MP3_HEADER_SIZE + mp3ID3Header->size;
-	fseek(audioFP, audioFrameStart, SEEK_CUR);
-
-	/* skip pad bytes if any */
-	mp3SkipPadBytes (audioFP);
-
-	foundPadBytes = ftell(audioFP) - audioFrameStart;
-	
-	if (foundPadBytes) {
-		fprintf(stderr, "Warning: Illegal MP3 file. ID3 frame header size does not include pad bytes\n");
-	}
-		
-		
-	mp3AudioFrameHeader = mp3ReadAudioFrameHeader(audioFP);
-	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", mp3AudioFrameHeader, "Coudln't read Audio Frame Header\n");
-	// vprintf("Read first Audio Frame: \n");
-	// vprintf("\tframe length: %04ld bitrate: %06ld samplerate: %06ld \n", 
-	//		mp3AudioFrameHeader->frameLength, mp3AudioFrameHeader->bitrate, mp3AudioFrameHeader->samplerate);	
-	
-	/* if the first frame of audio is a VBR frame (XING, Info, VBR), skip it */
-	if (mp3AudioFrameHeader->vbrHeaderflag) {
-		vprintf("Skipping XING Frame\n");
-		fseek(audioFP, mp3AudioFrameHeader->frameLength, SEEK_CUR);
-	}
-	
-	audioFrameStart = ftell(audioFP);
-	
-	/* calculate how long the audio frame data is by seeking to EOF and saving size  */
-	fseek(audioFP, 0L, SEEK_END);
-	audioFrameEnd = ftell(audioFP);	
-	fseek(audioFP, audioFrameStart, SEEK_SET);
-
-	/* skip the 128 byte ID3v1 tag at the end of the file, if it's there */
-	if (mp3HasID3v1Tag(audioFP)) {
-		audioFrameEnd -= id3v1TagSize;
-	}
-	
-	audioFrameLength = audioFrameEnd - audioFrameStart;
-		
-	mediaHash = uitsCreateDigestBuffered (audioFP, audioFrameLength, "SHA256") ;
-	
-	mediaHashString = uitsDigestToString(mediaHash);
-		
-	/* cleanup */
-	fclose(audioFP);
-	
-	/* CMA: these two cleanup calls were coredumping under windows. need to investigate */
-//	free(mp3AudioFrameHeader);
-//	free(mp3ID3Header);
-	
-	return (mediaHashString);
-}
 
 /*
  * Function: mp3IdentifyFrame
@@ -667,13 +664,13 @@ int mp3IdentifyFrame (FILE *fpin)
 {
 	unsigned long saveSeek;
 	
-	saveSeek = ftell(fpin);
+	saveSeek = ftello(fpin);
 		
 	err = fread(header, 1L, 4L, fpin);
 	uitsHandleErrorINT(mp3ModuleName, "mp3IdentifyFrame", err, 4L, "Couldn't read mp3 Frame header\n");
 	
 	// return FP to original position
-	fseek(fpin, saveSeek, SEEK_SET);
+	fseeko(fpin, saveSeek, SEEK_SET);
 
 	if ((header[0] == 0xff) && ((header[1] & 0xe0) == 0xe0))	// Sync bytes - start of an MP3 audio frame, always eleven 1's.
 	{
@@ -703,7 +700,7 @@ MP3_ID3_HEADER *mp3ReadID3Header(FILE *fpin)
 	unsigned long tagsize;
 	MP3_ID3_HEADER *mp3Header = calloc(sizeof(MP3_ID3_HEADER), 1);
 
-	saveSeek = ftell(fpin);
+	saveSeek = ftello(fpin);
 	err = fread(header, 1L, MP3_HEADER_SIZE, fpin);
 	uitsHandleErrorINT(mp3ModuleName, "mp3ReadID3Header", err, MP3_HEADER_SIZE, "Couldn't read mp3 Frame header\n");
 
@@ -737,7 +734,7 @@ MP3_ID3_HEADER *mp3ReadID3Header(FILE *fpin)
 		fflush(stdout);
 		
 		// return file pointer to original location
-		fseek(fpin, saveSeek, SEEK_SET);
+		fseeko(fpin, saveSeek, SEEK_SET);
 		
 		return(mp3Header);
 	}
@@ -759,7 +756,7 @@ int	mp3WriteID3Header(FILE *audioOutFP, MP3_ID3_HEADER *mp3Header)
 {
 	unsigned long saveSeek;
 		
-	saveSeek = ftell(audioOutFP);	/* so we can restore fp before return */
+	saveSeek = ftello(audioOutFP);	/* so we can restore fp before return */
 
 	// the first 3 bytes are 'I' 'D' '3' 
 	header[0] = 'I';
@@ -787,7 +784,7 @@ int	mp3WriteID3Header(FILE *audioOutFP, MP3_ID3_HEADER *mp3Header)
 					"Couldn't write updated MP3 header to audio output file\n");
 	
 	// return file pointer to original location
-	fseek(audioOutFP, saveSeek, SEEK_SET);
+	fseeko(audioOutFP, saveSeek, SEEK_SET);
 		
 	return(OK);
 }
@@ -812,7 +809,7 @@ MP3_AUDIO_FRAME_HEADER *mp3ReadAudioFrameHeader (FILE *fpin)
 
 //	unsigned long next_frame, save_seek, aindex = 0L;
 	
-	saveSeek = ftell(fpin);
+	saveSeek = ftello(fpin);
 	err = fread(header, 1L, 4L, fpin);
 	uitsHandleErrorINT(mp3ModuleName, "mp3ReadAudioFrame", err, 4L, "Couldn't read mp3 audio frame header\n");
 	
@@ -868,12 +865,12 @@ MP3_AUDIO_FRAME_HEADER *mp3ReadAudioFrameHeader (FILE *fpin)
 		
 	frameHeader->frameLength = ((144L * frameHeader->bitrate) / frameHeader->samplerate) + frameHeader->paddedFlag;
 		
-//	next_frame = (ftell(fpin)) + frame_length - 4L;
+//	next_frame = (ftello(fpin)) + frame_length - 4L;
 	
 	frameHeader->vbrHeaderflag = mp3IsVBRFrame (fpin, frameHeader);
 		
 	// return file pointer to original location
-	fseek(fpin, saveSeek, SEEK_SET);
+	fseeko(fpin, saveSeek, SEEK_SET);
 	return (frameHeader);
 
 }
@@ -898,7 +895,7 @@ int mp3IsVBRFrame (FILE *fpin, MP3_AUDIO_FRAME_HEADER *frameHeader)
 //	int xingHeader = 0L;
 	int returnValue = FALSE;
 
-	saveSeek = ftell(fpin);
+	saveSeek = ftello(fpin);
 	audiobuf = calloc(frameHeader->frameLength, 1);
 	
 	fread(audiobuf, 1L, frameHeader->frameLength, fpin);
@@ -921,7 +918,7 @@ int mp3IsVBRFrame (FILE *fpin, MP3_AUDIO_FRAME_HEADER *frameHeader)
 	
 	/* cleanup */
 	free(audiobuf);
-	fseek(fpin, saveSeek, SEEK_SET);	// back up to where we were
+	fseeko(fpin, saveSeek, SEEK_SET);	// back up to where we were
 	
 	return (returnValue);
 }
@@ -943,9 +940,9 @@ int mp3HasID3v1Tag (FILE *fpin)
 	char *audiobuf;
 	int returnValue = FALSE;
 	
-	saveSeek = ftell(fpin);	// save the starting position
+	saveSeek = ftello(fpin);	// save the starting position
 	
-	fseek(fpin, -id3v1TagSize, SEEK_END);	// seek back 128 bytes from end of file
+	fseeko(fpin, -id3v1TagSize, SEEK_END);	// seek back 128 bytes from end of file
 	
 	audiobuf = calloc(id3v1TagSize, 1);
 	
@@ -958,7 +955,7 @@ int mp3HasID3v1Tag (FILE *fpin)
 	
 	/* cleanup */
 	free(audiobuf);
-	fseek(fpin, saveSeek, SEEK_SET);	// back up to where we were
+	fseeko(fpin, saveSeek, SEEK_SET);	// back up to where we were
 	
 	return (returnValue);
 }
