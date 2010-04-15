@@ -463,6 +463,10 @@ void uitsCheckRequiredParams (char *command)
 			printf("Error: Can't %s UITS payload. No payload file specified.\n", command);
 			exit (0);
 		}
+		if (strcmp(audioFileName, payloadFileName) == 0) {
+			printf("Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
+			exit (0);
+		}
 		if (!uitsSignatureDesc->algorithm) {
 			printf("Error: Can't %s UITS payload. No algorithm specified.\n", command);
 			exit (0);
@@ -526,6 +530,10 @@ void uitsCheckRequiredParams (char *command)
 		}
 		if (!payloadFileName) {
 			printf("Error: Can't %s UITS payload. No payload file specified.\n", command);
+			exit (0);
+		}
+		if (strcmp(audioFileName, payloadFileName) == 0) {
+			printf("Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
 			exit (0);
 		}
 		if (!uitsSignatureDesc->algorithm) {

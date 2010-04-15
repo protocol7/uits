@@ -945,10 +945,11 @@ unsigned char *uitsReadFile (char *filename)
 	}
 	
 	/* read the whole file into memory */
-	fseeko(fp, 0L, SEEK_END);  /* Position to end of file */
-	fileLen = ftell(fp);      /* Get file length */
-	rewind(fp);               /* Back to start of file */
-	
+//	fseeko(fp, 0L, SEEK_END);  /* Position to end of file */
+//	fileLen = ftell(fp);      /* Get file length */
+//	rewind(fp);               /* Back to start of file */
+
+	fileLen = uitsGetFileSize(fp);
 	fileData = calloc(fileLen + 1, sizeof(char));
 	
 	if(!fileData){
@@ -963,6 +964,30 @@ unsigned char *uitsReadFile (char *filename)
 	
 	
 }
+
+/*
+ * Function: uitsGetFileSize
+ * Purpose:  Seek from beginning to end of a file to find the size
+ * Passed:   pointer to file
+ * Returns:  File size, fp left at original location
+ *
+ */
+
+int uitsGetFileSize (FILE *fp) 
+{
+	unsigned long fileSize;
+	unsigned long saveSeek;
+	
+	saveSeek = ftello(fp);
+	
+	fseeko(fp, 0L, SEEK_END);  /* Position to end of file */
+	fileSize = ftello(fp);
+	fseeko(fp, saveSeek, SEEK_SET);
+	
+	return (fileSize);
+	
+}
+
 
 
 // EOF

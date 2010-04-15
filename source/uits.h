@@ -65,7 +65,8 @@ void uitsHandleErrorPTR (char *uitsModuleName,  // name of uitsModule where erro
 						 char *errorMessage);	// error message string, if any	
 
 
-unsigned char *uitsReadFile	(char *filename); 
+unsigned char *uitsReadFile		(char *filename); 
+int			  uitsGetFileSize	(FILE *fp);
 
 void uitsPrintHelp (char *command); 
 int	 uitsInit(void);										// uits initialization housekeeping

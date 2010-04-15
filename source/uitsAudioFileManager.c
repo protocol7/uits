@@ -118,7 +118,7 @@ UITS_AUDIO_CALLBACKS *uitsAudioGetCB (char *audioFileName) {
 	}
 	
 	/* audio file is not one of our known types */
-	uitsHandleErrorPTR(audioModuleName, "uitsAudioGetCB", currAudioCB, "Couldn't find audio file type \n");
+	uitsHandleErrorPTR(audioModuleName, "uitsAudioGetCB", NULL, "Couldn't find audio file type \n");
 
 }
 
