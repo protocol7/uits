@@ -114,10 +114,14 @@ char *mp4GetMediaHash (char *audioFileName)
  *
  * Function: mp4EmbedPayload
  * Purpose:	 Embed the UITS payload into an MP4 file
- *			 The UITS payload is added as a top-level 'udta' atom.
- *           If there is an existing top-level 'udta' atom, a UITS leaf atom is appended to it.
- *           If there is no top-level 'udta' atom, a 'udta' atom containing a UITS leaf atom 
- *           is added to the end of the file.
+ *			 The UITS payload is added in a top-level 'skip' atom.
+ *			 After the UITS payload is embedded, the atom hierarchy will look something like this:
+ *				'ftyp'
+ *				'moov'
+ *				'mdat'
+ *				'skip'
+ *					'udta'
+ *						'UITS'
  *
  *
  * Returns:   OK or ERROR
@@ -168,8 +172,17 @@ int mp4EmbedPayload  (char *audioFileName,
 		}
 	}
 	
-	/* add a udta atom containing a UITS atom */
-	atomSize = 8 + payloadXMLSize + 8;
+	/* add a skip atom containing a udta atom containing a UITS atom */
+	
+	atomSize = 8 + 8 + 8 + payloadXMLSize; /* skip atom size is payloadXML size, plus 8-byte overhead of 3 atom headers */
+	lswap(&atomSize);
+	
+	/* write the skip atom header */
+	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
+	fwrite("skip",    1, 4, audioOutFP);   /* 4-bytes ID */
+	
+	
+	atomSize = 8 + 8 + payloadXMLSize;	/* udta atom size is payload XML size plus 8-byte overhead of 2 atom headers */
 	lswap(&atomSize);
 	
 	/* write the udta atom header */
@@ -177,7 +190,7 @@ int mp4EmbedPayload  (char *audioFileName,
 	fwrite("udta",    1, 4, audioOutFP);   /* 4-bytes ID */
 	
 	/* write the UITS atom */
-	atomSize = payloadXMLSize + 8;
+	atomSize = 8 + payloadXMLSize ;	/* UITS atom size is payload XML size plus 8-byte overhead atom header */
 	lswap(&atomSize);
 	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
 	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
@@ -470,7 +483,7 @@ MP4_ATOM_HEADER *mp4ReadAtomHeader (FILE *fpin)
 	uitsHandleErrorINT(mp4ModuleName, "mp4ReadAtomHeader", err, MP4_HEADER_SIZE, "Couldn't read mp4 atom header\n");
 
 	
-	printf("%c%c%c%c\n", header[4], header[5], header[6], header[7]);
+//	printf("%c%c%c%c\n", header[4], header[5], header[6], header[7]);
 	
 	memcpy (atomHeader->type, &header[4], 4); 
 
