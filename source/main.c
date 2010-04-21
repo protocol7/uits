@@ -967,7 +967,7 @@ unsigned char *uitsReadFile (char *filename)
 
 /*
  * Function: uitsGetFileSize
- * Purpose:  Seek from beginning to end of a file to find the size
+ * Purpose:  Seek from the current location to end of a file to find the remaining size of the file
  * Passed:   pointer to file
  * Returns:  File size, fp left at original location
  *

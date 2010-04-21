@@ -45,7 +45,6 @@ int mp4EmbedPayload		    (char *audioFileName,
 char *mp4ExtractPayload		(char *audioFileName); 
 
 char *mp4GetMediaHash		(char *audioFileName);
-int   mp4CopyAtom			(FILE *fpin, FILE *fpout);
 
 
 /*
@@ -54,6 +53,7 @@ int   mp4CopyAtom			(FILE *fpin, FILE *fpout);
 
 MP4_ATOM_HEADER *mp4FindAtomHeader (FILE *fpin,  char *atomType, unsigned long endSeek);
 MP4_ATOM_HEADER *mp4ReadAtomHeader  (FILE *fpin);
+int   mp4CopyAtom			(FILE *fpin, FILE *fpout);
 
 #endif
 

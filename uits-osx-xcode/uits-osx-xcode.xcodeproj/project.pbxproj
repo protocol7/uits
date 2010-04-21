@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8340BE84117CE5E600BF7652 /* uitsFLACManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 8340BE83117CE5E600BF7652 /* uitsFLACManager.c */; };
+		8340BECD117CF2C900BF7652 /* libFLAC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8340BECC117CF2C800BF7652 /* libFLAC.a */; };
 		8385F558116688CE00277C6E /* uitsMP4Manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */; };
 		83D0F548115AC66B003129FF /* libxml2.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F547115AC66B003129FF /* libxml2.2.dylib */; };
 		83D0F54A115AC6A7003129FF /* libssl_1.0.0-beta4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */; };
@@ -34,6 +36,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8340BE7E117CE4AB00BF7652 /* libFLAC.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libFLAC.dylib; path = usr/local/lib/libFLAC.dylib; sourceTree = SDKROOT; };
+		8340BE82117CE5E600BF7652 /* uitsFLACManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsFLACManager.h; path = ../source/uitsFLACManager.h; sourceTree = SOURCE_ROOT; };
+		8340BE83117CE5E600BF7652 /* uitsFLACManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsFLACManager.c; path = ../source/uitsFLACManager.c; sourceTree = SOURCE_ROOT; };
+		8340BECC117CF2C800BF7652 /* libFLAC.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libFLAC.a; path = "/Users/chris/Work/UMG_Development/uits/uits-osx-xcode/FLAC/lib/libFLAC.a"; sourceTree = "<absolute>"; };
 		8385F4FE116684D300277C6E /* uitsMP4Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsMP4Manager.h; path = ../source/uitsMP4Manager.h; sourceTree = SOURCE_ROOT; };
 		8385F557116688CE00277C6E /* uitsMP4Manager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsMP4Manager.c; path = ../source/uitsMP4Manager.c; sourceTree = SOURCE_ROOT; };
 		83D0F547115AC66B003129FF /* libxml2.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.2.dylib; path = usr/lib/libxml2.2.dylib; sourceTree = SDKROOT; };
@@ -63,6 +69,7 @@
 				83D0F54A115AC6A7003129FF /* libssl_1.0.0-beta4.a in Frameworks */,
 				83D0F54C115AC6AD003129FF /* libcrypto_1.0.0-beta4.a in Frameworks */,
 				83D0F54E115AC6B4003129FF /* libmxml.a in Frameworks */,
+				8340BECD117CF2C900BF7652 /* libFLAC.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +86,8 @@
 				83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */,
 				83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */,
 				83D0F54D115AC6B4003129FF /* libmxml.a */,
+				8340BE7E117CE4AB00BF7652 /* libFLAC.dylib */,
+				8340BECC117CF2C800BF7652 /* libFLAC.a */,
 			);
 			name = "uits-osx-xcode";
 			sourceTree = "<group>";
@@ -98,6 +107,8 @@
 				83EB9397115AD18C005F460F /* uitsOpenSSL.h */,
 				83EB9398115AD18C005F460F /* uitsPayloadManager.c */,
 				83EB9399115AD18C005F460F /* uitsPayloadManager.h */,
+				8340BE82117CE5E600BF7652 /* uitsFLACManager.h */,
+				8340BE83117CE5E600BF7652 /* uitsFLACManager.c */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -167,6 +178,7 @@
 				83EB939D115AD18C005F460F /* uitsOpenSSL.c in Sources */,
 				83EB939E115AD18C005F460F /* uitsPayloadManager.c in Sources */,
 				8385F558116688CE00277C6E /* uitsMP4Manager.c in Sources */,
+				8340BE84117CE5E600BF7652 /* uitsFLACManager.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -186,13 +198,13 @@
 					"./mxml/include/**",
 					"./openssl/include/**",
 					"/usr/include/libxml2/**",
+					"./FLAC/include/**",
 				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"./openssl/lib/**",
 					"./mxml/lib/**",
-					"\"$(SRCROOT)/openssl/lib\"",
-					"\"$(SRCROOT)/mxml/lib\"",
+					"./FLAC/lib/**",
 				);
 				PRODUCT_NAME = UITS_Tool;
 				SDKROOT = macosx10.5;
@@ -210,6 +222,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/openssl/lib\"",
 					"\"$(SRCROOT)/mxml/lib\"",
+					"\"$(SRCROOT)/FLAC/lib\"",
 				);
 				PRODUCT_NAME = "uits-osx-xcode";
 			};
