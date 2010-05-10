@@ -113,6 +113,7 @@ void uitsPrintHelp (char *command)
 		printf("UITS_Tool version : %s\n", version);
 	} else if (strcmp(command, "hash") == 0) {
 		printf("\n");
+		printf("Usage: uits_tool hash [options]\n");
 		printf("--verbose   (-v)\n");
 		printf("--audio     (-a)   [file-name] (REQUIRED): Audio file for which to generate media hash\n");
 		printf("--b64       (-c)               (OPTIONAL): Base-64 encode the media hash (DEFAULT is hex)\n");
