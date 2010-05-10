@@ -119,6 +119,7 @@ int flacEmbedPayload  (char *audioFileName,
 					  int  numPadBytes) 
 {
 	FLAC__StreamMetadata    *uitsFlacMetadata = NULL;
+	FLAC__StreamMetadata    *flacMetadata = NULL;
 	FLAC__Metadata_Chain    *flacMetadataChain = NULL;
 	FLAC__Metadata_Iterator *flacMetadataIterator = NULL;
 	
@@ -149,8 +150,7 @@ int flacEmbedPayload  (char *audioFileName,
 	err = FLAC__metadata_object_application_set_data (uitsFlacMetadata, uitsMetadata, payloadSize, FALSE);
   	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, "Couldn't add UITS payload data to FLAC metadata object\n");
 	
-	/* this is a BIG FAT NO NO, but I cannot for the life of me find any way in the FLAC API to set */
-	/* the Application block application ID, therefore I am going rogue and setting it explicitly */
+	/* Set the Application block application ID */
 	
 	uitsFlacMetadata->data.application.id[0] = 'U';
 	uitsFlacMetadata->data.application.id[1] = 'I';
@@ -174,8 +174,20 @@ int flacEmbedPayload  (char *audioFileName,
 	/* point the iterator at the chain */
 	FLAC__metadata_iterator_init (flacMetadataIterator,flacMetadataChain);
 	
-	/* walk the iterator to the end of the chain */
-	while (FLAC__metadata_iterator_next(flacMetadataIterator)) { }
+	/* walk the iterator to the end of the chain and make sure there isn't already a UITS block */
+	while (FLAC__metadata_iterator_next(flacMetadataIterator)) {
+		if (FLAC__metadata_iterator_get_block_type(flacMetadataIterator) == FLAC__METADATA_TYPE_APPLICATION) {
+			flacMetadata = FLAC__metadata_iterator_get_block (flacMetadataIterator);
+			if ((flacMetadata->data.application.id[0] == 'U') &&
+				(flacMetadata->data.application.id[1] == 'I') &&
+				(flacMetadata->data.application.id[2] == 'T') &&
+				(flacMetadata->data.application.id[3] == 'S')) {
+				
+				uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, 0, "Audio input file already contains a UITS payload \n");
+
+			}
+		}
+	}
 
 	/* add the new block */
 	err = FLAC__metadata_iterator_insert_block_after (flacMetadataIterator, uitsFlacMetadata);
@@ -249,7 +261,7 @@ FLAC__StreamDecoderWriteStatus flacWriteCallback(const FLAC__StreamDecoder *deco
 												 void *client_data)
 {
 
-	vprintf("flacWriteCallback\n");
+//	vprintf("flacWriteCallback\n");
 	return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
 

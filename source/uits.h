@@ -38,6 +38,7 @@
 #include "uitsMP3Manager.h"
 #include "uitsMP4Manager.h"
 #include "uitsFLACManager.h"
+#include "uitsAIFFManager.h"
 
 
 #define OK 0

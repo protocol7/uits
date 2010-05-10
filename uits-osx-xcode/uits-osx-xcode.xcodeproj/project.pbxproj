@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		831F3CC81190BB26000A685A /* uitsAIFFManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 831F3CC71190BB26000A685A /* uitsAIFFManager.c */; };
 		8340BE84117CE5E600BF7652 /* uitsFLACManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 8340BE83117CE5E600BF7652 /* uitsFLACManager.c */; };
 		8340BECD117CF2C900BF7652 /* libFLAC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8340BECC117CF2C800BF7652 /* libFLAC.a */; };
 		8385F558116688CE00277C6E /* uitsMP4Manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */; };
@@ -36,7 +37,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		8340BE7E117CE4AB00BF7652 /* libFLAC.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libFLAC.dylib; path = usr/local/lib/libFLAC.dylib; sourceTree = SDKROOT; };
+		831F3CC61190BB26000A685A /* uitsAIFFManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsAIFFManager.h; path = ../source/uitsAIFFManager.h; sourceTree = SOURCE_ROOT; };
+		831F3CC71190BB26000A685A /* uitsAIFFManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsAIFFManager.c; path = ../source/uitsAIFFManager.c; sourceTree = SOURCE_ROOT; };
 		8340BE82117CE5E600BF7652 /* uitsFLACManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsFLACManager.h; path = ../source/uitsFLACManager.h; sourceTree = SOURCE_ROOT; };
 		8340BE83117CE5E600BF7652 /* uitsFLACManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsFLACManager.c; path = ../source/uitsFLACManager.c; sourceTree = SOURCE_ROOT; };
 		8340BECC117CF2C800BF7652 /* libFLAC.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libFLAC.a; path = "/Users/chris/Work/UMG_Development/uits/uits-osx-xcode/FLAC/lib/libFLAC.a"; sourceTree = "<absolute>"; };
@@ -86,7 +88,6 @@
 				83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */,
 				83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */,
 				83D0F54D115AC6B4003129FF /* libmxml.a */,
-				8340BE7E117CE4AB00BF7652 /* libFLAC.dylib */,
 				8340BECC117CF2C800BF7652 /* libFLAC.a */,
 			);
 			name = "uits-osx-xcode";
@@ -109,6 +110,8 @@
 				83EB9399115AD18C005F460F /* uitsPayloadManager.h */,
 				8340BE82117CE5E600BF7652 /* uitsFLACManager.h */,
 				8340BE83117CE5E600BF7652 /* uitsFLACManager.c */,
+				831F3CC61190BB26000A685A /* uitsAIFFManager.h */,
+				831F3CC71190BB26000A685A /* uitsAIFFManager.c */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -179,6 +182,7 @@
 				83EB939E115AD18C005F460F /* uitsPayloadManager.c in Sources */,
 				8385F558116688CE00277C6E /* uitsMP4Manager.c in Sources */,
 				8340BE84117CE5E600BF7652 /* uitsFLACManager.c in Sources */,
+				831F3CC81190BB26000A685A /* uitsAIFFManager.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

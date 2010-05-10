@@ -41,7 +41,7 @@ int mp4IsValidFile (char *audioFileName)
 
 	fclose (audioFP);	
 
- 	if (strcmp(atomHeader->type, "ftyp") == 0) {
+ 	if (strncmp(atomHeader->type, "ftyp", 4) == 0) {
 		vprintf("Audio file is MP4\n");
 		return (TRUE);
 	} else {
@@ -164,7 +164,7 @@ int mp4EmbedPayload  (char *audioFileName,
 	bytesLeftInFile = audioInFileSize;
 	while (bytesLeftInFile) {
 		atomHeader = mp4ReadAtomHeader(audioInFP);
-		if (strcmp(atomHeader->type, "udta") == 0) { /* existing udta atom */
+		if (strncmp(atomHeader->type, "udta", 4) == 0) { /* existing udta atom */
 			uitsHandleErrorINT(mp4ModuleName, "mp4EmbedPayload", ERROR, OK, "Error: audio file has an existing UITS payload\n");
 		} else {
 			bytesCopied = mp4CopyAtom(audioInFP, audioOutFP);
@@ -392,7 +392,7 @@ char *mp4ExtractPayload (char *audioFileName)
 	
 	atomSize = udtaAtomHeader->size - 8;
 	
-	/* find the 'udta' atom header that is a child the 'moov' atom container */
+	/* find the 'UITS' atom that is a child of the 'udata' atom */
 	uitsAtomHeader = mp4FindAtomHeader(audioInFP, "UITS", atomSize);
 	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", udtaAtomHeader, "Coudln't find 'UITS' atom header\n");
 	
@@ -440,7 +440,7 @@ MP4_ATOM_HEADER *mp4FindAtomHeader (FILE *fpin, char *atomType, unsigned long en
 	
 	/* read atoms until finding the atom type or end of search */
 	atomHeader = mp4ReadAtomHeader(fpin);
-	while (strcmp(atomHeader->type, atomType) != 0) {
+	while (strncmp(atomHeader->type, atomType, 4) != 0) {
 		if ( bytesLeft && (atomHeader->size)) {					
 			bytesLeft -= atomHeader->size;
 			fseeko(fpin, atomHeader->size, SEEK_CUR);
