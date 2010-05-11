@@ -15,9 +15,9 @@
 
 CC      = gcc
 OPTIM   = -Os -g -arch i386
-CFLAGS  = $(OPTIM) -I /usr/include/libxml2 -I openssl/include -I mxml/include
+CFLAGS  = $(OPTIM) -I /usr/include/libxml2 -I openssl/include -I mxml/include -I FLAC/include
 LDFLAGS = $(OPTIM)
-OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsPayloadManager.o uitsOpenSSL.o uitsMP4Manager.o
+OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsPayloadManager.o uitsOpenSSL.o uitsMP4Manager.o uitsFLACManager.o uitsAIFFManager.o
 RM = rm
 
 #
@@ -33,7 +33,7 @@ vpath %.c ../source
 #
 
 UITS_Tool: $(OBJECTS)
-	$(CC) $(LDFLAGS) -o UITS_Tool   $(OBJECTS) mxml/lib/libmxml.a -lxml2 openssl/lib/libcrypto_1.0.0-beta4.a openssl/lib/libssl_1.0.0-beta4.a  
+	$(CC) $(LDFLAGS) -o UITS_Tool   $(OBJECTS) mxml/lib/libmxml.a -lxml2 openssl/lib/libcrypto_1.0.0-beta4.a openssl/lib/libssl_1.0.0-beta4.a  FLAC/lib/libflac.a
 
 
 #
