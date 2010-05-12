@@ -411,7 +411,7 @@ int uitsGenHash ()
 	
 	uitsCheckRequiredParams("genhash");
 	
-	mediaHash = mp3GetMediaHash(audioFileName);
+	mediaHash = uitsAudioGetMediaHash(audioFileName);
 	printf("Media Hash for file %s is: \n\t%s\n", audioFileName, mediaHash);
 	outputMediaHash = mediaHash;
 	

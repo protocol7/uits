@@ -107,7 +107,7 @@ int main (int argc, const char * argv[]) {
 
 void uitsPrintHelp (char *command) 
 {
-	char *version = "$Revision$";
+//	char *version = "$Revision$";
 		
 	if (strcmp(command, "version") == 0) {
 		printf("UITS_Tool version : %s\n", version);

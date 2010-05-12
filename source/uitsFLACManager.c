@@ -49,9 +49,10 @@ int flacIsValidFile (char *audioFileName)
  * Function: flacGetMediaHash
  * Purpose:	 Calcluate the media hash for a FLAC file
  *			 The FLAC file is parsed using the following algorithm:
- *			  1. Use the flac decoder API to decode all of the metadata blocks
- *			  2. The filepointer should be left at the start of the first audio frame
- *			  3. Hash the rest of the data in the file, which is the audio frame data
+ *			  1. Use the FLAC stream decoder to seek to the start of the first audio frame
+ *			  2. Use the FLAC stream decoder to decode all of the audio frames, which leaves
+ *				 the audio file pointer at the end of the audio data
+ *			  3. Has the raw audio data between the first frame and last frame
  *
  * Returns:   Pointer to the hashed frame data
  */
@@ -75,21 +76,34 @@ char *flacGetMediaHash (char *audioFileName)
 	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, FLAC__STREAM_DECODER_INIT_STATUS_OK, 
 					   "Couldn't initialize decoder for file\n");
 	
-	err = FLAC__stream_decoder_process_until_end_of_metadata(decoder);
-	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, TRUE, "FLAC stream decode failed\n");
+	err = FLAC__stream_decoder_seek_absolute(decoder, 1);
+	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, TRUE, "FLAC stream seek to first audio frame failed\n");
 
-//	fprintf(stderr, "   state: %s\n", FLAC__StreamDecoderStateString[FLAC__stream_decoder_get_state(decoder)]);
-
-	
+	// audioFP is at start of audio frame data
 	audioFrameStart  = ftello(audioFP);
-	audioFrameEnd    = uitsGetFileSize(audioFP);
-	audioFrameLength = audioFrameEnd - audioFrameStart;
 
-	mediaHash = uitsCreateDigestBuffered (audioFP, audioFrameLength, "SHA256") ;
-	mediaHashString = uitsDigestToString(mediaHash);
+	err = FLAC__stream_decoder_process_until_end_of_stream (decoder);
+	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, TRUE, "FLAC process to end of stream failed\n");
+	
+	// audioFP is at end of audio frame data
+	audioFrameEnd  = ftello(audioFP);
+
+	audioFrameLength = audioFrameEnd - audioFrameStart;
 	
 	/* cleanup */
 	FLAC__stream_decoder_delete(decoder);
+	fclose(audioFP);
+
+//	vprintf("Audio Frame Start: %d, audioFrameEnd: %d, audioFrameLength: %d\n", audioFrameStart, audioFrameEnd, audioFrameLength);
+	
+	// now reopen and read the raw audio data
+	audioFP = fopen(audioFileName, "rb");
+	uitsHandleErrorPTR(flacModuleName, "flacGetMediaHash", audioFP, "Couldn't open FLAC audio file for reading\n");
+
+	fseeko(audioFP, audioFrameStart, SEEK_SET);
+	mediaHash = uitsCreateDigestBuffered (audioFP, audioFrameLength, "SHA256") ;
+	mediaHashString = uitsDigestToString(mediaHash);
+	
 	fclose(audioFP);
 	
 	return (mediaHashString);
@@ -277,6 +291,8 @@ void flacMetadataCallback(const FLAC__StreamDecoder *decoder,
 	} else {
 		vprintf("Got flac metadata type: %d\n", metadata->type);
 	}
+	
+	fflush(stdout);
 					
 }
 
