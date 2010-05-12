@@ -33,7 +33,7 @@ int main (int argc, const char * argv[]) {
 
 	uitsInit();						// standard initializations 								
 	
-	uitsAction = uitsGetCommand (argc, argv);
+//	uitsAction = uitsGetCommand (argc, argv);
 	uitsHandleErrorINT(moduleName, "main", err, OK, 
 					"Error: Couldn't parse command-line options\n");
 	

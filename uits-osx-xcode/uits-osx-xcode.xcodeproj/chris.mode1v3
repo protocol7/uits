@@ -202,25 +202,24 @@
 			<key>Content</key>
 			<dict>
 				<key>PBXProjectModuleGUID</key>
-				<string>834F7EDF1199FF59009B4EA0</string>
+				<string>834F7F36119A389B009B4EA0</string>
 				<key>PBXProjectModuleLabel</key>
-				<string>uitsMP4Manager.c</string>
+				<string>main.c</string>
 				<key>PBXSplitModuleInNavigatorKey</key>
 				<dict>
 					<key>Split0</key>
 					<dict>
 						<key>PBXProjectModuleGUID</key>
-						<string>834F7EEB119A0190009B4EA0</string>
+						<string>834F7F38119A38A8009B4EA0</string>
 						<key>PBXProjectModuleLabel</key>
-						<string>uitsMP4Manager.c</string>
+						<string>main.c</string>
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>834F7F1D119A3728009B4EA0</string>
+						<string>834F7F39119A38A8009B4EA0</string>
 						<key>history</key>
 						<array>
-							<string>834F7F1B119A3728009B4EA0</string>
-							<string>834F7F1C119A3728009B4EA0</string>
+							<string>834F7F35119A389B009B4EA0</string>
 						</array>
 					</dict>
 					<key>SplitCount</key>
@@ -318,7 +317,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>2</integer>
+									<integer>4</integer>
 									<integer>1</integer>
 									<integer>0</integer>
 								</array>
@@ -371,7 +370,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>834F7F1A119A3728009B4EA0</string>
+										<string>834F7F37119A38A8009B4EA0</string>
 										<key>history</key>
 										<array>
 											<string>8385F4D51166844800277C6E</string>
@@ -563,7 +562,7 @@
 	<key>PerspectivesBarVisible</key>
 	<false/>
 	<key>PinnedNavigatorIdentifier</key>
-	<string>834F7EDF1199FF59009B4EA0</string>
+	<string>834F7F36119A389B009B4EA0</string>
 	<key>ShelfIsVisible</key>
 	<false/>
 	<key>SourceDescription</key>
@@ -588,14 +587,13 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>834F7F1E119A3728009B4EA0</string>
 		<string>834F7ED11199FE42009B4EA0</string>
 		<string>834F7ED21199FE42009B4EA0</string>
 		<string>83D0F545115AC60B003129FF</string>
-		<string>/Users/chris/Work/UMG_Development/uits/uits-osx-xcode/uits-osx-xcode.xcodeproj</string>
-		<string>1C78EAAD065D492600B07095</string>
 		<string>1CD10A99069EF8BA00B06720</string>
-		<string>834F7EDF1199FF59009B4EA0</string>
+		<string>1C78EAAD065D492600B07095</string>
+		<string>/Users/chris/Work/UMG_Development/uits/uits-osx-xcode/uits-osx-xcode.xcodeproj</string>
+		<string>834F7F36119A389B009B4EA0</string>
 	</array>
 	<key>WindowString</key>
 	<string>150 134 1128 744 0 0 1440 878 </string>
