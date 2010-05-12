@@ -369,6 +369,7 @@ int mp4EmbedPayload  (char *audioFileName,
 char *mp4ExtractPayload (char *audioFileName) 
 
 {
+	MP4_ATOM_HEADER *skipAtomHeader;
 	MP4_ATOM_HEADER *udtaAtomHeader;
 	MP4_ATOM_HEADER	*uitsAtomHeader;
 	FILE			*audioInFP;
@@ -382,9 +383,17 @@ char *mp4ExtractPayload (char *audioFileName)
 
 	audioInFileSize = uitsGetFileSize(audioInFP);
 	
-	/* find the 'udta' container atom header */	
+	/* find the 'skip' container atom header */	
+	skipAtomHeader = mp4FindAtomHeader(audioInFP, "skip", audioInFileSize);
+	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", udtaAtomHeader, "Coudln't find 'skip' top level atom header\n");
+
+	/* seek past the skip atom header */
+	fseeko(audioInFP, skipAtomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, 8, SEEK_CUR);
+	
+	/* find the 'udata' atom header within the skip atom */
 	udtaAtomHeader = mp4FindAtomHeader(audioInFP, "udta", audioInFileSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", udtaAtomHeader, "Coudln't find 'udta' top level atom header\n");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", udtaAtomHeader, "Coudln't find 'udta' atom header\n");
 	
 	/* seek past the udta atom header */
 	fseeko(audioInFP, udtaAtomHeader->saveSeek, SEEK_SET);

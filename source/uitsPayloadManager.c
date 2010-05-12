@@ -523,7 +523,7 @@ void uitsCheckRequiredParams (char *command)
 		 }
 	}
 	
-	if ((strcmp(command, "extract") == 0) && verifyFlag) {
+	if (strcmp(command, "extract") == 0) {
 		if (!audioFileName) {
 			printf("Error: Can't %s UITS payload. No audio file specified.\n", command);
 			exit(0);
@@ -536,13 +536,16 @@ void uitsCheckRequiredParams (char *command)
 			printf("Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
 			exit (0);
 		}
-		if (!uitsSignatureDesc->algorithm) {
-			printf("Error: Can't %s UITS payload. No algorithm specified.\n", command);
-			exit (0);
-		}
-		if (!uitsSignatureDesc->pubKeyFileName) {
-			printf("Error: Can't %s UITS payload. No public key file specified.\n", command);
-			exit (0);
+		
+		if (verifyFlag) {
+			if (!uitsSignatureDesc->algorithm) {
+				printf("Error: Can't %s UITS payload. No algorithm specified.\n", command);
+				exit (0);
+			}
+			if (!uitsSignatureDesc->pubKeyFileName) {
+				printf("Error: Can't %s UITS payload. No public key file specified.\n", command);
+				exit (0);
+			}
 		}
 	}
 
