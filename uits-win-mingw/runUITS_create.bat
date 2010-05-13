@@ -17,6 +17,7 @@
  --verbose ^
  --audio ..\test\test_audio.mp3 ^
  --uits ..\test\test_payload.mp3 ^
+ --xsd ..\test\uits.xsd ^
  --algorithm RSA2048 ^
  --embed ^
  --priv  ..\test\privateRSA2048.pem ^

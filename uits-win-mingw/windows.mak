@@ -6,6 +6,10 @@
 # file should be run under MinGW. This makefile resides in a sub-directory
 # of the project directory which contains all of the .c and .h files.
 #  
+# 5/13/10: MinGW does not support 'ftello' or 'fseeko', so in order to compile
+#          the fseeko/ftello calls are replaced with calls to fseek/ftell via
+#          compile time defines (-Dfseeko-fseek). This will cause problems with
+#          audio files that are larger than 2GB.
 #  $Date$
 #  $Revision$
 # 
@@ -15,10 +19,10 @@
 #
 
 CC      = gcc
-OPTIM   = -Os -g
-CFLAGS  = $(OPTIM) -I libxml2/include -I ssl/include -I mxml/include
+OPTIM   = -Os -g -Dfseeko=fseek -Dftello=ftell
+CFLAGS  = $(OPTIM) -I libxml2/include -I ssl/include -I mxml/include -I FLAC/include
 LDFLAGS = $(OPTIM)
-OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsMP4Manager.o uitsPayloadManager.o uitsOpenSSL.o
+OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsMP4Manager.o uitsPayloadManager.o uitsOpenSSL.o uitsAIFFManager.o uitsFLACManager.o
 RM = rm
 
 #
@@ -34,7 +38,7 @@ vpath %.c ../source
 #
 
 UITS_Tool.exe :$(OBJECTS)
-	$(CC) $(LDFLAGS) -o UITS_Tool.exe   $(OBJECTS) mxml/lib/libmxml.a libxml2/lib/libxml2.a -lwsock32 ssl/lib/libcrypto.a -lgdi32 ssl/lib/libssl.a  
+	$(CC) $(LDFLAGS) -o UITS_Tool.exe   $(OBJECTS) mxml/lib/libmxml.a libxml2/lib/libxml2.a FLAC/lib/libFLAC.a -lwsock32 ssl/lib/libcrypto.a -lgdi32 ssl/lib/libssl.a 
 
 
 #
