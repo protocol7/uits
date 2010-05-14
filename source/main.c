@@ -33,7 +33,7 @@ int main (int argc, const char * argv[]) {
 
 	uitsInit();						// standard initializations 								
 	
-	uitsAction = uitsGetCommand (argc, argv);
+//	uitsAction = uitsGetCommand (argc, argv);
 	uitsHandleErrorINT(moduleName, "main", err, OK, 
 					"Error: Couldn't parse command-line options\n");
 	
@@ -189,21 +189,22 @@ void uitsPrintHelp (char *command)
 		printf("Usage: uits_tool verify [options]\n");
 		printf("\n");
 		printf("--verbose    (-v) \n");
-		printf("--audio      (-a)   [file-name]  (REQUIRED if no hash or hashfile)\n");
+		printf("--nohash     (-n)				 (OPTIONAL): Disable media hash validation.\n");
+		printf("--audio      (-a)   [file-name]  (REQUIRED if hash validation enabled and no hash or hashfile specified)\n");
 		printf("                                            Name of the audio file for which to verify payload\n");
 		printf("                                            If the audio file contains a UITS payload, that \n");
 		printf("                                            payload will be verified.\n");
 		printf("--uits       (-u)   [file-name]  (REQUIRED if no audio file with embedded UITS payload)\n");
 		printf("                                            Name of a file containing a UITS payload ONLY.\n");
 		printf("                                            in the audio file. \n");
-		printf("--hash       (-h)   [hash value] (REQUIRED if no audio or hashfile)\n");
+		printf("--hash       (-h)   [hash value] (REQUIRED if hash validation enabled and no audio or hashfile specified)\n");
 		printf("                                            The reference media hash value for the UITS payload. This\n");
 		printf("                                            value will be compared with the value in the payload for verification. \n");
-		printf("--hashfile   (-f)   [file-name]  (REQUIRED if no audio file or hash)\n");
+		printf("--hashfile   (-f)   [file-name]  (REQUIRED if hash validation enabled and no audio file or hash specified)\n");
 		printf("                                            Name of a file containing the reference media hash value\n");
 		printf("                                            The reference media hash value will be compared with the value \n");
 		printf("                                            in the payload for verification. \n");
-		printf("--algorithm  (-r)   [name]      (REQUIRED): Name of the algorithm to use for signing. \n");
+		printf("--algorithm  (-r)   [name]      (OPTIONAL): Name of the algorithm to use for signing. \n");
 		printf("                                            Possible values: RSA2048 (DEFAULT)\n");
 		printf("                                                             DSA2048\n");
 		printf("--pub        (-b)   [file-name] (REQUIRED): Name of the file containing the public key for validating\n");
@@ -519,6 +520,7 @@ int uitsGetOptVerify (int argc, const char * argv[])
 		{"algorithm",		required_argument,	0,	'r'},	// algorithm for signature encryption file: 'DSA2048' or 'RSA2048'
 		{"pub",				required_argument,	0,	'b'},	// public key file
 		{"xsd",				required_argument,	0,	'x'},	// xsd file for schema validation
+		{"nohash",			no_argument,		0,	'n'},	// don't validate media hash
 		
 		/* end of option list */
 		{0,			0,				0,				0}
@@ -579,6 +581,11 @@ int uitsGetOptVerify (int argc, const char * argv[])
 				option_value = strdup(optarg);
 				uitsSetSignatureParamValue ("pubKeyFileName", option_value);
 				dprintf ("public key file '%s'\n", option_value);
+				break;
+				
+			case 'n':		// set the flag to disable media hash verification
+				uitsSetCommandLineParam ("nohash", TRUE);
+				dprintf("Media hash will not be verified\n");
 				break;
 				
 			default: 

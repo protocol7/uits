@@ -96,10 +96,10 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				8385F557116688CE00277C6E /* uitsMP4Manager.c */,
-				8385F4FE116684D300277C6E /* uitsMP4Manager.h */,
 				83EB938F115AD18C005F460F /* main.c */,
 				83EB9391115AD18C005F460F /* uits.h */,
+				8385F557116688CE00277C6E /* uitsMP4Manager.c */,
+				8385F4FE116684D300277C6E /* uitsMP4Manager.h */,
 				83EB9392115AD18C005F460F /* uitsAudioFileManager.c */,
 				83EB9393115AD18C005F460F /* uitsAudioFileManager.h */,
 				83EB9394115AD18C005F460F /* uitsMP3Manager.c */,

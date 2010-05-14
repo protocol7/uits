@@ -28,6 +28,7 @@ int  numPadBytes;					// number of bytes of padding to insert into MP3 ID3 tag (
 int  gpMediaHashFlag;				// genparam: Media_Hash
 int  gpB64MediaHashFlag;			// genparam: Base64 Media_Hash
 int  gpPubKeyIDFlag;				// genparam: Public Key ID 
+int  mediaHashNoVerifyFlag;			// set if media hash should not be verified
 
 char *clMediaHashValue;				// media hash value passed from the command-line
 char *mediaHashFileName;			// file containing pre-computed media hash
@@ -39,6 +40,7 @@ UITS_command_line_params clParams [] = {
 	{"media_hash",     &gpMediaHashFlag},
 	{"b64_media_hash", &gpB64MediaHashFlag},
 	{"public_key_ID",  &gpPubKeyIDFlag},
+	{"nohash",		   &mediaHashNoVerifyFlag},
 	{0,	0}	// end of list	
 };
 
@@ -140,6 +142,7 @@ int uitsPayloadManagerInit (void)
 	gpPubKeyIDFlag      = FALSE;			// genparam: Public Key ID 
 	clMediaHashValue	= 0;				// media hash value passed from the command-line
 	mediaHashFileName	= NULL;				// file containing pre-computed media hash
+	mediaHashNoVerifyFlag = 0;
 	return (OK);
 }
 
@@ -509,13 +512,13 @@ void uitsCheckRequiredParams (char *command)
 				 printf("Error: Can't %s UITS payload.  No payload or audio file specified for verification.\n", command);
 				 exit(0);
 			 }
-			 if (!clMediaHashValue && !mediaHashFileName) {
+			 if (!mediaHashNoVerifyFlag && !clMediaHashValue && !mediaHashFileName) {
 				 printf("Error: Can't %s UITS payload. No audio file or media hash specified.\n", command);
 				 exit(0);
 			 }
 		 } else {
 
-			 if (clMediaHashValue && mediaHashFileName) {
+			 if (!mediaHashNoVerifyFlag && (clMediaHashValue && mediaHashFileName)) {
 				 printf("Error: Can't %s UITS payload. Multiple reference media hashes specified. Please provide either command line value or file. \n", command);
 				 exit(0);
 			 }
@@ -779,17 +782,19 @@ int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode)
 	
 	printf("\tPayload passed schema validation\n");
 
-	/* verify that the media hash is correct */
-	vprintf("\tAbout to verify media hash in payload XML\n");
-	mediaHash = uitsGetElementText(xmlRootNode, "Media");
-	uitsHandleErrorPTR(payloadModuleName, "uitsVerifyPayloadXML", mediaHash,  
-					"Error: Couldn't get Media hash value from payload XML for validation\n");
+	if (!mediaHashNoVerifyFlag) {	// don't verify media hash if set 
+		/* verify that the media hash is correct */
+		vprintf("\tAbout to verify media hash in payload XML\n");
+		mediaHash = uitsGetElementText(xmlRootNode, "Media");
+		uitsHandleErrorPTR(payloadModuleName, "uitsVerifyPayloadXML", mediaHash,  
+						"Error: Couldn't get Media hash value from payload XML for validation\n");
 
-	err = uitsVerifyMediaHash (mediaHash);
-	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 0, 
-					   "Error: Couldn't verify the media hash\n");
-	
-	vprintf("\tMedia hash verified\n");
+		err = uitsVerifyMediaHash (mediaHash);
+		uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 0, 
+						   "Error: Couldn't verify the media hash\n");
+		
+		vprintf("\tMedia hash verified\n");
+	}
 	
 	// To verify the signature we need the metadata element text, the public key file, and the signature
 	metadataString	= uitsGetMetadataString ( xmlRootNode);	
