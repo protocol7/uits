@@ -138,7 +138,6 @@ int aiffEmbedPayload  (char *audioFileName,
 	AIFF_CHUNK_HEADER *applChunk = NULL;
 	unsigned long	audioInFileSize;
 	
-	MP4_ATOM_HEADER *udtaChunk = NULL;
 	unsigned long	udtaChunkDataSize;
 	unsigned long	payloadXMLSize;
 	

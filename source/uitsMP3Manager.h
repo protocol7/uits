@@ -27,6 +27,8 @@
  * Defines
  */
 
+// int	  intelCPUFlag = 1;
+
 
 /*
  * Frame types
@@ -44,6 +46,7 @@
  */
 
 #define MP3_HEADER_SIZE 10
+
 
 /* 
  * Structures
@@ -131,14 +134,6 @@ char *mp3FindUITSPayload	(FILE *audioInFP);
 void uitsMake28From32		(long *length);
 void uitsMake32From28		(long *length);
 
-/*
- *  Housekeeping functions - to convert endian-ness of 2, 4, and 8-byte integers, when necessary...
- *
- */
-
-int wswap(short *word);
-int lswap(long *lword);
-int llswap(unsigned long long *llword);
 
 
 #endif

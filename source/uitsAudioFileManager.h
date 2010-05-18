@@ -29,7 +29,8 @@ enum uitsAudioFileTypes {
 	MP3,
 	MP4,
 	FLAC,
-	AIFF
+	AIFF,
+	WAV
 };
 
 /* The audio callbacks */
@@ -66,5 +67,14 @@ int uitsAudioBufferedCopy			(FILE *audioInFP,
 									 FILE *audioOutFP, 
 									 unsigned long numBytes);
 
+/*
+ *  Housekeeping functions - to convert endian-ness of 2, 4, and 8-byte integers, when necessary...
+ *
+ */
+
+int wswap(short *word);
+int lswap(long *lword);
+int llswap(unsigned long long *llword);
+void SetBigEndianFlag (int flag);
 
 #endif

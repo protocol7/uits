@@ -22,7 +22,7 @@ CC      = gcc
 OPTIM   = -Os -g -Dfseeko=fseek -Dftello=ftell
 CFLAGS  = $(OPTIM) -I libxml2/include -I ssl/include -I mxml/include -I FLAC/include
 LDFLAGS = $(OPTIM)
-OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsMP4Manager.o uitsPayloadManager.o uitsOpenSSL.o uitsAIFFManager.o uitsFLACManager.o
+OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsMP4Manager.o uitsPayloadManager.o uitsOpenSSL.o uitsAIFFManager.o uitsFLACManager.o uitsWAVManager.o
 RM = rm
 
 #

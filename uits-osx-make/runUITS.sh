@@ -17,9 +17,9 @@
 
 ./UITS_Tool create \
 --verbose \
---audio ../test/test_audio.mp3 \
+--audio ../test/test_audio.wav \
 --xsd ../test/uits.xsd \
---uits ../test/test_payload.mp3 \
+--uits ../test/test_payload.wav \
 --embed \
 --algorithm RSA2048 \
 --priv  ../test/privateRSA2048.pem \

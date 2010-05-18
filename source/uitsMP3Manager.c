@@ -17,7 +17,7 @@ char *mp3ModuleName = "uitsMP3Manager.c";
 
 int   id3v1TagSize = 128L;
 char *id3privFrameEmail = "mailto:uits-info@umusic.com";
-int	  intelCPUFlag = 1;
+
 
 // int   id3v22Flag; // version 1.0 of tool only supports MP3 ID3 v23
 
@@ -960,82 +960,6 @@ int mp3HasID3v1Tag (FILE *fpin)
 	return (returnValue);
 }
 	
-/*
- *  Housekeeping functions - to convert endian-ness of 2, 4, and 8-byte integers, when necessary...
- *
- *	First the 2-byte version...
- *
- */
-
-int wswap(short *word)
-{
-	short w1, w2;
-	
-	if (intelCPUFlag) {
-		w1 = w2 = *word;
-		*word = (w1 << 8) & 0xff00;
-		*word |= ((w2 >> 8) & 0x00ff);
-	}
-	return(0);
-}
-
-/*
- *  4-byte version...
- *
- */
-
-int lswap(long *lword)
-{
-	union {
-		long ul;
-		struct {
-			char b1, b2, b3, b4;
-		} bytes ;
-	} *pu, lu;
-	
-	if (intelCPUFlag) {
-		dprintf("lswap intel_cpu defined\n");
-		lu.ul = *lword;
-		pu  = lword;
-		pu->bytes.b4 = lu.bytes.b1;
-		pu->bytes.b3 = lu.bytes.b2;
-		pu->bytes.b2 = lu.bytes.b3;
-		pu->bytes.b1 = lu.bytes.b4;
-	}
-	
-	return(0);
-}
-
-/*
- *  8-byte version...
- *
- */
-
-int llswap(unsigned long long *llword)
-{
-	unsigned long long ll1;
-	union {
-		unsigned long long ul;
-		struct {
-			char b1, b2, b3, b4, b5, b6, b7,b8;
-		} bytes ;
-	} *pu, lu;
-	
-	if (intelCPUFlag) {
-		lu.ul = *llword;
-		pu = llword;
-		pu->bytes.b8 = lu.bytes.b1;
-		pu->bytes.b7 = lu.bytes.b2;
-		pu->bytes.b6 = lu.bytes.b3;
-		pu->bytes.b5 = lu.bytes.b4;
-		pu->bytes.b4 = lu.bytes.b5;
-		pu->bytes.b3 = lu.bytes.b6;
-		pu->bytes.b2 = lu.bytes.b7;
-		pu->bytes.b1 = lu.bytes.b8;
-	}
-
-	return(0);
-}
 
 /*
  *  Convert any ID3V2.x header unpacked size to a usable (packed) 28-bit form.
@@ -1078,4 +1002,5 @@ void uitsMake32From28 (long *length)
 	*length = l4;	
 	return;
 }
+
 
