@@ -377,7 +377,7 @@ int uitsGenKey ()
 	// Convert the key digest to a string
 		
 	pubKeyIDValue = uitsDigestToString(pubKeyIDDigest);
-	printf("Public Key ID for file %s is %s\n", uitsSignatureDesc->pubKeyFileName, pubKeyIDValue);
+	vprintf("Public Key ID for file %s is %s\n", uitsSignatureDesc->pubKeyFileName, pubKeyIDValue);
 
 	if (outputFileName) {
 		vprintf("Writing public Key ID to file %s\n", outputFileName);
@@ -415,13 +415,13 @@ int uitsGenHash ()
 	uitsCheckRequiredParams("genhash");
 	
 	mediaHash = uitsAudioGetMediaHash(audioFileName);
-	printf("Media Hash for file %s is: \n\t%s\n", audioFileName, mediaHash);
+	vprintf("Media Hash for file %s is: \n\t%s\n", audioFileName, mediaHash);
 	outputMediaHash = mediaHash;
 	
 	if (gpB64MediaHashFlag) {
 		b64MediaHash = uitsBase64Encode(mediaHash, strlen(mediaHash), TRUE);
 		outputMediaHash = b64MediaHash;
-		printf("Base 64 Encoded Media Hash for file %s is:\n\t %s\n", audioFileName, b64MediaHash);
+		vprintf("Base 64 Encoded Media Hash for file %s is:\n\t %s\n", audioFileName, b64MediaHash);
 	}
 
 	if (outputFileName) {
@@ -451,51 +451,56 @@ void uitsCheckRequiredParams (char *command)
 {
 	/* This is an ugly, brute-force method of checking, but time is short */
 	
-	/* all thre commands require audio_file and payload_file */
 	
 	vprintf("uitsCheckRequiredParams command: %s\n", command);
-	
-	
+		
 
 	if (strcmp(command, "create") == 0) {
 		if (!audioFileName) {
-			printf("Error: Can't %s UITS payload. No audio file specified.\n", command);
-			exit(0);
+			snprintf(errStr, strlen((char *)errStr), "Error: Can't %s UITS payload. No audio file specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		if (!payloadFileName) {
-			printf("Error: Can't %s UITS payload. No payload file specified.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), "Error: Can't %s UITS payload. No payload file specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		if (strcmp(audioFileName, payloadFileName) == 0) {
-			printf("Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		if (!uitsSignatureDesc->algorithm) {
-			printf("Error: Can't %s UITS payload. No algorithm specified.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. No algorithm specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		if (!uitsSignatureDesc->pubKeyFileName) {
-			printf("Error: Can't %s UITS payload. No public key file specified.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. No public key file specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		if (!uitsSignatureDesc->privateKeyFileName) {
-			printf("Error: Can't %s UITS payload. No private key file specified.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. No private key file specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		if (!uitsSignatureDesc->pubKeyID) {
-			printf("Error: Can't %s UITS payload. No public key ID specified.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. No public key ID specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 	}
 	
 	if (strcmp(command, "verify") == 0) {
 		if (!uitsSignatureDesc->algorithm) {
-			printf("Error: Can't %s UITS payload. No algorithm specified.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. No algorithm specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		if (!uitsSignatureDesc->pubKeyFileName) {
-			printf("Error: Can't %s UITS payload. No public key file specified.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. No public key file specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		
 		/* The media hash can be verified in one of 3 ways
@@ -509,18 +514,22 @@ void uitsCheckRequiredParams (char *command)
 		 
 		 if (!audioFileName) {
 			 if (!payloadFileName) { /* no audio file and no payload file. nothing to verify */
-				 printf("Error: Can't %s UITS payload.  No payload or audio file specified for verification.\n", command);
-				 exit(0);
+				 snprintf(errStr, strlen((char *)errStr), 
+						  "Error: Can't %s UITS payload.  No payload or audio file specified for verification.\n", command);
+				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 			 }
 			 if (!mediaHashNoVerifyFlag && !clMediaHashValue && !mediaHashFileName) {
-				 printf("Error: Can't %s UITS payload. No audio file or media hash specified.\n", command);
-				 exit(0);
+				 snprintf(errStr, strlen((char *)errStr), 
+						  "Error: Can't %s UITS payload. No audio file or media hash specified.\n", command);
+				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 			 }
 		 } else {
 
 			 if (!mediaHashNoVerifyFlag && (clMediaHashValue && mediaHashFileName)) {
-				 printf("Error: Can't %s UITS payload. Multiple reference media hashes specified. Please provide either command line value or file. \n", command);
-				 exit(0);
+				 snprintf(errStr, strlen((char *)errStr), 
+						  "Error: Can't %s UITS payload. Multiple reference media hashes specified. Please provide either command line value or file.", 
+						  command);
+				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 			 }
 		 
 		 }
@@ -528,41 +537,48 @@ void uitsCheckRequiredParams (char *command)
 	
 	if (strcmp(command, "extract") == 0) {
 		if (!audioFileName) {
-			printf("Error: Can't %s UITS payload. No audio file specified.\n", command);
-			exit(0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. No audio file specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		if (!payloadFileName) {
-			printf("Error: Can't %s UITS payload. No payload file specified.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. No payload file specified.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		if (strcmp(audioFileName, payloadFileName) == 0) {
-			printf("Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 		
 		if (verifyFlag) {
 			if (!uitsSignatureDesc->algorithm) {
-				printf("Error: Can't %s UITS payload. No algorithm specified.\n", command);
-				exit (0);
+				snprintf(errStr, strlen((char *)errStr), 
+						 "Error: Can't %s UITS payload. No algorithm specified\n", command);
+				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 			}
 			if (!uitsSignatureDesc->pubKeyFileName) {
-				printf("Error: Can't %s UITS payload. No public key file specified.\n", command);
-				exit (0);
+				snprintf(errStr, strlen((char *)errStr), 
+						 "Error: Can't %s UITS payload. No public key file specified.\n", command);
+				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 			}
 		}
 	}
 
 	if (strcmp(command, "genkey") == 0) {
 		if (!uitsSignatureDesc->pubKeyFileName) {
-			printf("Error: Can't generate public key ID, no public key file file specified\n");
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't generate public key ID, no public key file file specified\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 	}
 
 	if (strcmp(command, "genhash") == 0) {
 		if (!audioFileName) {
-			printf("Error: Can't generate media hash, no audio file specified\n");
-			exit (0);
+			snprintf(errStr, strlen((char *)errStr), 
+					 "Error: Can't generate media hash, no audio file specified\n", command);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
 		}
 	}	
 }
@@ -780,7 +796,7 @@ int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode)
 	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 0, 
 					"Error: Couldn't verify the schema\n");
 	
-	printf("\tPayload passed schema validation\n");
+	vprintf("\tPayload passed schema validation\n");
 
 	if (!mediaHashNoVerifyFlag) {	// don't verify media hash if set 
 		/* verify that the media hash is correct */
@@ -823,13 +839,13 @@ int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode)
 		signatureDigestName = "SHA224";
 	}
 	
-	printf("\tAbout to verify signature with Public Key in file: %s\n", uitsSignatureDesc->pubKeyFileName );
+	vprintf("\tAbout to verify signature with Public Key in file: %s\n", uitsSignatureDesc->pubKeyFileName );
 	err = uitsVerifySignature(uitsSignatureDesc->pubKeyFileName, metadataString, signatureString, signatureDigestName);
 	
 	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 1, 
 					"Error: Couldn't validate signature\n");
 	
-	printf("\tPayload signature verified\n");
+	vprintf("\tPayload signature verified\n");
 		
 	return (OK);
 	
@@ -850,7 +866,8 @@ int  uitsVerifyMediaHash (char *mediaHash)
 	int			rMHLen;
 	char		*lastChar;
 
-	// printf("mediaHash: %s\n", mediaHash);
+	// vprintf("mediaHash: %s\n", mediaHash);
+	
 	/* The command line reference media hash takes precedence over the audio file */
 		
 	if (clMediaHashValue) {
@@ -923,7 +940,7 @@ int uitsCompareMediaHash (char *calculatedMediaHashValue, char *mediaHashValue)
 	
 	err = strcmp(mediaHashValue, b64CalculatedMediaHashValue);
 	if (err == OK) {
-		fprintf (stderr, "Warning: Media hash in payload is base 64 encoded\n");
+		vprintf ("Warning: Media hash in payload is base 64 encoded\n");
 		return(OK);
 	}
 	
@@ -940,7 +957,7 @@ int uitsCompareMediaHash (char *calculatedMediaHashValue, char *mediaHashValue)
 	
 	err = strcmp(lowerCaseMediaHashValue, calculatedMediaHashValue);
 	if (err == OK) {
-		fprintf (stderr, "Warning: Media hash in payload has different case than calculated media hash.\n");
+		vprintf ("Warning: Media hash in payload has different case than calculated media hash.\n");
 		return(OK);
 	}
 	
@@ -1168,7 +1185,7 @@ int uitsSetMetadataValue (char *name, char *value)
 		}
 		metadata_ptr++;
 	}
-	printf("Tried to set non-existent metadata value: name '%s' value '%s'\n", name, value);
+	vprintf("Tried to set non-existent metadata value: name '%s' value '%s'\n", name, value);
 	return (ERROR);
 	
 }
@@ -1210,7 +1227,7 @@ int uitsSetMetadataAttributeValue (char *name, char *value)
 		}
 		metadata_ptr++;
 	}
-	printf("Tried to set non-existent metadata element attribute value: name '%s' value '%s'\n", name, value);
+	vprintf("Tried to set non-existent metadata element attribute value: name '%s' value '%s'\n", name, value);
 	return (ERROR);
 }
 
@@ -1223,7 +1240,7 @@ int uitsSetMetadataAttributeValue (char *name, char *value)
 
 int uitsSetSignatureParamValue (char *name, char *value) 
 {
-	// printf("uitsSetSignatureParamValue name: %s, value %s\n", name, value);
+	// vprintf("uitsSetSignatureParamValue name: %s, value %s\n", name, value);
 	
 	
 	if (strcmp (name, "algorithm") == 0) {
@@ -1235,11 +1252,11 @@ int uitsSetSignatureParamValue (char *name, char *value)
 	} else if (strcmp (name, "b64LFFlag") == 0) {	/* hack: if the b64 flag is present on command line, it's true */
 		uitsSignatureDesc->b64LFFlag = TRUE;
 	} else if (strcmp (name, "pubKeyID") == 0) {
-		printf("pubKeyID value = %s\n", value);
+		vprintf("pubKeyID value = %s\n", value);
 		uitsSignatureDesc->pubKeyID = value;
 	} else {
-		fprintf(stderr, "ERROR: invalid signature parameter name=%s\n", name);
-		exit(ERROR);
+		snprintf(errStr, strlen((char *)errStr), "ERROR: invalid signature parameter name=%s\n", name);
+		uitsHandleErrorINT(payloadModuleName, "uitsSetSignatureParamValue", ERROR, OK, errStr);
 	}
 
 	return (OK);
@@ -1280,8 +1297,8 @@ int	 uitsSetIOFileName (int fileType, char *name)
 			break;
 			
 		default:
-			fprintf(stderr, "Error uitsSetIOFileName: Invalid fileType value=%d\n", fileType);
-			exit(ERROR);
+			snprintf(errStr, strlen((char *)errStr), "Error uitsSetIOFileName: Invalid fileType value=%d\n", fileType);
+			uitsHandleErrorINT(payloadModuleName, "uitsSetIOFileName", ERROR, OK, errStr);
 			break;
 	}
 	
@@ -1309,7 +1326,7 @@ void uitsSetCommandLineParam (char *paramName, int paramValue)
 		clParamPtr++;
 	}
 	
-	fprintf(stderr, "Warning: tried to set non-existent parameter: %s value %d\n", paramName, paramValue);
+	vprintf("Warning: tried to set non-existent parameter: %s value %d\n", paramName, paramValue);
 }
 
 /*

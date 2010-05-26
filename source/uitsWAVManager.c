@@ -264,7 +264,7 @@ WAV_CHUNK_HEADER *wavReadChunkHeader (FILE *fpin)
 	uitsHandleErrorINT(wavModuleName, "wavExtractPayload", err, WAV_HEADER_SIZE, "Couldn't read wav chunk header\n");
 	
 	
-	//	printf("%c%c%c%c\n", header[4], header[5], header[6], header[7]);
+	//	vprintf("%c%c%c%c\n", header[4], header[5], header[6], header[7]);
 	
 	memcpy (chunkHeader->chunkID, &header[0], 4); 
 	

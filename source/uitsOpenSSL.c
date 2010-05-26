@@ -147,10 +147,10 @@ UITS_digest *uitsCreateDigest (unsigned char *message,
 	uitsDigest->length = mdLen;
 	uitsDigest->value  = mdValue;
 	
-//	printf("Digest Length is: %d\n", uitsDigest->length);
-//	printf("Digest is: ");
+//	vprintf("Digest Length is: %d\n", uitsDigest->length);
+//	vprintf("Digest is: ");
 //	for(i = 0; i < uitsDigest->length; i++) printf("%02x", uitsDigest->value[i]);
-//	printf("\n");
+//	vprintf("\n");
 	
 	
 	return (uitsDigest);
@@ -210,10 +210,10 @@ UITS_digest *uitsCreateDigestBuffered (FILE *messageFile,
 	uitsDigest->length = mdLen;
 	uitsDigest->value  = mdValue;
 	
-//	printf("Digest Length is: %d\n", uitsDigest->length);
-//		printf("Digest is: ");
+//	vprintf("Digest Length is: %d\n", uitsDigest->length);
+//		vprintf("Digest is: ");
 //		for(i = 0; i < uitsDigest->length; i++) printf("%02x", uitsDigest->value[i]);
-//		printf("\n");
+//		vprintf("\n");
 	
 	
 	return (uitsDigest);
@@ -273,16 +273,15 @@ unsigned char *uitsCreateSignature(unsigned char *message,
 	
 	fp = fopen (privateKeyFileName, "r");
 	if (!fp) {
-		printf("ERROR: Couldn't open private key file %s\n", privateKeyFileName);
-		exit (1);
+		snprintf(errStr, strlen((char *)errStr), "ERROR: Couldn't open private key file %s\n", privateKeyFileName);
+		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, errStr);
 	}
 	
 	evpPrivateKey = PEM_read_PrivateKey(fp, NULL, NULL, NULL);
 	fclose (fp);
 	
 	if (!evpPrivateKey) {
-		printf("ERROR: Couldn't read private key from file\n");
-		exit (1);
+		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, "ERROR: Couldn't read private key from file\n");
 	}
 	
 	/* sign the message using either RSA/SHA256 or DSA/SHA224 digest */
@@ -291,8 +290,9 @@ unsigned char *uitsCreateSignature(unsigned char *message,
 	} else if (!strcmp(digestName, "SHA224")) {
 		mdType = EVP_sha224();
 	} else {
-		printf("ERROR: Couldn't assign digest type for signing. Unrecognized digest name: %s\n", digestName);
-		exit(1);
+		snprintf(errStr, strlen((char *)errStr), 
+				 "ERROR: Couldn't assign digest type for signing. Unrecognized digest name: %s\n", digestName);
+		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, errStr);
 	}
 	
 	ctx = EVP_MD_CTX_create();
@@ -313,7 +313,7 @@ unsigned char *uitsCreateSignature(unsigned char *message,
 	
 //	fp = fopen ("testsig.bin", "w");
 //	if (!fp) {
-//		printf("ERROR: Couldn't open testsig.bin\n");
+//		vprintf("ERROR: Couldn't open testsig.bin\n");
 //		exit (1);
 //	}
 //	fwrite(sig, sigLen, 1, fp);
@@ -410,7 +410,7 @@ unsigned char *uitsBase64Encode	(unsigned char *message,
 								 int messageLength,
 								 int b64LFFlag)
 {
-	//	printf("Base64Encode message: %s\n", message);
+	//	vprintf("Base64Encode message: %s\n", message);
 	
 	BIO *bmem, *b64;
 	BUF_MEM *bptr;
@@ -476,7 +476,7 @@ UITS_digest *uitsBase64Decode (unsigned char *message,
 	
 	BIO_free_all(bmem);
 	
-//	printf("base64decode buffer length: %d\n", decodedMessage->length);
+//	vprintf("base64decode buffer length: %d\n", decodedMessage->length);
 	
 	decodedMessage->value = buffer;
 	return (decodedMessage);
@@ -500,10 +500,10 @@ UITS_digest *uitsGetPubKeyID (char *pubKeyFileName)
 	
 	pubKeyID = uitsCreateDigest(pubKeyData, "SHA1");	/* create a SHA1 hash of the key file data */
 	
-	//	printf("pubKeyID = %d\n", pubKeyID->length);
-	//	printf("pubKeyID is: \n");
+	//	vprintf("pubKeyID = %d\n", pubKeyID->length);
+	//	vprintf("pubKeyID is: \n");
 	//	for(i = 0; i < pubKeyID->length; i++) printf("%02x", pubKeyID->value[i]);
-	//	printf("\n");
+	//	vprintf("\n");
 	
 	/* cleanup */
 	free(pubKeyData);

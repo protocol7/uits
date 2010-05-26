@@ -156,6 +156,8 @@ int mp4EmbedPayload  (char *audioFileName,
 
 	/* calculate how long the input audio file is by seeking to EOF and saving size  */
 	audioInFileSize = uitsGetFileSize(audioInFP);
+
+#ifdef UITS_AT_END_OF_file
 	
 	/* read and copy top level atoms until end-of-file */
 	bytesLeftInFile = audioInFileSize;
@@ -171,12 +173,12 @@ int mp4EmbedPayload  (char *audioFileName,
 	
 	/* add a skip atom containing a udta atom containing a UITS atom */
 	
-	atomSize = 8 + 8 + 8 + payloadXMLSize; /* skip atom size is payloadXML size, plus 8-byte overhead of 3 atom headers */
-	lswap(&atomSize);
+//	atomSize = 8 + 8 + 8 + payloadXMLSize; /* skip atom size is payloadXML size, plus 8-byte overhead of 3 atom headers */
+//	lswap(&atomSize);
 	
-	/* write the skip atom header */
-	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
-	fwrite("skip",    1, 4, audioOutFP);   /* 4-bytes ID */
+	/* write the udta atom header */
+//	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
+//	fwrite("skip",    1, 4, audioOutFP);   /* 4-bytes ID */
 	
 	
 	atomSize = 8 + 8 + payloadXMLSize;	/* udta atom size is payload XML size plus 8-byte overhead of 2 atom headers */
@@ -192,7 +194,157 @@ int mp4EmbedPayload  (char *audioFileName,
 	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
 	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
 	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
-			
+#endif
+	
+#ifdef UITS_BEFORE_moov_atom
+	/* find the 'moov' atom header */	
+	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", moovAtomHeader, "Coudln't find 'moov' atom header\n");
+
+	/* now do the data copy and modification */
+	rewind(audioInFP);
+	
+	/* copy from beginning of file to beginning of 'moov' atom */
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, moovAtomHeader->saveSeek);
+	
+	/* write a udta atom containing the UITS data */
+	atomSize = 8+ payloadXMLSize + 8;
+	lswap(&atomSize);
+	
+	/* write the udta atom header */
+	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
+	fwrite("udta",    1, 4, audioOutFP);   /* 4-bytes ID */
+		
+	/* write the UITS atom */
+	atomSize = payloadXMLSize + 8;
+	lswap(&atomSize);
+	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
+	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
+	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
+	
+	/* write the rest of the file */
+	endSeek = audioInFileSize - ftello(audioInFP);			/* save the size of the rest of the data */
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, endSeek);
+#endif	
+		
+#ifdef UITS_AT_START_OF_udta
+	/* find the 'moov' atom header */	
+	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", moovAtomHeader, "Coudln't find 'moov' atom header\n");
+
+	/* seek past the moov atom header */
+	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, 8, SEEK_CUR);
+
+	atomSize = moovAtomHeader->size - 8;
+
+	/* find the 'udta' atom header that is a child the 'moov' atom container */
+	udtaAtomHeader = mp4FindAtomHeader(audioInFP, "udta", atomSize);
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", udtaAtomHeader, "Coudln't find 'udta' atom header\n");
+
+	/* now do the data copy and modification */
+	rewind(audioInFP);
+
+	/* copy from beginning of file to beginning of 'moov' atom */
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, moovAtomHeader->saveSeek);
+	
+	atomSize = moovAtomHeader->size + payloadXMLSize + 8;
+	lswap(&atomSize);
+	
+	/* write the moov atom header */
+	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
+	fwrite("moov",    1, 4, audioOutFP);   /* 4-bytes ID */
+	
+	/* seek past the moov atom header */
+	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, 8, SEEK_CUR);
+	
+	/* write the moov atom until the start of the 'udta' atom */
+	atomSize = udtaAtomHeader->saveSeek - ftello(audioInFP);
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, atomSize);
+
+	/* write the udta atom header */
+	atomSize = udtaAtomHeader->size + payloadXMLSize + 8;
+	lswap(&atomSize);
+	
+	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
+	fwrite("udta",    1, 4, audioOutFP);   /* 4-bytes ID */
+	fseeko(audioInFP, 8, SEEK_CUR);
+	
+	/* write the UITS atom */
+	atomSize = payloadXMLSize + 8;
+	lswap(&atomSize);
+	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
+	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
+	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
+
+	/* write the rest of the file */
+	endSeek = audioInFileSize - ftello(audioInFP);			/* save the size of the rest of the data */
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, endSeek);
+#endif
+
+#define UITS_AT_END_OF_udta	
+#ifdef UITS_AT_END_OF_udta
+	/* find the 'moov' atom header */	
+	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", moovAtomHeader, "Coudln't find 'moov' atom header\n");
+	
+	/* seek past the moov atom header */
+	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, 8, SEEK_CUR);
+	
+	atomSize = moovAtomHeader->size - 8;
+	
+	/* find the 'udta' atom header that is a child the 'moov' atom container */
+	udtaAtomHeader = mp4FindAtomHeader(audioInFP, "udta", atomSize);
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", udtaAtomHeader, "Coudln't find 'udta' atom header\n");
+	
+	/* now do the data copy and modification */
+	rewind(audioInFP);
+	/* copy from beginning of file to beginning of 'moov' atom */
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, moovAtomHeader->saveSeek);
+	
+	atomSize = moovAtomHeader->size + payloadXMLSize  + 8;
+	lswap(&atomSize);
+	
+	/* write the moov atom header */
+	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
+	fwrite("moov",    1, 4, audioOutFP);   /* 4-bytes ID */
+	
+	/* seek past the moov atom header */
+	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, 8, SEEK_CUR);
+	
+	/* write the moov atom until the start of the 'udta' atom */
+	atomSize = udtaAtomHeader->saveSeek - ftello(audioInFP);
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, atomSize);	
+	
+	/* write the udta atom header */
+	atomSize = udtaAtomHeader->size + payloadXMLSize + 8;
+	lswap(&atomSize);
+	
+	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
+	fwrite("udta",    1, 4, audioOutFP);   /* 4-bytes ID */
+	
+	/* seek past the udata header in input file */
+	fseeko(audioInFP, 8, SEEK_CUR);
+
+	/* write the rest of the udta atom */
+	atomSize = udtaAtomHeader->size - 8;
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, atomSize);
+	
+	/* write the UITS atom */
+	atomSize = payloadXMLSize + 8 ;
+	lswap(&atomSize);
+	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
+	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
+	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
+	
+	/* write the rest of the file */
+	endSeek = audioInFileSize - ftello(audioInFP);			/* save the size of the rest of the data */
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, endSeek);
+#endif
+		
 	/* cleanup */
 	fclose(audioInFP);
 	fclose(audioOutFP);

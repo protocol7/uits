@@ -134,7 +134,8 @@ char *mp3GetMediaHash (char *audioFileName)
 	foundPadBytes = ftello(audioFP) - audioFrameStart;
 	
 	if (foundPadBytes) {
-		fprintf(stderr, "Warning: Illegal MP3 file. ID3 frame header size does not include pad bytes\n");
+		uitsHandleErrorINT(mp3ModuleName, "mp3GetMediaHash", ERROR, OK, 
+						   "Warning: Illegal MP3 file. ID3 frame header size does not include pad bytes\n");
 	}
 	
 	
@@ -242,7 +243,7 @@ int mp3EmbedPayload  (char *audioFileName,
 				break;
 				
 			default:
-				fprintf(stderr, "Unidentified frame at %ld\n", (ftello(audioInFP) - 4));
+				vprintf("Unidentified frame at %ld\n", (ftello(audioInFP) - 4));
 				break;
 		}
 		
@@ -340,7 +341,7 @@ char *mp3ExtractPayload (char *audioFileName)
 				break;
 				
 			default:
-				printf("Unidentified frame at %ld\n", (ftello(audioInFP) - 4));
+				vprintf("Unidentified frame at %ld\n", (ftello(audioInFP) - 4));
 				break;
 		}
 		
@@ -373,8 +374,13 @@ int mp3CheckFileVersion (char *audioFileName)
 	uitsHandleErrorPTR(mp3ModuleName, "mp3ExtractUITSPayload", id3Header, "Couldn't read ID3 header\n");
 	
 	if (id3Header->majorVersion != 3) {
-		fprintf(stderr, "MP3 file ID3 Tag format ID3V2.%d.%d not supported.\n", id3Header->majorVersion, id3Header->minorVersion);
 		exit(OK);
+		snprintf(errStr, strlen((char *)errStr), 
+				 "MP3 file ID3 Tag format ID3V2.%d.%d not supported.\n", 
+				 id3Header->majorVersion, 
+				 id3Header->minorVersion);
+		uitsHandleErrorINT(mp3ModuleName, "mp3ExtractUITSPayload", ERROR, OK, errStr);
+
 	}
 	
 	fclose(audioInFP);
@@ -721,7 +727,7 @@ MP3_ID3_HEADER *mp3ReadID3Header(FILE *fpin)
 //		{
 //			tag_has_footer = 1;
 //			if (verbosity)
-//				printf("ID3 tag footer is present.\n");
+//				vprintf("ID3 tag footer is present.\n");
 //		}
 		
 		// The next 4 bytes have the size in sync-safe format. Need to convert to integer.

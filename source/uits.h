@@ -48,13 +48,14 @@
 #define	FALSE 0
 #define TRUE  1
 
-#define vprintf(...)  if (verboseFlag) {printf (__VA_ARGS__);}
-#define dprintf(...)  if (debugFlag)   {printf (__VA_ARGS__);}
+#define vprintf(...)  if (!silentFlag && verboseFlag) {printf (__VA_ARGS__);}
+#define dprintf(...)  if (!silentFlag && debugFlag)   {printf (__VA_ARGS__);}
 
-static long int err = 0;						// error flag
-int verboseFlag;								// verbose message flag set via command line
-int debugFlag;									// debug message flag set via command line
-
+static long int err = 0;			// error flag
+int silentFlag ;					// silent mode
+int verboseFlag;					// verbose message flag (DEFAULT mode is verbose)
+int debugFlag;						// debug message flag set via command line
+char * restrict errStr[255];		// static buffer to hold an error message string
 
 void uitsHandleErrorINT(char *uitsModuleName,	// name of uitsModule where error occured
 						char *functionName,		// name of calling function 

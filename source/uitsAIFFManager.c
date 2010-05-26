@@ -261,7 +261,7 @@ AIFF_CHUNK_HEADER *aiffReadChunkHeader (FILE *fpin)
 	uitsHandleErrorINT(aiffModuleName, "aiffReadChunkHeader", err, AIFF_HEADER_SIZE, "Couldn't read aiff chunk header\n");
 	
 	
-	//	printf("%c%c%c%c\n", header[4], header[5], header[6], header[7]);
+	//	vprintf("%c%c%c%c\n", header[4], header[5], header[6], header[7]);
 	
 	memcpy (chunkHeader->chunkID, &header[0], 4); 
 	

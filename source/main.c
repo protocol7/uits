@@ -89,9 +89,10 @@ int main (int argc, const char * argv[]) {
 			uitsHandleErrorINT(moduleName, "main", err, OK, 
 							   "Error: Couldn't generate key parameter\n");
 			break;
+			
 		default:
-			fprintf (stderr, "Error: Invalid action value %d\n", uitsAction);
-			exit(ERROR);
+			snprintf(errStr, strlen(errStr), "rror: Invalid action value: %d\n", uitsAction);
+			uitsHandleErrorINT(moduleName, "main", ERROR, OK, "Error: Invalid action value\n");
 			break;
 	}
 	
@@ -128,7 +129,8 @@ void uitsPrintHelp (char *command)
 	} else if(strcmp(command, "create") == 0) {
 		printf("Usage: uits_tool create [options]\n");
 		printf("\n");
-		printf("--verbose   (-v)\n");
+		printf("--verbose   (-v)							Run in verbose mode (DEFAULT)\n");
+		printf("--silent    (-s)							Run in silent mode \n");
 		printf("--audio     (-a)    [file-name] (REQUIRED): Name of the audio file for which to create payload\n");
 		printf("--uits      (-u)    [file-name] (REQUIRED): Name of UITS payload file\n");
 		printf("--embed     (-e)                (OPTIONAL): Embed UITS payload into the audio and write to payload file\n");
@@ -188,8 +190,9 @@ void uitsPrintHelp (char *command)
 	} else if (strcmp(command, "verify") == 0) {
 		printf("Usage: uits_tool verify [options]\n");
 		printf("\n");
-		printf("--verbose    (-v) \n");
-		printf("--nohash     (-n)				 (OPTIONAL): Disable media hash validation.\n");
+		printf("--verbose    (-v)							Run in verbose mode (DEFAULT)\n");
+		printf("--silent     (-s)							Run in silent mode \n");
+		printf("--nohash     (-n)				 (OPTIONAL) Disable media hash validation.\n");
 		printf("--audio      (-a)   [file-name]  (REQUIRED if hash validation enabled and no hash or hashfile specified)\n");
 		printf("                                            Name of the audio file for which to verify payload\n");
 		printf("                                            If the audio file contains a UITS payload, that \n");
@@ -214,7 +217,8 @@ void uitsPrintHelp (char *command)
 	} else if (strcmp(command, "extract") == 0) {
 		printf("Usage: uits_tool extract [options]\n");
 		printf("\n");
-		printf("--verbose   (-v) \n");
+		printf("--verbose   (-v)							  Run in verbose mode (DEFAULT)\n");
+		printf("--silent    (-s)							  Run in silent mode \n");
 		printf("--audio     (-a)      [file-name] (REQUIRED): Name of the audio file from which to extract payload\n");
 		printf("--uits      (-u)      [file-name] (REQUIRED): Name of the standalone file to write payload\n");
 		printf("--verify    (-v)    			  (OPTIONAL): If specified, verify the payload after it is extracted from the audio file\n");
@@ -317,6 +321,7 @@ int uitsGetOptCreate (int argc, const char * argv[])
 	static struct option long_options [MAX_COMMAND_LINE_OPTIONS] = {
 		{"debug",           no_argument,		0,	'w'},	// turn on debug printing (hidden option!)
 		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode
+		{"silent",			no_argument,		0,	's'},	// turn on silent mode
 		{"audio",   		required_argument,	0,	'a'},	// audio file
 		{"uits",	        required_argument,	0,	'u'},	// uits payload file
 		{"embed",			no_argument,		0,	'e'},	// embed audio into audio file
@@ -378,13 +383,13 @@ int uitsGetOptCreate (int argc, const char * argv[])
 		metadataPtr++;
 		option_count++;
 		if (option_count > MAX_COMMAND_LINE_OPTIONS) {
-			fprintf (stderr, "ERROR uitsGetOpt: too many UITS metadata parameters. Increase MAX_COMMAND_LINE_OPTIONS.\n");
-			exit(ERROR);
+			uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK,  
+							   "ERROR uitsGetOpt: too many UITS metadata parameters. Increase MAX_COMMAND_LINE_OPTIONS.\n");
 		}
 	}
 	
 	while (1) {
-		c = getopt_long (argc, argv, "vemca:u:f:r:b:i:k:d:x:m:h:Y:Z:w:", long_options, &option_index);
+		c = getopt_long (argc, argv, "vsemca:u:f:r:b:i:k:d:x:m:h:Y:Z:w:", long_options, &option_index);
 		// dprintf("Got option: %c, value: %s\n", c, optarg);
 		
 		fflush(stdout);
@@ -400,6 +405,11 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				verboseFlag = TRUE;
 				break;
 
+			case 's':		// set silent mode
+				silentFlag = TRUE;
+				stderr = fopen("/dev/null", "w");
+				break;
+				
 			case 'a':		// set input audio file name
 				option_value = strdup(optarg);
 				dprintf ("audio file '%s'\n", option_value);
@@ -485,8 +495,8 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				break;
 				
 			default: 
-				fprintf (stderr, "Error processing options: unknown option: %c\n", c);
-				return (ERROR);
+				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
 		}
 	}
 	
@@ -513,6 +523,7 @@ int uitsGetOptVerify (int argc, const char * argv[])
 	static struct option long_options [MAX_COMMAND_LINE_OPTIONS] = {
 		{"debug",           no_argument,		0,	'w'},	// turn on debug printing (hidden option!)
 		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode
+		{"silent",			no_argument,		0,	's'},	// turn on silent mode
 		{"audio",		    required_argument,	0,	'a'},	// audio file
 		{"uits",			required_argument,	0,	'u'},	// payload file
 		{"hash",			required_argument,	0,	'h'},	// media hash value against which to verify
@@ -527,7 +538,7 @@ int uitsGetOptVerify (int argc, const char * argv[])
 	};
 		
 	while (1) {
-		c = getopt_long (argc, argv, "va:u:h:f:r:b:x:w:", long_options, &option_index);
+		c = getopt_long (argc, argv, "vsa:u:h:f:r:b:x:w:", long_options, &option_index);
 		
 		if (c == -1) { break; }
 		
@@ -541,6 +552,10 @@ int uitsGetOptVerify (int argc, const char * argv[])
 				verboseFlag = TRUE;
 				break;
 
+			case 's':		// set silent mode flag
+				silentFlag = TRUE;
+				break;
+				
 			case 'a':		// set input audio file name
 				option_value = strdup(optarg);
 				dprintf ("audio file '%s'\n", option_value);
@@ -589,8 +604,8 @@ int uitsGetOptVerify (int argc, const char * argv[])
 				break;
 				
 			default: 
-				fprintf (stderr, "Error processing options: unknown option: %c\n", c);
-				return (ERROR);
+				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
 		}
 	}
 	
@@ -618,7 +633,8 @@ int uitsGetOptExtract (int argc, const char * argv[])
 	// command-line option definition for option parsing
 	static struct option long_options [MAX_COMMAND_LINE_OPTIONS] = {
 		{"debug",           no_argument,		0,	'w'},	// turn on debug printing (hidden option!)
-		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode
+		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode (DEFAULT)
+		{"silent",			no_argument,		0,	's'},	// turn on silent mode
 		{"verify",			no_argument,		0,  'y'},	// verify payload after extraction
 		{"audio",		    required_argument,	0,	'a'},	// audio file
 		{"uits",			required_argument,	0,	'u'},	// payload file
@@ -632,7 +648,7 @@ int uitsGetOptExtract (int argc, const char * argv[])
 	
 	
 	while (1) {
-		c = getopt_long (argc, argv, "vya:u:r:b:x:w:", long_options, &option_index);
+		c = getopt_long (argc, argv, "vsya:u:r:b:x:w:", long_options, &option_index);
 		
 		if (c == -1) { break; }
 		
@@ -645,6 +661,10 @@ int uitsGetOptExtract (int argc, const char * argv[])
 
 			case 'v':		// set the verbose flag
 				verboseFlag = TRUE;
+				break;
+				
+			case 's':		// set silent mode flag
+				silentFlag = TRUE;
 				break;
 				
 			case 'y':		// set verify flag
@@ -683,8 +703,8 @@ int uitsGetOptExtract (int argc, const char * argv[])
 				break;
 				
 			default: 
-				fprintf (stderr, "Error processing options: unknown option: %c\n", c);
-				return (ERROR);
+				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
 		}
 		
 	}
@@ -756,8 +776,8 @@ int uitsGetOptGenHash (int argc, const char * argv[])
 							
 				
 			default: 
-				fprintf (stderr, "Error processing options: unknown option: %c\n", c);
-				return (ERROR);
+				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
 		}
 	}
 	
@@ -816,8 +836,8 @@ int uitsGetOptGenKey (int argc, const char * argv[])
 				break;
 				
 			default: 
-				printf ("Error processing options: unknown option: %c\n", c);
-				return (ERROR);
+				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
 		}
 	}
 	
@@ -833,6 +853,12 @@ int uitsGetOptGenKey (int argc, const char * argv[])
  *
  */
 int	uitsInit() {											
+	
+
+	// init the printf output flags
+	silentFlag  = FALSE;			// silent mode		OFF
+	verboseFlag = TRUE;				// verbose mode		ON
+	debugFlag   = FALSE;			// debug messages	OFF
 	
 	// make sure the mxml writing routines don't do any spurious line-wrapping
 	
@@ -947,8 +973,8 @@ unsigned char *uitsReadFile (char *filename)
 	
 	fp = fopen(filename, "r");	
 	if (!fp) {
-		fprintf(stderr, "ERROR: Couldn't open file: %s\n", filename);
-		exit (0);
+		snprintf(errStr, strlen((char *)errStr), "ERROR: Couldn't open file: %s\n", filename);
+		uitsHandleErrorINT(moduleName, "uitsReadFile", ERROR, OK, errStr);
 	}
 	
 	/* read the whole file into memory */
@@ -960,8 +986,8 @@ unsigned char *uitsReadFile (char *filename)
 	fileData = calloc(fileLen + 1, sizeof(char));
 	
 	if(!fileData){
-		fprintf(stderr, "ERROR: Insufficient memory to read %s\n", filename);
-		exit (0);
+		snprintf(errStr, strlen((char *)errStr),  "ERROR: Insufficient memory to read %s\n", filename);
+		uitsHandleErrorINT(moduleName, "uitsReadFile", ERROR, OK, errStr);
 	}
 	
 	fread(fileData, fileLen, 1, fp); /* Read the entire file into fileData */

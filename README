@@ -18,7 +18,7 @@ INTRODUCTION
 	information on UITS, contact Universal Music Group.
 
     	UITS_Tool is a command-line tool that creates, validates, and extracts UITS
-	payloads. Version 0.01 works with only MP3 formatted audio files. 
+	payloads. Version 2.0 suports MP3, AAC, WAV, FLAC and AIFF file formats.
 	
 	This distribution includes the following directories:
 	
@@ -52,12 +52,13 @@ RUNNING UITS_Tool
 BUILDING UITS_Tool
 
    The UITS_Tool is written in C and has been compiled using the GNU C compiler on Mac
-   and Windows (MinGW). It uses three open source libraries. Compiled versions of those
+   and Windows (MinGW). It uses several open source libraries. Compiled versions of those
    libraries are distributed with the tool. To build in another environment, those
    libraries must be re-compiled. The three libraries are:
 			OpenSSL -  (http://www.openssl.org/) Version 1.0 beta4 
 			Libxml2 -  (http://xmlsoft.org/) Distributed with MacOSX 
 			Mini-XML - (http://www.minixml.org/)
+			FLAC     - (http://flac.sourceforge.net/)
 			
 	To build under MacOSX using X-Code, use the xcode project,
 		uits-osx-xcode/uits-osx-xcode.xcodeproj
