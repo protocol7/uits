@@ -30,6 +30,10 @@ typedef struct {
 	unsigned long saveSeek;	/* saved seek location for the header start */
 } MP4_ATOM_HEADER;
 
+typedef struct {
+	unsigned char atomType[5];	
+	MP4_ATOM_HEADER *atomHeader;
+} MP4_NESTED_ATOM;
 
 /* 
  * PUBLIC Functions 
@@ -46,6 +50,9 @@ char *mp4ExtractPayload		(char *audioFileName);
 
 char *mp4GetMediaHash		(char *audioFileName);
 
+int mp4UpdateChunkOffsetTable(FILE *audioOutFP, int uitsAtomSize);
+
+MP4_ATOM_HEADER *mp4FindAtomHeaderNested (FILE *fpin, MP4_NESTED_ATOM *nestedAtoms);
 
 /*
  * PRIVATE Functions

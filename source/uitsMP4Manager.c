@@ -151,82 +151,13 @@ int mp4EmbedPayload  (char *audioFileName,
 	audioInFP = fopen(audioFileName, "rb");
 	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioInFP, "Couldn't open audio file for reading\n");
 	
-	audioOutFP = fopen(audioFileNameOut, "wb");
+	audioOutFP = fopen(audioFileNameOut, "w+b");
 	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioOutFP, "Couldn't open audio file for writing\n");
 
 	/* calculate how long the input audio file is by seeking to EOF and saving size  */
 	audioInFileSize = uitsGetFileSize(audioInFP);
 
-#ifdef UITS_AT_END_OF_file
-	
-	/* read and copy top level atoms until end-of-file */
-	bytesLeftInFile = audioInFileSize;
-	while (bytesLeftInFile) {
-		atomHeader = mp4ReadAtomHeader(audioInFP);
-		if (strncmp(atomHeader->type, "udta", 4) == 0) { /* existing udta atom */
-			uitsHandleErrorINT(mp4ModuleName, "mp4EmbedPayload", ERROR, OK, "Error: audio file has an existing UITS payload\n");
-		} else {
-			bytesCopied = mp4CopyAtom(audioInFP, audioOutFP);
-			bytesLeftInFile -= bytesCopied;
-		}
-	}
-	
-	/* add a skip atom containing a udta atom containing a UITS atom */
-	
-//	atomSize = 8 + 8 + 8 + payloadXMLSize; /* skip atom size is payloadXML size, plus 8-byte overhead of 3 atom headers */
-//	lswap(&atomSize);
-	
-	/* write the udta atom header */
-//	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
-//	fwrite("skip",    1, 4, audioOutFP);   /* 4-bytes ID */
-	
-	
-	atomSize = 8 + 8 + payloadXMLSize;	/* udta atom size is payload XML size plus 8-byte overhead of 2 atom headers */
-	lswap(&atomSize);
-	
-	/* write the udta atom header */
-	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
-	fwrite("udta",    1, 4, audioOutFP);   /* 4-bytes ID */
-	
-	/* write the UITS atom */
-	atomSize = 8 + payloadXMLSize ;	/* UITS atom size is payload XML size plus 8-byte overhead atom header */
-	lswap(&atomSize);
-	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
-	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
-	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
-#endif
-	
-#ifdef UITS_BEFORE_moov_atom
-	/* find the 'moov' atom header */	
-	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", moovAtomHeader, "Coudln't find 'moov' atom header\n");
-
-	/* now do the data copy and modification */
-	rewind(audioInFP);
-	
-	/* copy from beginning of file to beginning of 'moov' atom */
-	uitsAudioBufferedCopy(audioInFP, audioOutFP, moovAtomHeader->saveSeek);
-	
-	/* write a udta atom containing the UITS data */
-	atomSize = 8+ payloadXMLSize + 8;
-	lswap(&atomSize);
-	
-	/* write the udta atom header */
-	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
-	fwrite("udta",    1, 4, audioOutFP);   /* 4-bytes ID */
-		
-	/* write the UITS atom */
-	atomSize = payloadXMLSize + 8;
-	lswap(&atomSize);
-	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
-	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
-	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
-	
-	/* write the rest of the file */
-	endSeek = audioInFileSize - ftello(audioInFP);			/* save the size of the rest of the data */
-	uitsAudioBufferedCopy(audioInFP, audioOutFP, endSeek);
-#endif	
-		
+#define UITS_AT_START_OF_udta			
 #ifdef UITS_AT_START_OF_udta
 	/* find the 'moov' atom header */	
 	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
@@ -281,9 +212,16 @@ int mp4EmbedPayload  (char *audioFileName,
 	/* write the rest of the file */
 	endSeek = audioInFileSize - ftello(audioInFP);			/* save the size of the rest of the data */
 	uitsAudioBufferedCopy(audioInFP, audioOutFP, endSeek);
+	
+	/* the output file now has the UITS payload inserted into the 'udta' chunk */
+	/* one last bit of housekeeping is reqyired: */
+	/* update the chunk offset table to skip past the new chunk */
+	atomSize = payloadXMLSize + 8;
+	err = mp4UpdateChunkOffsetTable(audioOutFP, atomSize);
+	uitsHandleErrorINT(mp4ModuleName, "mp4EmbedPayload", err, OK, "Couldn't update chunk offset table\n");
+	
 #endif
 
-#define UITS_AT_END_OF_udta	
 #ifdef UITS_AT_END_OF_udta
 	/* find the 'moov' atom header */	
 	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
@@ -369,50 +307,43 @@ int mp4EmbedPayload  (char *audioFileName,
 char *mp4ExtractPayload (char *audioFileName) 
 
 {
-	MP4_ATOM_HEADER *skipAtomHeader;
-	MP4_ATOM_HEADER *udtaAtomHeader;
-	MP4_ATOM_HEADER	*uitsAtomHeader;
+	MP4_NESTED_ATOM nestedAtoms [] = {
+		{ "moov", NULL },
+		{ "udta", NULL },
+		{ "UITS", NULL },
+		{ NULL, 0}
+	};
+	
 	FILE			*audioInFP;
 	unsigned long	audioInFileSize;
 	char			*payloadXML;
 	unsigned long	atomSize;
+	MP4_NESTED_ATOM *chunkTable = NULL;
 	
 	/* open the audio input file */
 	audioInFP = fopen(audioFileName, "rb");
 	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", audioInFP, "Couldn't open audio file for reading\n");
 
 	audioInFileSize = uitsGetFileSize(audioInFP);
-	
-	/* find the 'skip' container atom header */	
-	skipAtomHeader = mp4FindAtomHeader(audioInFP, "skip", audioInFileSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", udtaAtomHeader, "Coudln't find 'skip' top level atom header\n");
 
-	/* seek past the skip atom header */
-	fseeko(audioInFP, skipAtomHeader->saveSeek, SEEK_SET);
-	fseeko(audioInFP, 8, SEEK_CUR);
+	/* populate the nested atom pointers */
+	chunkTable = mp4FindAtomHeaderNested(audioInFP, nestedAtoms);
 	
-	/* find the 'udata' atom header within the skip atom */
-	udtaAtomHeader = mp4FindAtomHeader(audioInFP, "udta", audioInFileSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", udtaAtomHeader, "Coudln't find 'udta' atom header\n");
+	/* find the chunk offset table within the nested atoms */
+	while (	strcmp(chunkTable->atomType, "UITS") != 0) {
+		chunkTable++;
+	}
 	
 	/* seek past the udta atom header */
-	fseeko(audioInFP, udtaAtomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, chunkTable->atomHeader->saveSeek, SEEK_SET);
 	fseeko(audioInFP, 8, SEEK_CUR);
 	
-	atomSize = udtaAtomHeader->size - 8;
-	
-	/* find the 'UITS' atom that is a child of the 'udata' atom */
-	uitsAtomHeader = mp4FindAtomHeader(audioInFP, "UITS", atomSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", udtaAtomHeader, "Coudln't find 'UITS' atom header\n");
-	
-	/* seek past the UITS atom header */
-	fseeko(audioInFP, uitsAtomHeader->saveSeek, SEEK_SET);
-	fseeko(audioInFP, 8, SEEK_CUR);
+	atomSize = chunkTable->atomHeader->size - 8;
 	
 	/* this is a cheat. calloc 8 bytes more than we're going to read so that the payload XML */
 	/* will be null-terminated when it's read from the file */
-	payloadXML = calloc(uitsAtomHeader->size, 1);	
-	atomSize = uitsAtomHeader->size - 8;
+	payloadXML = calloc(chunkTable->atomHeader->size, 1);	
+	atomSize = chunkTable->atomHeader->size - 8;
 
 	err = fread(payloadXML, 1L, atomSize, audioInFP);
 	uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, atomSize, "Couldn't read UITS atom data\n");
@@ -421,6 +352,45 @@ char *mp4ExtractPayload (char *audioFileName)
 	
 }
 
+/*
+ *
+ * Function: mp4FindAtomHeaderNested
+ * Purpose:	 Find an set of nested atoms
+ 
+ *           
+ * Passed:   File pointer (should point to file location to start search)
+ *				The file pointer is returned to it's original position
+ *			 NULL-terminted Array containing nested list of atoms
+ * Returns:  Pointer to header structure or NULL if error
+ */
+
+
+MP4_ATOM_HEADER *mp4FindAtomHeaderNested (FILE *fpin, MP4_NESTED_ATOM *nestedAtoms)
+{
+	MP4_NESTED_ATOM *currAtom = nestedAtoms;
+	unsigned int saveSeek;
+	unsigned int atomSize;
+	unsigned int filesize;
+		
+	saveSeek = ftello(fpin);
+	rewind(fpin);
+	
+	atomSize = uitsGetFileSize(fpin);
+	
+	while (*currAtom->atomType) {
+		currAtom->atomHeader = mp4FindAtomHeader(fpin, currAtom->atomType, atomSize);
+		uitsHandleErrorPTR(mp4ModuleName, "mp4FindAtomHeaderNested", currAtom->atomHeader, 
+						   "Couldn't find nested atom\n");
+		/* move file pointer to just past current atom header*/
+		fseeko(fpin, currAtom->atomHeader->saveSeek, SEEK_SET);
+		fseeko(fpin, 8, SEEK_CUR);
+		atomSize = currAtom->atomHeader->size - 8;
+		currAtom++;
+	}
+	
+	return (nestedAtoms);
+	
+}
 
 /*
  *
@@ -513,6 +483,78 @@ MP4_ATOM_HEADER *mp4ReadAtomHeader (FILE *fpin)
 	
     return (atomHeader);
 }
+
+/*
+ *
+ * Function: mp4UpdateChunkOffsetTable
+ * Purpose:	 Update the chunk offset table in the moov chunk to reflect
+ *           the added payload XML.
+ *           The chunk offset table is contained within the following
+ *           hierarchy in the MP4 file:
+ *           'moov' - Movie
+ *              'trak'  - Track
+ *                 'minf'  - Media Information
+ *                    'stbl'  - Sample Table
+ *                       'stco'  - Chunk Offset Table
+ * Passed:   Input File pointer, size of UITS atom
+ * Returns:  OK or ERROR
+ */
+
+int mp4UpdateChunkOffsetTable(FILE *fpout, int uitsAtomSize)
+{
+	MP4_NESTED_ATOM nestedAtoms [] = {
+		{ "moov", NULL },
+		{ "trak", NULL },
+		{ "mdia", NULL },
+		{ "minf", NULL },
+		{ "stbl", NULL },
+		{ "stco", NULL },
+		{ NULL, 0}
+	};
+	MP4_NESTED_ATOM *chunkTable = NULL;
+	unsigned int saveSeek;
+	unsigned int atomSize;
+	unsigned int audioOutFileSize;
+	unsigned long numChunkEntries;
+	unsigned long chunkOffset;
+	int i;
+	
+	saveSeek = ftello(fpout);
+	rewind(fpout);
+
+	audioOutFileSize = uitsGetFileSize(fpout);
+	
+	/* populate the nested atom pointers */
+	chunkTable = mp4FindAtomHeaderNested(fpout, nestedAtoms);
+	
+	/* find the chunk offset table within the nested atoms */
+	while (	strcmp(chunkTable->atomType, "stco") != 0) {
+		chunkTable++;
+	}
+	/* seek to the beginning of the chunk offset table */
+	fseeko(fpout, chunkTable->atomHeader->saveSeek, SEEK_SET);
+	fseeko(fpout, 8, SEEK_CUR); /* seek past the atom size and type */
+	fseeko(fpout, 1, SEEK_CUR); /* seek past the version */
+	fseeko(fpout, 3, SEEK_CUR);	/* seek past the flags bytes */
+	fread(&numChunkEntries, 1, 4, fpout);
+	lswap(&numChunkEntries);
+
+	/* now, read each of the chunk sizes, add uits chunk size, and rewrite */
+	for (i=0; i<numChunkEntries; i++) {
+		fread(&chunkOffset, 1, 4, fpout);
+		lswap(&chunkOffset);
+		chunkOffset += uitsAtomSize;
+		lswap(&chunkOffset);
+		fseeko(fpout, -4, SEEK_CUR);	/* seek back to overwrite*/
+		fwrite(&chunkOffset, 1, 4, fpout);
+		fseeko(fpout, 0, SEEK_CUR);  /* must do a seek after write and before read */
+	}
+	
+	/* return fp to original position */
+	fseeko(fpout, saveSeek, SEEK_SET);
+	return (OK);
+}	
+	
 
 /*
  *
