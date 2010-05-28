@@ -111,7 +111,7 @@ void uitsPrintHelp (char *command)
 	char *version = "$Revision$";
 		
 	if (strcmp(command, "version") == 0) {
-//		printf("UITS_Tool version : %s\n", version);
+		printf("UITS_Tool version : %s\n", version);
 	} else if (strcmp(command, "hash") == 0) {
 		printf("\n");
 		printf("Usage: uits_tool hash [options]\n");
