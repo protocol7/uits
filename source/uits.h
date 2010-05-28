@@ -55,7 +55,7 @@ static long int err = 0;			// error flag
 int silentFlag ;					// silent mode
 int verboseFlag;					// verbose message flag (DEFAULT mode is verbose)
 int debugFlag;						// debug message flag set via command line
-char * restrict errStr[255];		// static buffer to hold an error message string
+char *errStr[255];					// static buffer to hold an error message string
 
 void uitsHandleErrorINT(char *uitsModuleName,	// name of uitsModule where error occured
 						char *functionName,		// name of calling function 
