@@ -76,7 +76,7 @@ int mp3IsValidFile (char *audioFileName)
 	MP3_ID3_HEADER		   *mp3ID3Header;
 	
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp3ModuleName, "mp3IsValidFile", audioFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3IsValidFile", audioFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	/* If this is an MP3 file, it will start with an ID3 tag header */
 	mp3ID3Header = mp3ReadID3Header(audioFP);
@@ -118,11 +118,11 @@ char *mp3GetMediaHash (char *audioFileName)
 	
 
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", audioFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", audioFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	/* The file should start with an ID3 tag header */
 	mp3ID3Header = mp3ReadID3Header(audioFP);
-	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", audioFP, "Couldn't read ID3 Tag header\n");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", audioFP, ERR_MP3, "Couldn't read ID3 Tag header\n");
 	
 	/* seek to the first audio frame, which will be after the MP3 ID3 tag header (10 bytes) */
 	audioFrameStart = MP3_HEADER_SIZE + mp3ID3Header->size;
@@ -134,13 +134,13 @@ char *mp3GetMediaHash (char *audioFileName)
 	foundPadBytes = ftello(audioFP) - audioFrameStart;
 	
 	if (foundPadBytes) {
-		uitsHandleErrorINT(mp3ModuleName, "mp3GetMediaHash", ERROR, OK, 
+		uitsHandleErrorINT(mp3ModuleName, "mp3GetMediaHash", ERROR, OK, ERR_MP3,
 						   "Warning: Illegal MP3 file. ID3 frame header size does not include pad bytes\n");
 	}
 	
 	
 	mp3AudioFrameHeader = mp3ReadAudioFrameHeader(audioFP);
-	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", mp3AudioFrameHeader, "Coudln't read Audio Frame Header\n");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3GetMediaHash", mp3AudioFrameHeader, ERR_MP3, "Coudln't read Audio Frame Header\n");
 	// vprintf("Read first Audio Frame: \n");
 	// vprintf("\tframe length: %04ld bitrate: %06ld samplerate: %06ld \n", 
 	//		mp3AudioFrameHeader->frameLength, mp3AudioFrameHeader->bitrate, mp3AudioFrameHeader->samplerate);	
@@ -209,10 +209,10 @@ int mp3EmbedPayload  (char *audioFileName,
 	
 	/* open the audio input and output files */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp3ModuleName, "mp3EmbedPayload", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3EmbedPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 
 	audioOutFP = fopen(audioFileNameOut, "wb");
-	uitsHandleErrorPTR(mp3ModuleName, "mp3EmbedPayload", audioOutFP, "Couldn't open audio file for writing\n");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3EmbedPayload", audioOutFP, ERR_FILE, "Couldn't open audio file for writing\n");
 	
 	/* read the original ID3 header for use later */
 	id3Header = mp3ReadID3Header(audioInFP);
@@ -233,12 +233,12 @@ int mp3EmbedPayload  (char *audioFileName,
 				break;
 				
 			case AUDIOFRAME:		// ID3 v1 tag should not occur until after the first audio frame
-				uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", AUDIOFRAME, 0, 
+				uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", AUDIOFRAME, 0, ERR_MP3,
 								"Error: Should insert Priv tag here\n");
 				break;
 				
 			case ID3V1TAG:		// ID3 v1 tag should not occur until after the first audio frame
-				uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", ID3V1TAG, 0, 
+				uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", ID3V1TAG, 0, ERR_MP3,
 								"Error: Found ID3V1 Tag before first Audio Frame\n");
 				break;
 				
@@ -251,11 +251,11 @@ int mp3EmbedPayload  (char *audioFileName,
 	
 	/* audioOutFP now points to the end of the copied ID3 frames. Write the new PRIV frame */
 	err = mp3WritePRIVFrame(audioOutFP, uitsPayloadXML);
-	uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", err, OK, "Couldn't write PRIV frame to audio output file\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", err, OK, ERR_MP3, "Couldn't write PRIV frame to audio output file\n");
 	
 	/* Write any requested pad bytes */
 	err = mp3WritePadBytes (audioOutFP, numPadBytes);
-	uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", err, OK, "Couldn't add pad bytes to ID3 tag\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", err, OK, ERR_MP3, "Couldn't add pad bytes to ID3 tag\n");
 
 	/* Update the ID3V2 tag size */
 	id3TagSize = ftello(audioOutFP);
@@ -263,7 +263,7 @@ int mp3EmbedPayload  (char *audioFileName,
 	fseeko(audioOutFP, 0, SEEK_SET);				/* seek to start of file for writing */
 
 	err = mp3WriteID3Header(audioOutFP, id3Header); 
-	uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", err, OK, "Couldn't write MP3 ID3 header\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3EmbedPayload", err, OK, ERR_MP3, "Couldn't write MP3 ID3 header\n");
 	
 	/* reset file pointer to end of ID3 frames */
 	fseeko(audioOutFP, id3TagSize, SEEK_SET);				/* seek to start of file for writing */
@@ -311,7 +311,7 @@ char *mp3ExtractPayload (char *audioFileName)
 	
 	/* open the audio input and output files */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp3ModuleName, "mp3ExtractUITSPayload", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3ExtractUITSPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 
 		/* read ID3 Tags and Frames, consume padding until a PRIV frame containing the UITS payload is found */
@@ -331,12 +331,12 @@ char *mp3ExtractPayload (char *audioFileName)
 				break;
 				
 			case AUDIOFRAME:		// We should not encounter an Audio frame. UITS payload should be found before this.
-				uitsHandleErrorINT(mp3ModuleName, "mp3ExtractPayload", AUDIOFRAME, 0, 
+				uitsHandleErrorINT(mp3ModuleName, "mp3ExtractPayload", AUDIOFRAME, 0, ERR_MP3,  
 								"Error: Did not find UITS payload in audio file\n");
 				break;
 				
 			case ID3V1TAG:		// We should not encounter an ID3 V1 tag. UITS payload should be found before this
-				uitsHandleErrorINT(mp3ModuleName, "mp3ExtractPayload", ID3V1TAG, 0, 
+				uitsHandleErrorINT(mp3ModuleName, "mp3ExtractPayload", ID3V1TAG, 0, ERR_MP3,  
 								"Error: Did not find UITS payload in audio file\n");
 				break;
 				
@@ -367,11 +367,11 @@ int mp3CheckFileVersion (char *audioFileName)
 	
 	/* open the audio input and output files */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp3ModuleName, "mp3ExtractUITSPayload", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3ExtractUITSPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 
 	/* read the original ID3 header for use later */
 	id3Header = mp3ReadID3Header(audioInFP);
-	uitsHandleErrorPTR(mp3ModuleName, "mp3ExtractUITSPayload", id3Header, "Couldn't read ID3 header\n");
+	uitsHandleErrorPTR(mp3ModuleName, "mp3ExtractUITSPayload", id3Header, ERR_MP3, "Couldn't read ID3 header\n");
 	
 	if (id3Header->majorVersion != 3) {
 		exit(OK);
@@ -379,7 +379,7 @@ int mp3CheckFileVersion (char *audioFileName)
 				 "MP3 file ID3 Tag format ID3V2.%d.%d not supported.\n", 
 				 id3Header->majorVersion, 
 				 id3Header->minorVersion);
-		uitsHandleErrorINT(mp3ModuleName, "mp3ExtractUITSPayload", ERROR, OK, errStr);
+		uitsHandleErrorINT(mp3ModuleName, "mp3ExtractUITSPayload", ERROR, OK, ERR_MP3, errStr);
 
 	}
 	
@@ -401,7 +401,7 @@ int mp3HandleID3Tag (FILE *audioInFP, FILE *audioOutFP)
 {
 	
 	err = fread(header, 1L, MP3_HEADER_SIZE, audioInFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, MP3_HEADER_SIZE, 
+	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, MP3_HEADER_SIZE, ERR_FILE,
 					"Couldn't read MP3 ID3 header from audio input file\n");
 	
 	
@@ -419,7 +419,7 @@ int mp3HandleID3Tag (FILE *audioInFP, FILE *audioOutFP)
 	
 	if (audioOutFP) {
 		err = fwrite(header, 1L, MP3_HEADER_SIZE, audioOutFP);
-		uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, MP3_HEADER_SIZE, 
+		uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, MP3_HEADER_SIZE, ERR_FILE, 
 						"Couldn't write MP3 ID3 header to audio output file\n");
 	}
 	
@@ -441,7 +441,7 @@ int mp3HandleID3Frame (FILE *audioInFP, FILE *audioOutFP)
 	unsigned long	 size = 0;
 
 	err = fread(header, 1, MP3_HEADER_SIZE, audioInFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Frame", err, MP3_HEADER_SIZE, 
+	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Frame", err, MP3_HEADER_SIZE, ERR_FILE,
 					"Couldn't read MP3 ID3 header from audio input file\n");
 	
 	/* this is where we would check the id3v22Flag and do the 3-byte to 4-byte tag conversion */
@@ -455,14 +455,14 @@ int mp3HandleID3Frame (FILE *audioInFP, FILE *audioOutFP)
 	/* write the header to the output file */
 	//	dprintf("ID3 Frame length: %ld", size);
 	err = fwrite(header, 1, MP3_HEADER_SIZE, audioOutFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Frame", err, MP3_HEADER_SIZE, 
+	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Frame", err, MP3_HEADER_SIZE, ERR_FILE,
 					"Couldn't write MP3 ID3 header to audio output file\n");
 
 
 	/* write the frame to the output file */
 
 	err = uitsAudioBufferedCopy (audioInFP, audioOutFP, size);
-	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Frame", err, size, 
+	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Frame", err, size, ERR_FILE,
 					"Error copying ID3 Frame from input audio file to output audio file\n");
 			
 	return(OK);
@@ -513,7 +513,7 @@ int mp3WritePadBytes (FILE *audioOutFP, int numPadBytes)
 	vprintf("Writing %d pad bytes to file\n", numPadBytes);
 	for (i=0; i<numPadBytes; i++) {
 		err = fwrite(&c, 1, 1, audioOutFP);
-		uitsHandleErrorINT(mp3ModuleName, "mp3WritePadBytes", err, 1, "Error writing pad bytes to MP3 output file\n");
+		uitsHandleErrorINT(mp3ModuleName, "mp3WritePadBytes", err, 1, ERR_FILE, "Error writing pad bytes to MP3 output file\n");
 	}
 	
 	return (OK);
@@ -568,23 +568,23 @@ int mp3WritePRIVFrame (FILE *audioOutFP, char *uitsPayloadXML)
 	
 	/* write the frame header */
 	err = fwrite(privFrameHeader, 1L, MP3_HEADER_SIZE, audioOutFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, MP3_HEADER_SIZE, "Error writing PRIV frame header\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, MP3_HEADER_SIZE, ERR_FILE, "Error writing PRIV frame header\n");
 	
 	/* write the frame data mailto string */
 	err = fwrite(id3privFrameEmail, 1L, strlen(id3privFrameEmail), audioOutFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, privFrameMailtoLen, "Error writing PRIV frame email\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, privFrameMailtoLen, ERR_FILE, "Error writing PRIV frame email\n");
 	
 	/* write a null terminator for the email */
 	err = fwrite(nullByte, 1L,1L, audioOutFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, 1, "Error writing PRIV frame email NULL terminator\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, 1, ERR_FILE, "Error writing PRIV frame email NULL terminator\n");
 
 	/* write the frame data UITS xml string */
 	err = fwrite(uitsPayloadXML, 1L, strlen(uitsPayloadXML), audioOutFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, privFrameuitsLen, "Error writing PRIV frame UITS xml\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, privFrameuitsLen, ERR_FILE, "Error writing PRIV frame UITS xml\n");
 	
 	/* write a null terminator for the email */
 	err = fwrite(nullByte, 1L,1L, audioOutFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, 1, "Error writing PRIV frame UITS xml NULL terminator\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3WritePRIVFrame", err, 1, ERR_FILE, "Error writing PRIV frame UITS xml NULL terminator\n");
 	
 	
 //	free(privFrameData);
@@ -611,7 +611,7 @@ char *mp3FindUITSPayload (FILE *audioInFP)
 	
 	/* read the frame header */
 	err = fread(header, 1L, MP3_HEADER_SIZE, audioInFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3FindUITSPayload", err, MP3_HEADER_SIZE, "Error reading ID3 frame header\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3FindUITSPayload", err, MP3_HEADER_SIZE, ERR_FILE, "Error reading ID3 frame header\n");
 	
 	/* calculate the frame size */
 
@@ -623,7 +623,7 @@ char *mp3FindUITSPayload (FILE *audioInFP)
 	/* read the frame data */
 	privFrameData = calloc(size, 1);
 	err = fread(privFrameData, 1L, size, audioInFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3FindUITSPayload", err, size, "Error reading PRIV frame data\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3FindUITSPayload", err, size, ERR_FILE, "Error reading PRIV frame data\n");
 	
 	/* Is this a PRIV frame? */
 	if (header[0] == 'P' && header[1] == 'R' && header[2] == 'I' && header[3] == 'V') {
@@ -673,7 +673,7 @@ int mp3IdentifyFrame (FILE *fpin)
 	saveSeek = ftello(fpin);
 		
 	err = fread(header, 1L, 4L, fpin);
-	uitsHandleErrorINT(mp3ModuleName, "mp3IdentifyFrame", err, 4L, "Couldn't read mp3 Frame header\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3IdentifyFrame", err, 4L, ERR_FILE, "Couldn't read mp3 Frame header\n");
 	
 	// return FP to original position
 	fseeko(fpin, saveSeek, SEEK_SET);
@@ -708,7 +708,7 @@ MP3_ID3_HEADER *mp3ReadID3Header(FILE *fpin)
 
 	saveSeek = ftello(fpin);
 	err = fread(header, 1L, MP3_HEADER_SIZE, fpin);
-	uitsHandleErrorINT(mp3ModuleName, "mp3ReadID3Header", err, MP3_HEADER_SIZE, "Couldn't read mp3 Frame header\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3ReadID3Header", err, MP3_HEADER_SIZE, ERR_FILE, "Couldn't read mp3 Frame header\n");
 
 	// ID 3 tag header starts with 'I' 'D' '3'
 	if (header[0] == 'I' && header[1] == 'D' && header[2] == '3') {
@@ -786,7 +786,7 @@ int	mp3WriteID3Header(FILE *audioOutFP, MP3_ID3_HEADER *mp3Header)
 	memcpy(&header[6] ,&mp3Header->size,  4);
 
 	err = fwrite(header, 1, MP3_HEADER_SIZE, audioOutFP);
-	uitsHandleErrorINT(mp3ModuleName, "mp3WriteID3Header", err, MP3_HEADER_SIZE, 
+	uitsHandleErrorINT(mp3ModuleName, "mp3WriteID3Header", err, MP3_HEADER_SIZE, ERR_FILE, 
 					"Couldn't write updated MP3 header to audio output file\n");
 	
 	// return file pointer to original location
@@ -817,12 +817,12 @@ MP3_AUDIO_FRAME_HEADER *mp3ReadAudioFrameHeader (FILE *fpin)
 	
 	saveSeek = ftello(fpin);
 	err = fread(header, 1L, 4L, fpin);
-	uitsHandleErrorINT(mp3ModuleName, "mp3ReadAudioFrame", err, 4L, "Couldn't read mp3 audio frame header\n");
+	uitsHandleErrorINT(mp3ModuleName, "mp3ReadAudioFrame", err, 4L, ERR_FILE, "Couldn't read mp3 audio frame header\n");
 	
 	// Make sure this is an audio frame header
 	// Sync bytes - start of an MP3 audio frame, always eleven 1's.
 	if (!((header[0] == 0xff) && ((header[1] & 0xe0) == 0xe0))){
-		uitsHandleErrorINT(mp3ModuleName, "mp3ReadAudioFrameHeader", ERROR, OK, "Couldn't read audio frame header\n");
+		uitsHandleErrorINT(mp3ModuleName, "mp3ReadAudioFrameHeader", ERROR, OK, ERR_MP3, "Couldn't read audio frame header\n");
 	}
 
 	bytebuf = (header[1] >> 3) & 0x03;

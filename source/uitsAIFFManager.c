@@ -32,7 +32,7 @@ int aiffIsValidFile (char *audioFileName)
 	int  isAIFF = FALSE;
 	
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(aiffModuleName, "aiffIsValidFile", audioFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(aiffModuleName, "aiffIsValidFile", audioFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	/* Read the first 8 bytes of the file and check to see if they represent an AIFF "FORM" chunk */
 	aiffChunkHeader = aiffReadChunkHeader(audioFP);
@@ -43,7 +43,7 @@ int aiffIsValidFile (char *audioFileName)
 		
 		/* FORM type must be AIFF or AIFC */
 		err = fread(formType, 1, 4, audioFP);
-		uitsHandleErrorINT(aiffModuleName, "aiffIsValidFile", err, 4, "Couldn't read AIFF FORM chunk type\n");
+		uitsHandleErrorINT(aiffModuleName, "aiffIsValidFile", err, 4, ERR_FILE, "Couldn't read AIFF FORM chunk type\n");
 		
 		if ((strncmp(formType, "AIFF", 4) == 0) ||
 			(strncmp(formType, "AIFC", 4) == 0)) {
@@ -79,7 +79,7 @@ char *aiffGetMediaHash (char *audioFileName)
 	AIFF_CHUNK_HEADER *ssndChunk;
 	
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(aiffModuleName, "aiffGetMediaHash", audioFP, "Couldn't open AIFF audio file for reading\n");
+	uitsHandleErrorPTR(aiffModuleName, "aiffGetMediaHash", audioFP, ERR_FILE, "Couldn't open AIFF audio file for reading\n");
 	
 	/* seek past the FORM chunk */
 	/* FORM chunk is 12 bytes: */
@@ -95,7 +95,7 @@ char *aiffGetMediaHash (char *audioFileName)
 	fileLength = uitsGetFileSize(audioFP);
 
 	ssndChunk = aiffFindChunkHeader(audioFP, "SSND", NULL, fileLength);
-	uitsHandleErrorPTR(aiffModuleName, "aiffGetMediaHash", ssndChunk, "Couldn't find 'SSND' chunk in audio file\n");
+	uitsHandleErrorPTR(aiffModuleName, "aiffGetMediaHash", ssndChunk, ERR_AIFF, "Couldn't find 'SSND' chunk in audio file\n");
 	
 	/* move fp to start of SSND */
 	fseeko(audioFP, ssndChunk->saveSeek, SEEK_SET);
@@ -146,10 +146,10 @@ int aiffEmbedPayload  (char *audioFileName,
 	
 	/* open the audio input and output files */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(aiffModuleName, "aiffEmbedPayload", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(aiffModuleName, "aiffEmbedPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	audioOutFP = fopen(audioFileNameOut, "wb");
-	uitsHandleErrorPTR(aiffModuleName, "aiffEmbedPayload", audioOutFP, "Couldn't open audio file for writing\n");
+	uitsHandleErrorPTR(aiffModuleName, "aiffEmbedPayload", audioOutFP, ERR_FILE, "Couldn't open audio file for writing\n");
 	
 	/* calculate how long the input audio file is by seeking to EOF and saving size  */
 	audioInFileSize = uitsGetFileSize(audioInFP);
@@ -159,7 +159,7 @@ int aiffEmbedPayload  (char *audioFileName,
 	fseeko(audioInFP, AIFF_HEADER_SIZE + 4, SEEK_CUR);	/* seek past FORM header and type */
 	applChunk = aiffFindChunkHeader (audioInFP, "APPL", "UITS", audioInFileSize);
 	if (applChunk) {
-		uitsHandleErrorPTR(aiffModuleName, "aiffEmbedPayload", NULL, "Audio file already contains a UITS payload\n");
+		uitsHandleErrorPTR(aiffModuleName, "aiffEmbedPayload", NULL, ERR_AIFF, "Audio file already contains a UITS payload\n");
 	}
 	
 	/* no existing payload, rewind and create new file */
@@ -215,7 +215,7 @@ char *aiffExtractPayload (char *audioFileName)
 	
 	/* open the audio input file */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(aiffModuleName, "aiffExtractPayload", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(aiffModuleName, "aiffExtractPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	audioInFileSize = uitsGetFileSize(audioInFP);
 	
@@ -225,7 +225,7 @@ char *aiffExtractPayload (char *audioFileName)
 	
 	/* find an 'APPL' chunk with an OSType of "UITS" */	
 	applChunkHeader = aiffFindChunkHeader (audioInFP, "APPL", "UITS", audioInFileSize);
-	uitsHandleErrorPTR(aiffModuleName, "aiffExtractPayload", applChunkHeader, "Coudln't find UITS payload in AIFF file\n");
+	uitsHandleErrorPTR(aiffModuleName, "aiffExtractPayload", applChunkHeader, ERR_AIFF, "Coudln't find UITS payload in AIFF file\n");
 	
 	fseeko(audioInFP, applChunkHeader->saveSeek, SEEK_SET);	/* seek to start of chunk */
 	fseeko(audioInFP, AIFF_HEADER_SIZE, SEEK_CUR);				/* seek past ID and Size in header */
@@ -236,7 +236,7 @@ char *aiffExtractPayload (char *audioFileName)
 	payloadXMLSize = applChunkHeader->chunkSize - 4;
 	
 	err = fread(payloadXML, 1L, payloadXMLSize, audioInFP);
-	uitsHandleErrorINT(aiffModuleName, "aiffExtractPayload", err, payloadXMLSize, "Couldn't read UITS payload\n");
+	uitsHandleErrorINT(aiffModuleName, "aiffExtractPayload", err, payloadXMLSize, ERR_AIFF, "Couldn't read UITS payload\n");
 	
 	return (payloadXML);
 }
@@ -258,7 +258,7 @@ AIFF_CHUNK_HEADER *aiffReadChunkHeader (FILE *fpin)
 	
 	chunkHeader->saveSeek = ftello(fpin);
 	err = fread(header, 1L, AIFF_HEADER_SIZE, fpin);
-	uitsHandleErrorINT(aiffModuleName, "aiffReadChunkHeader", err, AIFF_HEADER_SIZE, "Couldn't read aiff chunk header\n");
+	uitsHandleErrorINT(aiffModuleName, "aiffReadChunkHeader", err, AIFF_HEADER_SIZE, ERR_FILE,  "Couldn't read aiff chunk header\n");
 	
 	
 	//	vprintf("%c%c%c%c\n", header[4], header[5], header[6], header[7]);

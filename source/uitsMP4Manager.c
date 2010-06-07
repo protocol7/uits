@@ -32,7 +32,7 @@ int mp4IsValidFile (char *audioFileName)
 	MP4_ATOM_HEADER *atomHeader = calloc(sizeof(MP4_ATOM_HEADER), 1);
 		
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp4ModuleName, "mp4IsValidFile", audioFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4IsValidFile", audioFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	/* Read the first 8 bytes of the file and check to see if they represent a MP4 'ftyp' atom */
 	/* The first 4 bytes are size, the second 4 bytes should be 'ftyp' */
@@ -70,13 +70,13 @@ char *mp4GetMediaHash (char *audioFileName)
 	char			*mediaHashString;
 	
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp4ModuleName, "mp4GetMediaHash", audioFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4GetMediaHash", audioFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	/* get file size */
 	fileLength = uitsGetFileSize(audioFP);
 
 	atomHeader = mp4FindAtomHeader(audioFP, "mdat", fileLength);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4GetMediaHash", atomHeader, "Couldn't find 'mdat' atom in audio file\n");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4GetMediaHash", atomHeader, ERR_FILE, "Couldn't find 'mdat' atom in audio file\n");
 	
 	/* move fp to start of mdat atom */
 	fseeko(audioFP, atomHeader->saveSeek, SEEK_SET);
@@ -118,8 +118,6 @@ char *mp4GetMediaHash (char *audioFileName)
  *			 After the UITS payload is embedded, the atom hierarchy will look something like this:
  *				'ftyp'
  *				'moov'
- *				'mdat'
- *				'skip'
  *					'udta'
  *						'UITS'
  *
@@ -149,19 +147,17 @@ int mp4EmbedPayload  (char *audioFileName,
 	
 	/* open the audio input and output files */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	audioOutFP = fopen(audioFileNameOut, "w+b");
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioOutFP, "Couldn't open audio file for writing\n");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioOutFP, ERR_FILE, "Couldn't open audio file for writing\n");
 
 	/* calculate how long the input audio file is by seeking to EOF and saving size  */
 	audioInFileSize = uitsGetFileSize(audioInFP);
 
-#define UITS_AT_START_OF_udta			
-#ifdef UITS_AT_START_OF_udta
 	/* find the 'moov' atom header */	
 	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", moovAtomHeader, "Coudln't find 'moov' atom header\n");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", moovAtomHeader, ERR_MP4, "Coudln't find 'moov' atom header\n");
 
 	/* seek past the moov atom header */
 	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
@@ -171,7 +167,7 @@ int mp4EmbedPayload  (char *audioFileName,
 
 	/* find the 'udta' atom header that is a child the 'moov' atom container */
 	udtaAtomHeader = mp4FindAtomHeader(audioInFP, "udta", atomSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", udtaAtomHeader, "Coudln't find 'udta' atom header\n");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", udtaAtomHeader, ERR_MP4, "Coudln't find 'udta' atom header\n");
 
 	/* now do the data copy and modification */
 	rewind(audioInFP);
@@ -218,71 +214,9 @@ int mp4EmbedPayload  (char *audioFileName,
 	/* update the chunk offset table to skip past the new chunk */
 	atomSize = payloadXMLSize + 8;
 	err = mp4UpdateChunkOffsetTable(audioOutFP, atomSize);
-	uitsHandleErrorINT(mp4ModuleName, "mp4EmbedPayload", err, OK, "Couldn't update chunk offset table\n");
-	
-#endif
-
-#ifdef UITS_AT_END_OF_udta
-	/* find the 'moov' atom header */	
-	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", moovAtomHeader, "Coudln't find 'moov' atom header\n");
-	
-	/* seek past the moov atom header */
-	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
-	fseeko(audioInFP, 8, SEEK_CUR);
-	
-	atomSize = moovAtomHeader->size - 8;
-	
-	/* find the 'udta' atom header that is a child the 'moov' atom container */
-	udtaAtomHeader = mp4FindAtomHeader(audioInFP, "udta", atomSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", udtaAtomHeader, "Coudln't find 'udta' atom header\n");
-	
-	/* now do the data copy and modification */
-	rewind(audioInFP);
-	/* copy from beginning of file to beginning of 'moov' atom */
-	uitsAudioBufferedCopy(audioInFP, audioOutFP, moovAtomHeader->saveSeek);
-	
-	atomSize = moovAtomHeader->size + payloadXMLSize  + 8;
-	lswap(&atomSize);
-	
-	/* write the moov atom header */
-	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
-	fwrite("moov",    1, 4, audioOutFP);   /* 4-bytes ID */
-	
-	/* seek past the moov atom header */
-	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
-	fseeko(audioInFP, 8, SEEK_CUR);
-	
-	/* write the moov atom until the start of the 'udta' atom */
-	atomSize = udtaAtomHeader->saveSeek - ftello(audioInFP);
-	uitsAudioBufferedCopy(audioInFP, audioOutFP, atomSize);	
-	
-	/* write the udta atom header */
-	atomSize = udtaAtomHeader->size + payloadXMLSize + 8;
-	lswap(&atomSize);
-	
-	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
-	fwrite("udta",    1, 4, audioOutFP);   /* 4-bytes ID */
-	
-	/* seek past the udata header in input file */
-	fseeko(audioInFP, 8, SEEK_CUR);
-
-	/* write the rest of the udta atom */
-	atomSize = udtaAtomHeader->size - 8;
-	uitsAudioBufferedCopy(audioInFP, audioOutFP, atomSize);
-	
-	/* write the UITS atom */
-	atomSize = payloadXMLSize + 8 ;
-	lswap(&atomSize);
-	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
-	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
-	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
-	
-	/* write the rest of the file */
-	endSeek = audioInFileSize - ftello(audioInFP);			/* save the size of the rest of the data */
-	uitsAudioBufferedCopy(audioInFP, audioOutFP, endSeek);
-#endif
-		
+	uitsHandleErrorINT(mp4ModuleName, "mp4EmbedPayload", err, OK, ERR_MP4,
+					   "Couldn't update chunk offset table\n");
+			
 	/* cleanup */
 	fclose(audioInFP);
 	fclose(audioOutFP);
@@ -322,7 +256,7 @@ char *mp4ExtractPayload (char *audioFileName)
 	
 	/* open the audio input file */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 
 	audioInFileSize = uitsGetFileSize(audioInFP);
 
@@ -346,7 +280,7 @@ char *mp4ExtractPayload (char *audioFileName)
 	atomSize = chunkTable->atomHeader->size - 8;
 
 	err = fread(payloadXML, 1L, atomSize, audioInFP);
-	uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, atomSize, "Couldn't read UITS atom data\n");
+	uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, atomSize, ERR_MP4, "Couldn't read UITS atom data\n");
 	
 	return (payloadXML);
 	
@@ -379,7 +313,7 @@ MP4_ATOM_HEADER *mp4FindAtomHeaderNested (FILE *fpin, MP4_NESTED_ATOM *nestedAto
 	
 	while (*currAtom->atomType) {
 		currAtom->atomHeader = mp4FindAtomHeader(fpin, currAtom->atomType, atomSize);
-		uitsHandleErrorPTR(mp4ModuleName, "mp4FindAtomHeaderNested", currAtom->atomHeader, 
+		uitsHandleErrorPTR(mp4ModuleName, "mp4FindAtomHeaderNested", currAtom->atomHeader, ERR_MP4,
 						   "Couldn't find nested atom\n");
 		/* move file pointer to just past current atom header*/
 		fseeko(fpin, currAtom->atomHeader->saveSeek, SEEK_SET);
@@ -459,7 +393,7 @@ MP4_ATOM_HEADER *mp4ReadAtomHeader (FILE *fpin)
  
 	atomHeader->saveSeek = ftello(fpin);
 	err = fread(header, 1L, MP4_HEADER_SIZE, fpin);
-	uitsHandleErrorINT(mp4ModuleName, "mp4ReadAtomHeader", err, MP4_HEADER_SIZE, "Couldn't read mp4 atom header\n");
+	uitsHandleErrorINT(mp4ModuleName, "mp4ReadAtomHeader", err, MP4_HEADER_SIZE, ERR_MP4, "Couldn't read mp4 atom header\n");
 
 	
 //	printf("%c%c%c%c\n", header[4], header[5], header[6], header[7]);
@@ -473,7 +407,7 @@ MP4_ATOM_HEADER *mp4ReadAtomHeader (FILE *fpin)
     /* check for extended (64 bit) atom size */
     if (atomSize == 1)
     {
-		uitsHandleErrorINT(mp4ModuleName, "mp4ReadAtomHeader", err, 1, "Unsupported extended size atom found in file\n");
+		uitsHandleErrorINT(mp4ModuleName, "mp4ReadAtomHeader", err, 1, ERR_MP4, "Unsupported extended size atom found in file\n");
 
 	}
 	

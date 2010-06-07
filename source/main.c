@@ -23,7 +23,8 @@ enum uitsActions {
 	EXTRACT,
 	HASH,
 	KEY,
-	HELP
+	HELP,
+	ERRORS,
 };
 
 
@@ -34,7 +35,7 @@ int main (int argc, const char * argv[]) {
 	uitsInit();						// standard initializations 								
 	
 	uitsAction = uitsGetCommand (argc, argv);
-	uitsHandleErrorINT(moduleName, "main", err, OK, 
+	uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
 					"Error: Couldn't parse command-line options\n");
 	
 	switch (uitsAction) {	// uitsAction value is set in uitsGetOpt
@@ -43,58 +44,62 @@ int main (int argc, const char * argv[]) {
 			dprintf ("Create UITS payload\n");
 			err = uitsGetOptCreate(argc, argv);		// parse the command-line options 
 			fflush(stdout);
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
 							"Error: Couldn't parse command line options for create\n");
 			err = uitsCreate();
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_CREATE,
 							"Error: Couldn't create UITS payload\n");
 			break;
 
 		case VERIFY:
 			dprintf ("Verify UITS payload\n");
 			err = uitsGetOptVerify(argc, argv);		// parse the command-line options 
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
 							"Error: Couldn't parse command line options for verify\n");
 			err = uitsVerify();
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_VERIFY,
 							"Error: Couldn't verify UITS payload\n");
 			break;
 
 		case EXTRACT:
 			dprintf ("Extract UITS payload\n");
 			err = uitsGetOptExtract(argc, argv);		// parse the command-line options
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
 							"Error: Couldn't parse command line options for extract\n");
 			err = uitsExtract();
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_EXTRACT,
 							"Error: Couldn't extract UITS payload\n");
 			break;
 
 		case HASH:
 			dprintf ("Generate media hash parameters\n");
 			err = uitsGetOptGenHash(argc, argv);		// parse the command-line options 
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
 							"Error: Couldn't parse command line options for hash\n");
 			err = uitsGenHash();
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_UITS,
 							"Error: Couldn't generate hash parameter\n");
 			break;
 
 		case KEY:
 			dprintf ("Generate media hash parameters\n");
 			err = uitsGetOptGenKey(argc, argv);		// parse the command-line options 
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
 							   "Error: Couldn't parse command line options for hash\n");
 			err = uitsGenKey();
-			uitsHandleErrorINT(moduleName, "main", err, OK, 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_UITS,
 							   "Error: Couldn't generate key parameter\n");
 			break;
 			
+		case ERRORS:
+			uitsListErrorCodes();
+			break;
+			
 		default:
-			snprintf(errStr, strlen(errStr), "rror: Invalid action value: %d\n", uitsAction);
-			uitsHandleErrorINT(moduleName, "main", ERROR, OK, "Error: Invalid action value\n");
+			uitsHandleErrorINT(moduleName, "main", ERROR, OK, ERR_VALUE, "Error: Invalid action value\n");
 			break;
 	}
+	
 	
 	exit (OK);
 }
@@ -129,8 +134,8 @@ void uitsPrintHelp (char *command)
 	} else if(strcmp(command, "create") == 0) {
 		printf("Usage: uits_tool create [options]\n");
 		printf("\n");
-		printf("--verbose   (-v)							Run in verbose mode (DEFAULT)\n");
-		printf("--silent    (-s)							Run in silent mode \n");
+		printf("--verbose   (-v)                            Run in verbose mode (DEFAULT)\n");
+		printf("--silent    (-s)                            Run in silent mode \n");
 		printf("--audio     (-a)    [file-name] (REQUIRED): Name of the audio file for which to create payload\n");
 		printf("--uits      (-u)    [file-name] (REQUIRED): Name of UITS payload file\n");
 		printf("--embed     (-e)                (OPTIONAL): Embed UITS payload into the audio and write to payload file\n");
@@ -190,8 +195,8 @@ void uitsPrintHelp (char *command)
 	} else if (strcmp(command, "verify") == 0) {
 		printf("Usage: uits_tool verify [options]\n");
 		printf("\n");
-		printf("--verbose    (-v)							Run in verbose mode (DEFAULT)\n");
-		printf("--silent     (-s)							Run in silent mode \n");
+		printf("--verbose    (-v)                           Run in verbose mode (DEFAULT)\n");
+		printf("--silent     (-s)                           Run in silent mode \n");
 		printf("--nohash     (-n)				 (OPTIONAL) Disable media hash validation.\n");
 		printf("--audio      (-a)   [file-name]  (REQUIRED if hash validation enabled and no hash or hashfile specified)\n");
 		printf("                                            Name of the audio file for which to verify payload\n");
@@ -217,8 +222,8 @@ void uitsPrintHelp (char *command)
 	} else if (strcmp(command, "extract") == 0) {
 		printf("Usage: uits_tool extract [options]\n");
 		printf("\n");
-		printf("--verbose   (-v)							  Run in verbose mode (DEFAULT)\n");
-		printf("--silent    (-s)							  Run in silent mode \n");
+		printf("--verbose   (-v)                              Run in verbose mode (DEFAULT)\n");
+		printf("--silent    (-s)                              Run in silent mode \n");
 		printf("--audio     (-a)      [file-name] (REQUIRED): Name of the audio file from which to extract payload\n");
 		printf("--uits      (-u)      [file-name] (REQUIRED): Name of the standalone file to write payload\n");
 		printf("--verify    (-v)    			  (OPTIONAL): If specified, verify the payload after it is extracted from the audio file\n");
@@ -228,12 +233,16 @@ void uitsPrintHelp (char *command)
 		printf("--pub       (-b)     [file-name] (REQUIRED for verify): Name of the file containing the public key for validating\n");
 		printf("--xsd       (-x)     [file-name] (OPTIONAL): Name of the schema to use for validation\n"); 
 		printf("                                             DEFAULT is uits.xsd in current directory\n");
+	} else if (strcmp(command, "errors") == 0) {
+		printf("\n");
+		printf("Usage: uits_tool errors \n");		
 	} else {	/* print the general help */
 		printf ("\nUsage: uits_tool command [options]\n");
 		printf("\n");
 		printf("commands\n");
 		printf("help        Display general help\n");
 		printf("version     Dislay the tool version number\n");
+		printf("errors      Display exit error codes and message list\n");
 		printf("create      Create a UITS payload for an audio file. \n");
 		printf("            Payload can be embedded into the audio file or written to a separate file\n");
 		printf("verify      Verify a UITS payload\n");
@@ -278,6 +287,8 @@ int uitsGetCommand (int argc, const char * argv[]) {
 		action = HASH;
 	} else if (strcmp(command, "key") == 0) {
 		action = KEY;
+	} else if (strcmp(command, "errors") == 0) {
+		action = ERRORS;
 	} else if (strcmp(command, "version") == 0) {
 		uitsPrintHelp(command);	// print version  and exit 
 	} else if (strcmp(command, "help") == 0) {
@@ -367,7 +378,7 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				// attribute option name is elementname_attributename (eg. "productID_type")
 				attributeOptionNameLen = strlen( metadataPtr->name) + strlen( attributePtr->name) + 2;
 				attributeOptionName = calloc(attributeOptionNameLen, sizeof(char));
-				uitsHandleErrorPTR(moduleName, "uitsGetOptCreate", attributeOptionName, "Error allocting attributeOptionName\n");		
+				uitsHandleErrorPTR(moduleName, "uitsGetOptCreate", attributeOptionName, ERR_UITS, "Error allocting attributeOptionName\n");		
 				attributeOptionName = strcat( attributeOptionName,  metadataPtr->name);
 				attributeOptionName = strcat( attributeOptionName, "_");
 				attributeOptionName = strcat( attributeOptionName,  attributePtr->name);
@@ -383,13 +394,13 @@ int uitsGetOptCreate (int argc, const char * argv[])
 		metadataPtr++;
 		option_count++;
 		if (option_count > MAX_COMMAND_LINE_OPTIONS) {
-			uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK,  
+			uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, ERR_UITS,  
 							   "ERROR uitsGetOpt: too many UITS metadata parameters. Increase MAX_COMMAND_LINE_OPTIONS.\n");
 		}
 	}
 	
 	while (1) {
-		c = getopt_long (argc, argv, "vsemca:u:f:r:b:i:k:d:x:m:h:Y:Z:w:", long_options, &option_index);
+		c = getopt_long (argc, argv, "vsemcoa:u:f:r:b:i:k:d:x:m:h:Y:Z:w:", long_options, &option_index);
 		// dprintf("Got option: %c, value: %s\n", c, optarg);
 		
 		fflush(stdout);
@@ -496,7 +507,7 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				
 			default: 
 				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
-				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
+				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, ERR_VALUE, errStr);
 		}
 	}
 	
@@ -605,7 +616,7 @@ int uitsGetOptVerify (int argc, const char * argv[])
 				
 			default: 
 				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
-				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
+				uitsHandleErrorINT(moduleName, "uitsGetOptVerify", ERROR, OK, ERR_VALUE, errStr);
 		}
 	}
 	
@@ -704,7 +715,7 @@ int uitsGetOptExtract (int argc, const char * argv[])
 				
 			default: 
 				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
-				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
+				uitsHandleErrorINT(moduleName, "uitsGetOptExtract", ERROR, OK, ERR_VALUE, errStr);
 		}
 		
 	}
@@ -777,7 +788,7 @@ int uitsGetOptGenHash (int argc, const char * argv[])
 				
 			default: 
 				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
-				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
+				uitsHandleErrorINT(moduleName, "uitsGetOptGenHash", ERROR, OK, ERR_VALUE, errStr);
 		}
 	}
 	
@@ -837,7 +848,7 @@ int uitsGetOptGenKey (int argc, const char * argv[])
 				
 			default: 
 				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
-				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, errStr);
+				uitsHandleErrorINT(moduleName, "uitsGetOptGenKey", ERROR, OK, ERR_VALUE, errStr);
 		}
 	}
 	
@@ -877,86 +888,6 @@ int	uitsInit() {
 
 
 /*
- * Function: uitsHandleErrorINT
- * Purpose:  Generic error handling for functions that return INT. 
- *           Checks return value against success value. If equal, no error. If 
- *           not equal, print error message and exit.
- * Returns:  Nothing if no error. Exits if error.
- *
- */
-void uitsHandleErrorINT(char *uitsModuleName,  // name of uitsModule where error occured
-						char *functionName,    // name of calling function 
-						int returnValue,       // return value to check
-						int sucessValue,       // success value, if isPtrFlag is FALSE
-						char *errorMessage)    // error message string, if any	
-{
-	int gotError = FALSE;	// clear the global error flag
-	
-	if ((int) returnValue != sucessValue) {
-		gotError = TRUE;
-		if (errorMessage) {
-			fprintf(stderr, "%s", errorMessage);
-		}
-		fprintf(stderr, "Error: Return value of %s in %s was %d should have been %d\n", 
-				functionName, 
-				uitsModuleName,
-				returnValue,
-				sucessValue);
-	}
-	
-	// Some modules have additional error messages. Print them if relevant.
-	
-	if (gotError) {
-		if (!strcmp(uitsModuleName, "uitsOpenSSL.c")) {
-			fprintf(stderr, "OpenSSL error messages:\n");
-			ERR_print_errors_fp(stderr);
-			exit(ERR_get_error());
-		}
-		exit(ERROR);
-	}
-	
-	return;
-}
-
-/*
- * Function: uitsHandleErrorPTR
- * Purpose:  Generic error handling for functions that return pointers. 
- *           Checks return value against NULL. If non-NULL, no error. If 
- *           NULL, print error message and exit.
- * Returns:  Nothing if no error. Exits if error.
- *
- */
-
-void uitsHandleErrorPTR (char *uitsModuleName,      // name of uitsModule where error occured
-							char *functionName,	    // name of calling function 
-							void *returnValue,		// return value to check
-							char *errorMessage)	    // error message string, if any	
-{
-	int gotError = FALSE;	// clear the global error flag
-	
-	if (!returnValue) {
-		gotError = TRUE;
-		if (errorMessage) {
-			fprintf(stderr, "%s", errorMessage);
-		}
-		fprintf(stderr, "Error: Return value of %s in %s was NULL\n", functionName, uitsModuleName);
-	}		
-	
-	// Some modules have additional error messages. Print them if relevant.
-	
-	if (gotError) {
-		if (!strcmp(uitsModuleName, "uitsOpenSSL.c")) {
-			fprintf(stderr, "OpenSSL error messages:\n");
-			ERR_print_errors_fp(stderr);
-			exit(ERR_get_error());
-		}
-		exit(ERROR);
-	}
-	
-	return;
-}
-
-/*
  * Function: uitsReadFile
  * Purpose:  Open, read, and close a file
  * Passed:   Name of file
@@ -974,7 +905,7 @@ unsigned char *uitsReadFile (char *filename)
 	fp = fopen(filename, "r");	
 	if (!fp) {
 		snprintf(errStr, strlen((char *)errStr), "ERROR: Couldn't open file: %s\n", filename);
-		uitsHandleErrorINT(moduleName, "uitsReadFile", ERROR, OK, errStr);
+		uitsHandleErrorINT(moduleName, "uitsReadFile", ERROR, OK, ERR_FILE, errStr);
 	}
 	
 	/* read the whole file into memory */
@@ -987,7 +918,7 @@ unsigned char *uitsReadFile (char *filename)
 	
 	if(!fileData){
 		snprintf(errStr, strlen((char *)errStr),  "ERROR: Insufficient memory to read %s\n", filename);
-		uitsHandleErrorINT(moduleName, "uitsReadFile", ERROR, OK, errStr);
+		uitsHandleErrorINT(moduleName, "uitsReadFile", ERROR, OK, ERR_FILE, errStr);
 	}
 	
 	fread(fileData, fileLen, 1, fp); /* Read the entire file into fileData */

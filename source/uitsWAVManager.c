@@ -31,7 +31,7 @@ int wavIsValidFile (char *audioFileName)
 	int  isWAV = FALSE;
 	
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(wavModuleName, "wavIsValidFile", audioFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(wavModuleName, "wavIsValidFile", audioFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	/* Read the first 8 bytes of the file and check to see if they represent an AIFF "FORM" chunk */
 	wavChunkHeader = wavReadChunkHeader(audioFP);
@@ -42,7 +42,7 @@ int wavIsValidFile (char *audioFileName)
 		
 		/* form type must be WAVE */
 		err = fread(formType, 1, 4, audioFP);
-		uitsHandleErrorINT(wavModuleName, "wavIsValidFile", err, 4, "Couldn't read WAV FORM chunk type\n");
+		uitsHandleErrorINT(wavModuleName, "wavIsValidFile", err, 4, ERR_WAV, "Couldn't read WAV FORM chunk type\n");
 		
 		if (strncmp(formType, "WAVE", 4) == 0){
 			vprintf("Audio file is WAV\n");
@@ -82,7 +82,7 @@ char *wavGetMediaHash (char *audioFileName)
 
 	
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(wavModuleName, "wavGetMediaHash", audioFP, "Couldn't open WAV audio file for reading\n");
+	uitsHandleErrorPTR(wavModuleName, "wavGetMediaHash", audioFP, ERR_FILE, "Couldn't open WAV audio file for reading\n");
 	
 	/* seek past the RIFF chunk */
 	/* RIFF chunk is 12 bytes: */
@@ -98,7 +98,8 @@ char *wavGetMediaHash (char *audioFileName)
 	fileLength = uitsGetFileSize(audioFP);
 	
 	dataChunk = wavFindChunkHeader(audioFP, "data", fileLength);
-	uitsHandleErrorPTR(wavModuleName, "wavGetMediaHash", dataChunk, "Couldn't find 'data' chunk in audio file\n");
+	uitsHandleErrorPTR(wavModuleName, "wavGetMediaHash", dataChunk, ERR_WAV, 
+					   "Couldn't find 'data' chunk in audio file\n");
 	
 	/* move fp to start of data */
 	fseeko(audioFP, dataChunk->saveSeek, SEEK_SET);
@@ -151,10 +152,10 @@ int wavEmbedPayload  (char *audioFileName,
 	
 	/* open the audio input and output files */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(wavModuleName, "wavEmbedPayload", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(wavModuleName, "wavEmbedPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	audioOutFP = fopen(audioFileNameOut, "wb");
-	uitsHandleErrorPTR(wavModuleName, "wavEmbedPayload", audioOutFP, "Couldn't open audio file for writing\n");
+	uitsHandleErrorPTR(wavModuleName, "wavEmbedPayload", audioOutFP, ERR_FILE, "Couldn't open audio file for writing\n");
 	
 	/* calculate how long the input audio file is by seeking to EOF and saving size  */
 	audioInFileSize = uitsGetFileSize(audioInFP);
@@ -164,7 +165,8 @@ int wavEmbedPayload  (char *audioFileName,
 	fseeko(audioInFP, WAV_HEADER_SIZE + 4, SEEK_CUR);	/* seek past RIFF header and WAVE type */
 	uitsChunk = wavFindChunkHeader (audioInFP, "UITS", audioInFileSize);
 	if (uitsChunk) {
-		uitsHandleErrorPTR(wavModuleName, "wavEmbedPayload", NULL, "Audio file already contains a UITS payload\n");
+		uitsHandleErrorPTR(wavModuleName, "wavEmbedPayload", NULL, ERR_WAV, 
+						   "Audio file already contains a UITS payload\n");
 	}
 	
 	/* no existing payload, rewind and create new file */
@@ -219,7 +221,7 @@ char *wavExtractPayload (char *audioFileName)
 //	intelCPUFlag = 0;	/* all WAV files are always little-endian */
 	/* open the audio input file */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(wavModuleName, "wavExtractPayload", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(wavModuleName, "wavExtractPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
 	audioInFileSize = uitsGetFileSize(audioInFP);
 	
@@ -229,7 +231,8 @@ char *wavExtractPayload (char *audioFileName)
 	
 	/* find a 'UITS' chunk */	
 	uitsChunkHeader = wavFindChunkHeader (audioInFP, "UITS", audioInFileSize);
-	uitsHandleErrorPTR(wavModuleName, "wavExtractPayload", uitsChunkHeader, "Coudln't find UITS payload in WAV file\n");
+	uitsHandleErrorPTR(wavModuleName, "wavExtractPayload", uitsChunkHeader, ERR_WAV, 
+					   "Coudln't find UITS payload in WAV file\n");
 	
 	fseeko(audioInFP, uitsChunkHeader->saveSeek, SEEK_SET);	/* seek to start of chunk */
 	fseeko(audioInFP, WAV_HEADER_SIZE, SEEK_CUR);				/* seek past ID and Size in header */
@@ -239,7 +242,8 @@ char *wavExtractPayload (char *audioFileName)
 	payloadXMLSize = uitsChunkHeader->chunkSize;
 	
 	err = fread(payloadXML, 1L, payloadXMLSize, audioInFP);
-	uitsHandleErrorINT(wavModuleName, "wavExtractPayload", err, payloadXMLSize, "Couldn't read UITS payload\n");
+	uitsHandleErrorINT(wavModuleName, "wavExtractPayload", err, ERR_FILE, payloadXMLSize, 
+					   "Couldn't read UITS payload\n");
 	
 	return (payloadXML);
 }
@@ -261,7 +265,8 @@ WAV_CHUNK_HEADER *wavReadChunkHeader (FILE *fpin)
 	
 	chunkHeader->saveSeek = ftello(fpin);
 	err = fread(header, 1L, WAV_HEADER_SIZE, fpin);
-	uitsHandleErrorINT(wavModuleName, "wavExtractPayload", err, WAV_HEADER_SIZE, "Couldn't read wav chunk header\n");
+	uitsHandleErrorINT(wavModuleName, "wavExtractPayload", err, WAV_HEADER_SIZE, ERR_FILE, 
+					   "Couldn't read wav chunk header\n");
 	
 	
 	//	vprintf("%c%c%c%c\n", header[4], header[5], header[6], header[7]);

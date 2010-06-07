@@ -189,13 +189,13 @@ int uitsCreate ()
 	/* Set the element value in the uits metadata array */
 	
 	err = uitsSetMetadataValue ("Media", mediaHashValue);
-	uitsHandleErrorINT(payloadModuleName, "uitsCreateMediaHashElement", err, OK, 
+	uitsHandleErrorINT(payloadModuleName, "uitsCreateMediaHashElement", err, OK, ERR_PAYLOAD,
 					"Couldn't set metadata value for Media hash\n");
 	
 	/* create the XML in an mxml data structure from the metadata array */
 	
 	xml = uitsCreatePayloadXML ();
-	uitsHandleErrorPTR(payloadModuleName, "uitsCreate", xml, 
+	uitsHandleErrorPTR(payloadModuleName, "uitsCreate", xml, ERR_PAYLOAD,
 					"Error: Couldn't create XML payload\n");
 	
 	// TO BE IMPLEMENTED: if no metadata file specified and no command-line options specified, try to read from standard in
@@ -205,7 +205,7 @@ int uitsCreate ()
 	vprintf("Validating payload ...\n");
 	
 	err =  uitsVerifyPayloadXML (xml);
-	uitsHandleErrorINT(payloadModuleName, "uitsCreate", err, OK, 
+	uitsHandleErrorINT(payloadModuleName, "uitsCreate", err, OK, ERR_PAYLOAD, 
 					"Error: Couldn't validate XML payload\n");
 	
 	//	mxmlSaveFile(xml, stdout, MXML_NO_CALLBACK); // no whitespace
@@ -220,16 +220,16 @@ int uitsCreate ()
 
 		/* read the audio file, embed the XML into it, write the new audio file */
 		err = uitsAudioEmbedPayload (audioFileName, payloadFileName, payloadXMLString, numPadBytes);
-		uitsHandleErrorINT(payloadModuleName, "uitsCreate", err, OK, "Couldn't embed payload into audio file\n");
+		uitsHandleErrorINT(payloadModuleName, "uitsCreate", err, OK, ERR_PAYLOAD, "Couldn't embed payload into audio file\n");
 	} else {
 		vprintf("Writing standalone UITS payload to file: %s ...\n", payloadFileName);
 		
 		payloadFP = fopen(payloadFileName, "wb");
-		uitsHandleErrorPTR(payloadModuleName, "uitsCreate", payloadFP, 
+		uitsHandleErrorPTR(payloadModuleName, "uitsCreate", payloadFP, ERR_FILE,
 						"Error: Couldn't open payload file\n");
 		
 		err = mxmlSaveFile(xml, payloadFP, MXML_NO_CALLBACK);
-		uitsHandleErrorINT(payloadModuleName, "uitsCreate", err, 0, 
+		uitsHandleErrorINT(payloadModuleName, "uitsCreate", err, 0, ERR_FILE,
 						"Error: Couldn't open save xml to file\n");
 		
 		fclose(payloadFP);
@@ -267,27 +267,27 @@ int uitsVerify (void)
 		vprintf("About to verify payload in file %s ...\n", payloadFileName);
 		
 		payloadFP = fopen(payloadFileName, "rb");
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", payloadFP, 
+		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", payloadFP, ERR_FILE,
 						   "Error: Couldn't open open UITS payload file for reading\n");
 		
 		xml = mxmlLoadFile(NULL, payloadFP, MXML_OPAQUE_CALLBACK);
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", xml,
+		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", xml, ERR_FILE,
 						   "Error: Couldn't load xml payload from UITS file\n");
 		fclose(payloadFP);
 	} else {
 		vprintf("About to verify payload in file %s ...\n", audioFileName);
 		uitsPayloadXML = uitsAudioExtractPayload (audioFileName);
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", uitsPayloadXML, 
+		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", uitsPayloadXML, ERR_PAYLOAD,
 						"Couldn't extract payload XML from audio file\n");
 
 		/*	convert the XML string to an mxml tree */
 		xml = mxmlLoadString (NULL, uitsPayloadXML, MXML_OPAQUE_CALLBACK);
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", xml, 
+		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", xml, ERR_PAYLOAD,
 						"Couldn't convert payload XML to  xml tree\n");
 	}
 		
 	err =  uitsVerifyPayloadXML (xml);
-	uitsHandleErrorINT(payloadModuleName, "uitsVerifyPayloadFile", err, 0, 
+	uitsHandleErrorINT(payloadModuleName, "uitsVerifyPayloadFile", err, 0, ERR_VERIFY,
 					   "Error: Payload failed validation\n");
 			
 	
@@ -321,7 +321,7 @@ int uitsExtract ()
 	
 	vprintf("Extracting uits payload from %s ... \n", audioFileName);
 	uitsPayloadXML = uitsAudioExtractPayload (audioFileName);
-	uitsHandleErrorPTR(payloadModuleName, "uitsExtract", uitsPayloadXML, 
+	uitsHandleErrorPTR(payloadModuleName, "uitsExtract", uitsPayloadXML, ERR_EXTRACT,
 					"Couldn't extract payload XML from audio file\n");
 	
 	/* write the XML to the payload file */
@@ -330,18 +330,19 @@ int uitsExtract ()
 	payloadLength = strlen(uitsPayloadXML);
 	
 	payloadFP = fopen(payloadFileName, "wb");
-	uitsHandleErrorPTR(payloadModuleName, "uitsExtract", payloadFP, "Couldn't open payload file for output\n");
+	uitsHandleErrorPTR(payloadModuleName, "uitsExtract", payloadFP, ERR_FILE,
+					   "Couldn't open payload file for output\n");
 	
 	err = fwrite(uitsPayloadXML, 1, payloadLength, payloadFP);
-	uitsHandleErrorINT(payloadModuleName, "uitsAudioExtractPayload", err, payloadLength, 
-					"Couldn't write UITS payload to file\n");
+	uitsHandleErrorINT(payloadModuleName, "uitsAudioExtractPayload", err,payloadLength, 
+					    ERR_FILE, "Couldn't write UITS payload to file\n");
 	fclose(payloadFP);
 	
 	/* if requested, verify the payload */
 	if (verifyFlag) {
 		vprintf("About to verify payload in file %s ...\n", payloadFileName);
 		err = uitsVerify ();
-		uitsHandleErrorINT(payloadModuleName, "uitsAudioExtractPayload", err, OK, 
+		uitsHandleErrorINT(payloadModuleName, "uitsAudioExtractPayload", err, OK, ERR_VERIFY,
 						"Couldn't verify UITS payload file\n");
 		vprintf("Payload verified\n");
 		
@@ -382,11 +383,11 @@ int uitsGenKey ()
 	if (outputFileName) {
 		vprintf("Writing public Key ID to file %s\n", outputFileName);
 		outFP = fopen(outputFileName, "w");
-		uitsHandleErrorPTR(outputFileName, "uitsGenKey", outFP, "Couldn't open output file\n");
+		uitsHandleErrorPTR(outputFileName, "uitsGenKey", outFP, ERR_FILE, "Couldn't open output file\n");
 		
 		len = strlen(pubKeyIDValue);
 		err = fwrite(pubKeyIDValue, 1, len, outFP);
-		uitsHandleErrorINT(payloadModuleName, "uitsGenKey", err, len, 
+		uitsHandleErrorINT(payloadModuleName, "uitsGenKey", err, len, ERR_FILE,
 						   "Couldn't write public key ID to file\n");
 		fclose(outFP);
 	}
@@ -427,11 +428,11 @@ int uitsGenHash ()
 	if (outputFileName) {
 		vprintf("Writing media hash to file %s\n", outputFileName);
 		outFP = fopen(outputFileName, "w");
-		uitsHandleErrorPTR(outputFileName, "uitsGenHash", outFP, "Couldn't open output file\n");
+		uitsHandleErrorPTR(outputFileName, "uitsGenHash", outFP, ERR_FILE, "Couldn't open output file\n");
 		
 		len = strlen(outputMediaHash);
 		err = fwrite(outputMediaHash, 1, len, outFP);
-		uitsHandleErrorINT(payloadModuleName, "uitsGenHash", err, len, 
+		uitsHandleErrorINT(payloadModuleName, "uitsGenHash", err, len, ERR_FILE,
 						   "Couldn't write media hash to file\n");
 		fclose(outFP);
 	}
@@ -458,36 +459,36 @@ void uitsCheckRequiredParams (char *command)
 	if (strcmp(command, "create") == 0) {
 		if (!audioFileName) {
 			snprintf(errStr, strlen((char *)errStr), "Error: Can't %s UITS payload. No audio file specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!payloadFileName) {
 			snprintf(errStr, strlen((char *)errStr), "Error: Can't %s UITS payload. No payload file specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (strcmp(audioFileName, payloadFileName) == 0) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->algorithm) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. No algorithm specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->pubKeyFileName) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. No public key file specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->privateKeyFileName) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. No private key file specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->pubKeyID) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. No public key ID specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 	}
 	
@@ -495,12 +496,12 @@ void uitsCheckRequiredParams (char *command)
 		if (!uitsSignatureDesc->algorithm) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. No algorithm specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->pubKeyFileName) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. No public key file specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		
 		/* The media hash can be verified in one of 3 ways
@@ -516,12 +517,12 @@ void uitsCheckRequiredParams (char *command)
 			 if (!payloadFileName) { /* no audio file and no payload file. nothing to verify */
 				 snprintf(errStr, strlen((char *)errStr), 
 						  "Error: Can't %s UITS payload.  No payload or audio file specified for verification.\n", command);
-				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 			 }
 			 if (!mediaHashNoVerifyFlag && !clMediaHashValue && !mediaHashFileName) {
 				 snprintf(errStr, strlen((char *)errStr), 
 						  "Error: Can't %s UITS payload. No audio file or media hash specified.\n", command);
-				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 			 }
 		 } else {
 
@@ -529,7 +530,7 @@ void uitsCheckRequiredParams (char *command)
 				 snprintf(errStr, strlen((char *)errStr), 
 						  "Error: Can't %s UITS payload. Multiple reference media hashes specified. Please provide either command line value or file.", 
 						  command);
-				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 			 }
 		 
 		 }
@@ -539,29 +540,29 @@ void uitsCheckRequiredParams (char *command)
 		if (!audioFileName) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. No audio file specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!payloadFileName) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. No payload file specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (strcmp(audioFileName, payloadFileName) == 0) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		
 		if (verifyFlag) {
 			if (!uitsSignatureDesc->algorithm) {
 				snprintf(errStr, strlen((char *)errStr), 
 						 "Error: Can't %s UITS payload. No algorithm specified\n", command);
-				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 			}
 			if (!uitsSignatureDesc->pubKeyFileName) {
 				snprintf(errStr, strlen((char *)errStr), 
 						 "Error: Can't %s UITS payload. No public key file specified.\n", command);
-				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 			}
 		}
 	}
@@ -570,7 +571,7 @@ void uitsCheckRequiredParams (char *command)
 		if (!uitsSignatureDesc->pubKeyFileName) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't generate public key ID, no public key file file specified\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 	}
 
@@ -578,7 +579,7 @@ void uitsCheckRequiredParams (char *command)
 		if (!audioFileName) {
 			snprintf(errStr, strlen((char *)errStr), 
 					 "Error: Can't generate media hash, no audio file specified\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 	}	
 }
@@ -664,10 +665,10 @@ mxml_node_t * uitsPayloadPopulateMetadata (mxml_node_t * xmlRootNode) {
 			} else {
 				/* update the text value */
 				textNode = mxmlWalkNext(elementNode, xmlRootNode, MXML_DESCEND);
-				uitsHandleErrorPTR(payloadModuleName, "uitsPayloadPopulateMetdata", textNode, 
+				uitsHandleErrorPTR(payloadModuleName, "uitsPayloadPopulateMetdata", textNode, ERR_PAYLOAD,
 								"Error: Couldn't get get text element value\n");
 				err = mxmlSetOpaque(textNode, metadata_ptr->value);
-				uitsHandleErrorINT(payloadModuleName, "uitsPayloadPopulateMetadata", err, 0, 
+				uitsHandleErrorINT(payloadModuleName, "uitsPayloadPopulateMetadata", err, 0, ERR_PAYLOAD,
 								"Error: Couldn't update metadata value\n");
 				
 			}
@@ -698,10 +699,10 @@ mxml_node_t * uitsPayloadPopulateSignature (mxml_node_t * xmlRootNode)
 	
 	mxml_node_t		* xmlSignatureNode=NULL;
 	mxml_node_t		*xmlSignatureOpaque=NULL;
-	UITS_digest		*pubKeyID;
+//	UITS_digest		*pubKeyID;
 	unsigned char	*encodedSignature;
 	char			*signatureDigestName;
-	char			*pubKeyValue;
+//	char			*pubKeyValue;
 	char			*metadataString;
 //	char			*strPtr;
 //	int				i;
@@ -758,11 +759,11 @@ mxml_node_t * uitsPayloadPopulateSignature (mxml_node_t * xmlRootNode)
 	
 		
 	xmlSignatureOpaque = mxmlWalkNext(xmlSignatureNode, xmlRootNode, MXML_DESCEND);
-	uitsHandleErrorPTR(payloadModuleName, "signature", xmlSignatureOpaque, 
+	uitsHandleErrorPTR(payloadModuleName, "signature", xmlSignatureOpaque, ERR_PARAM, 
 					"Error: Couldn't get get signature value\n");
 	
 	err = mxmlSetOpaque(xmlSignatureOpaque, encodedSignature);
-	uitsHandleErrorINT(payloadModuleName, "uitsPayloadPopulateSignature", err, 0, 
+	uitsHandleErrorINT(payloadModuleName, "uitsPayloadPopulateSignature", err, 0, ERR_PARAM, 
 					"Error: Couldn't update signature text value\n");
 	
 //	free (metadataString);
@@ -793,7 +794,7 @@ int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode)
 	vprintf("\tAbout to validate payload XML against schema\n");
 	
 	err = uitsValidatePayloadSchema (xmlRootNode);
-	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 0, 
+	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 0, ERR_SCHEMA, 
 					"Error: Couldn't verify the schema\n");
 	
 	vprintf("\tPayload passed schema validation\n");
@@ -802,11 +803,11 @@ int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode)
 		/* verify that the media hash is correct */
 		vprintf("\tAbout to verify media hash in payload XML\n");
 		mediaHash = uitsGetElementText(xmlRootNode, "Media");
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerifyPayloadXML", mediaHash,  
+		uitsHandleErrorPTR(payloadModuleName, "uitsVerifyPayloadXML", mediaHash,  ERR_PAYLOAD,
 						"Error: Couldn't get Media hash value from payload XML for validation\n");
 
 		err = uitsVerifyMediaHash (mediaHash);
-		uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 0, 
+		uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 0, ERR_HASH,
 						   "Error: Couldn't verify the media hash\n");
 		
 		vprintf("\tMedia hash verified\n");
@@ -821,15 +822,15 @@ int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode)
 	// Verify that the public key file is the correct one for this payload
 	
 	signatureElementNode = mxmlFindElement( xmlRootNode,  xmlRootNode, "signature", NULL, NULL, MXML_DESCEND);
-//	uitsHandleErrorPTR(payloadModuleName, " uitsVerifyPayloadXML", signatureElementNode, 
+//	uitsHandleErrorPTR(payloadModuleName, " uitsVerifyPayloadXML", signatureElementNode, ERR_SIG,
 //					"Error: Couldn't find XML signature element node\n");
 	
 //	pubKeyId = mxmlElementGetAttr(signatureElementNode, "keyID");
-//	uitsHandleErrorPTR(payloadModuleName, " uitsVerifyPayloadXML", pubKeyId,  
+//	uitsHandleErrorPTR(payloadModuleName, " uitsVerifyPayloadXML", pubKeyId, ERR_SIG,
 //					"Error: Couldn't get get keyId attribute value\n");
 	
 //	err = uitsValidatePubKeyID (uitsSignatureDesc->pubKeyFileName, pubKeyId);
-//	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, OK, 
+//	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, OK, ERR_SIG,
 //					"Error: Public key in file does not match keyID attribute in payload.\n");
 //	
 	/* convert the algorithm name to a digest name */
@@ -842,7 +843,7 @@ int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode)
 	vprintf("\tAbout to verify signature with Public Key in file: %s\n", uitsSignatureDesc->pubKeyFileName );
 	err = uitsVerifySignature(uitsSignatureDesc->pubKeyFileName, metadataString, signatureString, signatureDigestName);
 	
-	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 1, 
+	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 1, ERR_SIG,
 					"Error: Couldn't validate signature\n");
 	
 	vprintf("\tPayload signature verified\n");
@@ -876,7 +877,7 @@ int  uitsVerifyMediaHash (char *mediaHash)
 	} else if (mediaHashFileName) {
 		vprintf("\tVerifying against reference media hash in file: %s\n", mediaHashFileName);
 		referenceMediaHash = uitsReadFile(mediaHashFileName);
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerifyPayloadXML", mediaHash,  
+		uitsHandleErrorPTR(payloadModuleName, "uitsVerifyPayloadXML", mediaHash, ERR_FILE,
 						   "Error: Couldn't read media hash from file for validation\n");
 		
 		/* some editors (ahem EMACS) add an extra new-line at the end of a file. */
@@ -892,13 +893,13 @@ int  uitsVerifyMediaHash (char *mediaHash)
 	} else if (audioFileName) {
 		vprintf("\tVerifying against media hash generated from file %s\n", audioFileName);
 		referenceMediaHash = uitsAudioGetMediaHash (audioFileName);
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerifyPayloadXML", mediaHash,  
+		uitsHandleErrorPTR(payloadModuleName, "uitsVerifyPayloadXML", mediaHash,  ERR_HASH,
 					   "Error: Couldn't generate media hash value from audio file for validation\n");
 	}
 	
 	/* validate the media hash in the payload XML against the reference media hash */
 	err = uitsCompareMediaHash(referenceMediaHash, mediaHash);
-	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 0, 
+	uitsHandleErrorINT(payloadModuleName, " uitsVerifyPayloadXML", err, 0, ERR_HASH,
 					   "Error: Invalid media hash\n");	
 	
 	return (OK);
@@ -963,7 +964,7 @@ int uitsCompareMediaHash (char *calculatedMediaHashValue, char *mediaHashValue)
 	
 	// couldn't match error out
 	
-	uitsHandleErrorINT(payloadModuleName, "uitsCompareMediaHash", err, OK, 
+	uitsHandleErrorINT(payloadModuleName, "uitsCompareMediaHash", err, OK, ERR_HASH,
 					   "Error: Media hash in payload does not match reference media hash\n");
 	
 	/* The next line will never get executed, but include it to get rid of compiler warning */
@@ -989,7 +990,7 @@ int uitsValidatePayloadSchema (mxml_node_t * xmlRootNode)
 	
 	/* make sure that the xsd file exists */
 	tempFP = fopen(XSDFileName, "r");
-	uitsHandleErrorPTR(payloadModuleName, "uitsValidatePayloadSchema", tempFP, "Error: Could not open xsd file\n");
+	uitsHandleErrorPTR(payloadModuleName, "uitsValidatePayloadSchema", tempFP, ERR_FILE, "Error: Could not open xsd file\n");
 	fclose(tempFP);
 	
 	ctxt = xmlSchemaNewParserCtxt(XSDFileName);
@@ -1002,17 +1003,17 @@ int uitsValidatePayloadSchema (mxml_node_t * xmlRootNode)
 	
 	/* Convert the mxml tree data structure to a libxml doc structure */	
 	xmlString = uitsMXMLToXMLString(xmlRootNode);
-	uitsHandleErrorPTR(payloadModuleName, "uitsValidatePayloadSchema", xmlString, 
+	uitsHandleErrorPTR(payloadModuleName, "uitsValidatePayloadSchema", xmlString, ERR_PAYLOAD,
 					"Error: Couldn't generate xml string for validation\n");
 	
 	doc = xmlReadMemory(xmlString, strlen(xmlString), "noname.xml", NULL, 0);	
-	uitsHandleErrorPTR(payloadModuleName, "uitsValidatePayloadSchema", doc,  
+	uitsHandleErrorPTR(payloadModuleName, "uitsValidatePayloadSchema", doc,  ERR_PAYLOAD,
 					"Error: Couldn't parse xml buffer\n");
 	
 	ctxt = xmlSchemaNewValidCtxt(schema);
 	xmlSchemaSetValidErrors(ctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 	err = xmlSchemaValidateDoc(ctxt, doc);
-	uitsHandleErrorINT(payloadModuleName, "uitsValidatePayloadSchema", err, 0, 
+	uitsHandleErrorINT(payloadModuleName, "uitsValidatePayloadSchema", err, 0, ERR_SCHEMA,
 					"Error: Payload XML failed validation\n");
 	
 	
@@ -1046,12 +1047,12 @@ char *uitsGetElementText (mxml_node_t *xml, char *name) {
 	// find the named node element in the xml tree. 
 	// note that this assumes only ONE node with the requested name.
 	elementNode = mxmlFindElement(xml, xml, name, NULL, NULL, MXML_DESCEND);
-	uitsHandleErrorPTR(payloadModuleName, "uitsGetElementText", elementNode, 
+	uitsHandleErrorPTR(payloadModuleName, "uitsGetElementText", elementNode, ERR_PAYLOAD,
 					"Error: Couldn't get find XML element node\n");
 	
 	// now find the element's text value
 	textNode = mxmlWalkNext(elementNode, xml, MXML_DESCEND);
-	uitsHandleErrorPTR(payloadModuleName, "uitsGetElementText", elementNode,
+	uitsHandleErrorPTR(payloadModuleName, "uitsGetElementText", elementNode, ERR_PAYLOAD,
 					"Error: Couldn't get get text element value\n");
 	
 	//		vprintf("UITS_get_element_text Got element: %s value: %s\n", name, text_node->value.text.string);
@@ -1256,7 +1257,7 @@ int uitsSetSignatureParamValue (char *name, char *value)
 		uitsSignatureDesc->pubKeyID = value;
 	} else {
 		snprintf(errStr, strlen((char *)errStr), "ERROR: invalid signature parameter name=%s\n", name);
-		uitsHandleErrorINT(payloadModuleName, "uitsSetSignatureParamValue", ERROR, OK, errStr);
+		uitsHandleErrorINT(payloadModuleName, "uitsSetSignatureParamValue", ERROR, OK, ERR_VALUE, errStr);
 	}
 
 	return (OK);
@@ -1298,7 +1299,7 @@ int	 uitsSetIOFileName (int fileType, char *name)
 			
 		default:
 			snprintf(errStr, strlen((char *)errStr), "Error uitsSetIOFileName: Invalid fileType value=%d\n", fileType);
-			uitsHandleErrorINT(payloadModuleName, "uitsSetIOFileName", ERROR, OK, errStr);
+			uitsHandleErrorINT(payloadModuleName, "uitsSetIOFileName", ERROR, OK, ERR_VALUE, errStr);
 			break;
 	}
 	

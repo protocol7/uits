@@ -32,6 +32,7 @@
 
 #include <mxml.h>
 
+#include "uitsError.h"
 #include "uitsOpenSSL.h"
 #include "uitsPayloadManager.h"
 #include "uitsAudioFileManager.h"
@@ -52,21 +53,11 @@
 #define dprintf(...)  if (!silentFlag && debugFlag)   {printf (__VA_ARGS__);}
 
 static long int err = 0;			// error flag
-int silentFlag ;					// silent mode
+int silentFlag ;					// silent mode (overrides verbose if both are specified)
 int verboseFlag;					// verbose message flag (DEFAULT mode is verbose)
+int displayErrorCodes;				// display error messages and codes
 int debugFlag;						// debug message flag set via command line
 char *errStr[255];					// static buffer to hold an error message string
-
-void uitsHandleErrorINT(char *uitsModuleName,	// name of uitsModule where error occured
-						char *functionName,		// name of calling function 
-						int returnValue,		// return value to check
-						int sucessValue,		// success value, if isPtrFlag is FALSE
-						char *errorMessage);	// error message string, if any	
-
-void uitsHandleErrorPTR (char *uitsModuleName,  // name of uitsModule where error occured
-						 char *functionName,	// name of calling function 
-						 void *returnValue,		// return value to check
-						 char *errorMessage);	// error message string, if any	
 
 
 unsigned char *uitsReadFile		(char *filename); 

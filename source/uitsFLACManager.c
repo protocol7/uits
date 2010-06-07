@@ -66,24 +66,26 @@ char *flacGetMediaHash (char *audioFileName)
 	char				*mediaHashString;
 	
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(flacModuleName, "flacGetMediaHash", audioFP, "Couldn't open FLAC audio file for reading\n");
+	uitsHandleErrorPTR(flacModuleName, "flacGetMediaHash", audioFP, ERR_FILE, "Couldn't open FLAC audio file for reading\n");
 	
 	decoder = FLAC__stream_decoder_new();
-	uitsHandleErrorPTR(flacModuleName, "flacGetMediaHash", decoder, "Couldn't create FLAC stream decoder\n");
+	uitsHandleErrorPTR(flacModuleName, "flacGetMediaHash", decoder, ERR_FLAC, "Couldn't create FLAC stream decoder\n");
 
 		
 	err	= FLAC__stream_decoder_init_FILE (decoder, audioFP, flacWriteCallback, flacMetadataCallback, flacErrorCallback, NULL);
-	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, FLAC__STREAM_DECODER_INIT_STATUS_OK, 
+	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, FLAC__STREAM_DECODER_INIT_STATUS_OK, ERR_FLAC,
 					   "Couldn't initialize decoder for file\n");
 	
 	err = FLAC__stream_decoder_seek_absolute(decoder, 1);
-	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, TRUE, "FLAC stream seek to first audio frame failed\n");
+	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, TRUE, ERR_FLAC,
+					   "FLAC stream seek to first audio frame failed\n");
 
 	// audioFP is at start of audio frame data
 	audioFrameStart  = ftello(audioFP);
 
 	err = FLAC__stream_decoder_process_until_end_of_stream (decoder);
-	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, TRUE, "FLAC process to end of stream failed\n");
+	uitsHandleErrorINT(flacModuleName, "flacGetMediaHash", err, TRUE, ERR_FLAC,
+					   "FLAC process to end of stream failed\n");
 	
 	// audioFP is at end of audio frame data
 	audioFrameEnd  = ftello(audioFP);
@@ -98,7 +100,8 @@ char *flacGetMediaHash (char *audioFileName)
 	
 	// now reopen and read the raw audio data
 	audioFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(flacModuleName, "flacGetMediaHash", audioFP, "Couldn't open FLAC audio file for reading\n");
+	uitsHandleErrorPTR(flacModuleName, "flacGetMediaHash", audioFP, ERR_FILE, 
+					   "Couldn't open FLAC audio file for reading\n");
 
 	fseeko(audioFP, audioFrameStart, SEEK_SET);
 	mediaHash = uitsCreateDigestBuffered (audioFP, audioFrameLength, "SHA256") ;
@@ -143,11 +146,13 @@ int flacEmbedPayload  (char *audioFileName,
 	
 	/* clone the input file to the output file */
 	err = flacCloneAudioFile (audioFileName, audioFileNameOut);
-	uitsHandleErrorINT(flacModuleName, "flacEMbedPayload", err, OK, "Couldn't copy input FLAC audio file to output file\n");
+	uitsHandleErrorINT(flacModuleName, "flacEMbedPayload", err, OK, ERR_FLAC, 
+					   "Couldn't copy input FLAC audio file to output file\n");
 	
 	/* create the new FLAC metadata block */
 	uitsFlacMetadata = FLAC__metadata_object_new (FLAC__METADATA_TYPE_APPLICATION);
-	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", uitsFlacMetadata, "Couldn't create FLAC metadata object\n");
+	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", uitsFlacMetadata, ERR_FLAC, 
+					   "Couldn't create FLAC metadata object\n");
 	
 	
 	/* add the UITS payload to the metadata object */
@@ -157,12 +162,14 @@ int flacEmbedPayload  (char *audioFileName,
 	payloadSize	+= (payloadSize % 8);
 	
 	uitsMetadata = calloc(payloadSize, sizeof(FLAC__byte));
-	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", uitsMetadata, "Couldn't allocate uitsMetadata\n");	
+	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", uitsMetadata, ERR_FLAC,
+					   "Couldn't allocate uitsMetadata\n");	
 	
 	uitsMetadata = strcpy (uitsMetadata, uitsPayloadXML);
 		
 	err = FLAC__metadata_object_application_set_data (uitsFlacMetadata, uitsMetadata, payloadSize, FALSE);
-  	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, "Couldn't add UITS payload data to FLAC metadata object\n");
+  	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, ERR_FLAC,
+					   "Couldn't add UITS payload data to FLAC metadata object\n");
 	
 	/* Set the Application block application ID */
 	
@@ -174,16 +181,19 @@ int flacEmbedPayload  (char *audioFileName,
 	/* now read the metadata chain from the existing FLAC file */
 	
 	flacMetadataChain = FLAC__metadata_chain_new ();
-	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", flacMetadataChain, "Couldn't create FLAC metadata chain\n");	
+	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", flacMetadataChain, ERR_FLAC,
+					   "Couldn't create FLAC metadata chain\n");	
 	
 	err = FLAC__metadata_chain_read(flacMetadataChain, audioFileNameOut);
-	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, "Couldn't read FLAC metadata chain\n");
+	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, ERR_FLAC,
+					   "Couldn't read FLAC metadata chain\n");
 	
 	/* move all of the padding blocks, if any, to the end of the chain */
 	FLAC__metadata_chain_sort_padding (flacMetadataChain);
 
 	flacMetadataIterator = FLAC__metadata_iterator_new ();
-	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", flacMetadataChain, "Couldn't create FLAC metadata iterator\n");	
+	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", flacMetadataChain, ERR_FLAC,
+					   "Couldn't create FLAC metadata iterator\n");	
 
 	/* point the iterator at the chain */
 	FLAC__metadata_iterator_init (flacMetadataIterator,flacMetadataChain);
@@ -197,7 +207,8 @@ int flacEmbedPayload  (char *audioFileName,
 				(flacMetadata->data.application.id[2] == 'T') &&
 				(flacMetadata->data.application.id[3] == 'S')) {
 				
-				uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, 0, "Audio input file already contains a UITS payload \n");
+				uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, 0, ERR_FLAC,
+								   "Audio input file already contains a UITS payload \n");
 
 			}
 		}
@@ -205,12 +216,14 @@ int flacEmbedPayload  (char *audioFileName,
 
 	/* add the new block */
 	err = FLAC__metadata_iterator_insert_block_after (flacMetadataIterator, uitsFlacMetadata);
-  	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, "Couldn't add UITS payload block to iterator\n");
+  	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, ERR_FLAC,
+					   "Couldn't add UITS payload block to iterator\n");
 
 	
 	/* write the new chain */
 	err = FLAC__metadata_chain_write (flacMetadataChain, TRUE, FALSE);
-  	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, "Couldn't write new metadata chain\n");
+  	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, ERR_FLAC,
+					   "Couldn't write new metadata chain\n");
 
 	/* cleanup */
 	FLAC__metadata_chain_delete (flacMetadataChain);
@@ -235,14 +248,17 @@ char *flacExtractPayload (char *audioFileName)
 	
 	/* read the metadata chain from the existing FLAC file */
 	flacMetadataChain = FLAC__metadata_chain_new ();
-	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", flacMetadataChain, "Couldn't create FLAC metadata chain\n");	
+	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", flacMetadataChain, ERR_FLAC,
+					   "Couldn't create FLAC metadata chain\n");	
 	
 	err = FLAC__metadata_chain_read(flacMetadataChain, audioFileName);
-	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, "Couldn't read FLAC metadata chain\n");
+	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, ERR_FLAC,
+					   "Couldn't read FLAC metadata chain\n");
 	
 	/* create an iterator to walk the chain */
 	flacMetadataIterator = FLAC__metadata_iterator_new ();
-	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", flacMetadataChain, "Couldn't create FLAC metadata iterator\n");	
+	uitsHandleErrorPTR(flacModuleName, "flacEmbedPayload", flacMetadataChain, ERR_FLAC,
+					   "Couldn't create FLAC metadata iterator\n");	
 	
 	/* point the iterator at the chain */
 	FLAC__metadata_iterator_init (flacMetadataIterator,flacMetadataChain);
@@ -303,7 +319,8 @@ void flacErrorCallback(const FLAC__StreamDecoder *decoder,
 	(void)decoder, (void)client_data;
 	char *flacErrStr;
 	
-	uitsHandleErrorINT(flacModuleName, "flacErrorCallback", ERROR, OK, FLAC__StreamDecoderErrorStatusString[status]);
+	uitsHandleErrorINT(flacModuleName, "flacErrorCallback", ERROR, OK, ERR_FLAC,
+					   FLAC__StreamDecoderErrorStatusString[status]);
 }
 
 /*
@@ -325,10 +342,10 @@ int flacCloneAudioFile (char *audioFileName,
 
 	/* open the audio input and output files */
 	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(flacModuleName, "flacCloneAudioFile", audioInFP, "Couldn't open audio file for reading\n");
+	uitsHandleErrorPTR(flacModuleName, "flacCloneAudioFile", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
 
 	audioOutFP = fopen(audioFileNameOut, "wb");
-	uitsHandleErrorPTR(flacModuleName, "flacCloneAudioFile", audioOutFP, "Couldn't open audio file for writing\n");
+	uitsHandleErrorPTR(flacModuleName, "flacCloneAudioFile", audioOutFP, ERR_FILE, "Couldn't open audio file for writing\n");
 
 	/* calculate how long the input audio file is by seeking to EOF and saving size  */
 	audioInFileSize = uitsGetFileSize(audioInFP);

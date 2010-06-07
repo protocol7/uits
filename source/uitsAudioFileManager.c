@@ -53,7 +53,7 @@ int uitsAudioEmbedPayload  (char *audioFileName,
 	currAudioCB = uitsAudioGetCB (audioFileName);
 	
 	err = currAudioCB->uitsAudioEmbedPayload (audioFileName, audioOutFileName, uitsPayloadXML, numPadBytes);
-	uitsHandleErrorINT(audioModuleName, "uitsAudioEmbedPayload", err, OK, "Couldn't embed UITS payload into audio file\n");
+	uitsHandleErrorINT(audioModuleName, "uitsAudioEmbedPayload", err, OK, ERR_EMBED, "Couldn't embed UITS payload into audio file\n");
 	
 	return (OK);
 	
@@ -77,7 +77,7 @@ char *uitsAudioExtractPayload (char *audioFileName)
 	/* read the payload XML from the audio file */
 	
 	uitsPayloadXML = currAudioCB-> uitsAudioExtractPayload (audioFileName);
-	uitsHandleErrorPTR(audioModuleName, "uitsExtract", uitsPayloadXML, "Couldn't extract payload XML from audio file\n");
+	uitsHandleErrorPTR(audioModuleName, "uitsExtract", uitsPayloadXML, ERR_EXTRACT, "Couldn't extract payload XML from audio file\n");
 	
 	
 	return (uitsPayloadXML);
@@ -123,7 +123,7 @@ UITS_AUDIO_CALLBACKS *uitsAudioGetCB (char *audioFileName) {
 	}
 	
 	/* audio file is not one of our known types */
-	uitsHandleErrorPTR(audioModuleName, "uitsAudioGetCB", NULL, "Couldn't find audio file type \n");
+	uitsHandleErrorPTR(audioModuleName, "uitsAudioGetCB", NULL, ERR_AUD,  "Couldn't find audio file type \n");
 
 }
 
@@ -150,11 +150,11 @@ int uitsAudioBufferedCopy (FILE *audioInFP, FILE *audioOutFP, unsigned long numB
 		bufferSize = (bytesLeft > AUDIO_IO_BUFFER_SIZE) ? AUDIO_IO_BUFFER_SIZE : bytesLeft;
 		bytesRead = fread(ioBuffer, 1, bufferSize, audioInFP);
 		if (bytesRead != bufferSize) {
-			uitsHandleErrorINT(audioModuleName, "uitsAudioBufferedCopy", ERROR, OK, 
+			uitsHandleErrorINT(audioModuleName, "uitsAudioBufferedCopy", ERROR, OK, ERR_FILE,
 							   "Incorrect number of bytes read from audio input file\n");
 		}
 		bytesWritten = fwrite(ioBuffer, 1, bufferSize, audioOutFP);
-		uitsHandleErrorINT(audioModuleName, "uitsAudioBufferedCopy",  bytesWritten, bufferSize, NULL);
+		uitsHandleErrorINT(audioModuleName, "uitsAudioBufferedCopy",  bytesWritten, bufferSize, ERR_FILE, NULL);
 		totalBytesWritten += bytesWritten;
 		bytesLeft         -= bufferSize;
 	}

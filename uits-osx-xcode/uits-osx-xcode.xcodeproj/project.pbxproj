@@ -21,6 +21,7 @@
 		83EB939C115AD18C005F460F /* uitsMP3Manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 83EB9394115AD18C005F460F /* uitsMP3Manager.c */; };
 		83EB939D115AD18C005F460F /* uitsOpenSSL.c in Sources */ = {isa = PBXBuildFile; fileRef = 83EB9396115AD18C005F460F /* uitsOpenSSL.c */; };
 		83EB939E115AD18C005F460F /* uitsPayloadManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 83EB9398115AD18C005F460F /* uitsPayloadManager.c */; };
+		83EFC6B611B5AAE9000482DB /* uitsError.c in Sources */ = {isa = PBXBuildFile; fileRef = 83EFC6B511B5AAE9000482DB /* uitsError.c */; };
 		8DD76FB00486AB0100D96B5E /* uits-osx-xcode.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* uits-osx-xcode.1 */; };
 /* End PBXBuildFile section */
 
@@ -61,6 +62,8 @@
 		83EB9397115AD18C005F460F /* uitsOpenSSL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsOpenSSL.h; path = ../source/uitsOpenSSL.h; sourceTree = SOURCE_ROOT; };
 		83EB9398115AD18C005F460F /* uitsPayloadManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsPayloadManager.c; path = ../source/uitsPayloadManager.c; sourceTree = SOURCE_ROOT; };
 		83EB9399115AD18C005F460F /* uitsPayloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsPayloadManager.h; path = ../source/uitsPayloadManager.h; sourceTree = SOURCE_ROOT; };
+		83EFC6A111B5A631000482DB /* uitsError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsError.h; path = ../source/uitsError.h; sourceTree = SOURCE_ROOT; };
+		83EFC6B511B5AAE9000482DB /* uitsError.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsError.c; path = ../source/uitsError.c; sourceTree = SOURCE_ROOT; };
 		8DD76FB20486AB0100D96B5E /* UITS_Tool */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UITS_Tool; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6A0FF2C0290799A04C91782 /* uits-osx-xcode.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = "uits-osx-xcode.1"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -99,6 +102,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				83EFC6B511B5AAE9000482DB /* uitsError.c */,
+				83EFC6A111B5A631000482DB /* uitsError.h */,
 				83EB938F115AD18C005F460F /* main.c */,
 				83EB9391115AD18C005F460F /* uits.h */,
 				8385F557116688CE00277C6E /* uitsMP4Manager.c */,
@@ -189,6 +194,7 @@
 				8340BE84117CE5E600BF7652 /* uitsFLACManager.c in Sources */,
 				831F3CC81190BB26000A685A /* uitsAIFFManager.c in Sources */,
 				834F813E11A1B0BD009B4EA0 /* uitsWAVManager.c in Sources */,
+				83EFC6B611B5AAE9000482DB /* uitsError.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

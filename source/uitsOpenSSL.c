@@ -96,7 +96,7 @@ int uitsValidatePubKeyID (char *pubKeyFileName,
 	pubKeyValue = uitsDigestToString(pubKeyID);
 		
 	err = strcmp(pubKeyFromPayload, pubKeyValue);
-	uitsHandleErrorINT(openSSLmoduleName, "uitsValidatePubKeyID", err, 0, 
+	uitsHandleErrorINT(openSSLmoduleName, "uitsValidatePubKeyID", err, 0, ERR_SSL,
 					"Error: Public Key file does not match keyID in payload\n");
 
 	/* cleanup */
@@ -127,21 +127,21 @@ UITS_digest *uitsCreateDigest (unsigned char *message,
 	
 //	OpenSSL_add_all_digests();	
 	md = EVP_get_digestbyname(digestName);
-	uitsHandleErrorPTR(openSSLmoduleName, "EVP_DigestInit_ex", md, 
+	uitsHandleErrorPTR(openSSLmoduleName, "EVP_DigestInit_ex", md, ERR_SSL,
 					"Error: Couldn't initialize message digest\n");
 	
 	
 	EVP_MD_CTX_init(mdctx);	
 	err = EVP_DigestInit_ex(mdctx, md, NULL);
-	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestInit_ex", err, 1, NULL);
+	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestInit_ex", err, 1, ERR_SSL, "Error initializing Digest\n");
 	
 	messageLength = strlen(message);
 	
 	err = EVP_DigestUpdate(mdctx, message, messageLength);
-	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestUpdate",  err, 1, NULL);
+	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestUpdate",  err, 1,ERR_SSL, "Error updating digest\n");
 	
 	err = EVP_DigestFinal_ex(mdctx, mdValue, &mdLen);
-	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestFinal_ex",err, 1, NULL);
+	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestFinal_ex",err, 1, ERR_SSL, "Error finalizing digest\n");
 	
 	EVP_MD_CTX_cleanup(mdctx);
 	uitsDigest->length = mdLen;
@@ -181,13 +181,13 @@ UITS_digest *uitsCreateDigestBuffered (FILE *messageFile,
 	
 	//	OpenSSL_add_all_digests();	
 	md = EVP_get_digestbyname(digestName);
-	uitsHandleErrorPTR(openSSLmoduleName, "EVP_DigestInit_ex", md, 
+	uitsHandleErrorPTR(openSSLmoduleName, "EVP_DigestInit_ex", md, ERR_SSL,
 					"Error: Couldn't initialize message digest\n");
 	
 	
 	EVP_MD_CTX_init(mdctx);	
 	err = EVP_DigestInit_ex(mdctx, md, NULL);
-	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestInit_ex", err, 1, NULL);
+	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestInit_ex", err, 1, ERR_SSL,NULL);
 		
 	
 	// read and process the data in the file in 1024K chunks for length of message
@@ -195,16 +195,16 @@ UITS_digest *uitsCreateDigestBuffered (FILE *messageFile,
 		messageBufferSize = (messageBytesLeft > messageBufferSize) ? messageBufferSize : messageBytesLeft;
 		bytesRead = fread(messageBuffer, 1, messageBufferSize, messageFile);
 		if (bytesRead != messageBufferSize) {
-			uitsHandleErrorINT(openSSLmoduleName, "uitsCreateDigestBuffered", ERROR, OK, 
+			uitsHandleErrorINT(openSSLmoduleName, "uitsCreateDigestBuffered", ERROR, OK, ERR_FILE,
 							"Incorrect number of bytes read from message file\n");
 		}
 		err = EVP_DigestUpdate(mdctx, messageBuffer, bytesRead);
-		uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestUpdate",  err, 1, NULL);
+		uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestUpdate",  err, 1, ERR_SSL, "Error updating digest\n");
 		messageBytesLeft -= messageBufferSize;
 	}
 		
 	err = EVP_DigestFinal_ex(mdctx, mdValue, &mdLen);
-	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestFinal_ex",err, 1, NULL);
+	uitsHandleErrorINT(openSSLmoduleName, "EVP_DigestFinal_ex",err, 1, ERR_SSL, "Error finalizing digest\n");
 	
 	EVP_MD_CTX_cleanup(mdctx);
 	uitsDigest->length = mdLen;
@@ -274,14 +274,15 @@ unsigned char *uitsCreateSignature(unsigned char *message,
 	fp = fopen (privateKeyFileName, "r");
 	if (!fp) {
 		snprintf(errStr, strlen((char *)errStr), "ERROR: Couldn't open private key file %s\n", privateKeyFileName);
-		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, errStr);
+		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, ERR_FILE, errStr);
 	}
 	
 	evpPrivateKey = PEM_read_PrivateKey(fp, NULL, NULL, NULL);
 	fclose (fp);
 	
 	if (!evpPrivateKey) {
-		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, "ERROR: Couldn't read private key from file\n");
+		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, ERR_SSL, 
+						   "ERROR: Couldn't read private key from file\n");
 	}
 	
 	/* sign the message using either RSA/SHA256 or DSA/SHA224 digest */
@@ -292,7 +293,7 @@ unsigned char *uitsCreateSignature(unsigned char *message,
 	} else {
 		snprintf(errStr, strlen((char *)errStr), 
 				 "ERROR: Couldn't assign digest type for signing. Unrecognized digest name: %s\n", digestName);
-		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, errStr);
+		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, ERR_SSL, errStr);
 	}
 	
 	ctx = EVP_MD_CTX_create();
@@ -301,14 +302,14 @@ unsigned char *uitsCreateSignature(unsigned char *message,
 	sig = calloc(sigLen, 1);
 	
 	err = EVP_SignInit_ex(ctx, mdType, NULL);
-	uitsHandleErrorINT(openSSLmoduleName, "EVP_SignInit_ex", err, 1, NULL);
+	uitsHandleErrorINT(openSSLmoduleName, "EVP_SignInit_ex", err, 1, ERR_SSL, "Couldn't initialize signing\n");
 	
 	dataLen	= strlen(message);
 	err = EVP_SignUpdate(ctx, message, dataLen);
-	uitsHandleErrorINT(openSSLmoduleName, "EVP_SignUpdate", err, 1, NULL);
+	uitsHandleErrorINT(openSSLmoduleName, "EVP_SignUpdate", err, 1, ERR_SSL, "Couldn't update signature\n");
 	
 	err = EVP_SignFinal(ctx, sig, &sigLen,  evpPrivateKey);
-	uitsHandleErrorINT(openSSLmoduleName, "EVP_SignFinal", err, 1, NULL);
+	uitsHandleErrorINT(openSSLmoduleName, "EVP_SignFinal", err, 1, ERR_SSL, "Couldn't finalize signature\n");
 	
 	
 //	fp = fopen ("testsig.bin", "w");
@@ -354,7 +355,7 @@ int uitsVerifySignature (char			*pubKeyFileName,
 	
 	// read the public key from a file
 	fp = fopen(pubKeyFileName, "r");	
-	uitsHandleErrorPTR(openSSLmoduleName, "EVP_VerifyInit_ex", fp,  
+	uitsHandleErrorPTR(openSSLmoduleName, "EVP_VerifyInit_ex", fp, ERR_FILE,
 					"Error: Coudln't open public key file\n");
 
 	pubKey = PEM_read_PUBKEY(fp, NULL, NULL, NULL);
@@ -370,19 +371,19 @@ int uitsVerifySignature (char			*pubKeyFileName,
 	
 	// decode the signature
 	sig = uitsBase64Decode (b64Sig, strlen(b64Sig));
-	uitsHandleErrorPTR(openSSLmoduleName, "uitsVerifySignature", sig, 
+	uitsHandleErrorPTR(openSSLmoduleName, "uitsVerifySignature", sig, ERR_SSL,
 					"Error decoding Base 64 signature\n");
 
 
 	ctx = EVP_MD_CTX_create();
 	
 	md = EVP_get_digestbyname(digestName);
-	uitsHandleErrorPTR(openSSLmoduleName, "uitsVerifySignature", md, 
+	uitsHandleErrorPTR(openSSLmoduleName, "uitsVerifySignature", md, ERR_SSL,
 					"Error creating message digest object, unknown name?\n");
 	
 
 	err = EVP_VerifyInit_ex(ctx, md, NULL);
-	uitsHandleErrorINT(openSSLmoduleName, "EVP_VerifyInit_ex", err, 1, NULL);
+	uitsHandleErrorINT(openSSLmoduleName, "uitsVerifySignature", err, 1, ERR_SSL, "Couldn't initialize verification\n");
 	
 	//	data = calloc(EVP_MD_size(md), 1);
 	//	data_len = fread(data, 1, EVP_MD_size(md), data_file);
@@ -391,7 +392,7 @@ int uitsVerifySignature (char			*pubKeyFileName,
 	EVP_VerifyUpdate(ctx, data, dataLen);
 	
 	result = EVP_VerifyFinal(ctx, sig->value, sig->length, pubKey);
-	uitsHandleErrorINT (openSSLmoduleName, "Verify data", result, 1, NULL);
+	uitsHandleErrorINT (openSSLmoduleName, "uitsVerifySignature", result, 1, ERR_SSL, "Couldn't finalize verification\n");
 	
 	EVP_MD_CTX_destroy(ctx);
 
