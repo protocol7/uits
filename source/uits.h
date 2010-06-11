@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <getopt.h>
 
@@ -49,15 +50,15 @@
 #define	FALSE 0
 #define TRUE  1
 
+#define MAX_COMMAND_LINE_OPTIONS 50
+
 #define vprintf(...)  if (!silentFlag && verboseFlag) {printf (__VA_ARGS__);}
 #define dprintf(...)  if (!silentFlag && debugFlag)   {printf (__VA_ARGS__);}
 
-static long int err = 0;			// error flag
 int silentFlag ;					// silent mode (overrides verbose if both are specified)
 int verboseFlag;					// verbose message flag (DEFAULT mode is verbose)
 int displayErrorCodes;				// display error messages and codes
 int debugFlag;						// debug message flag set via command line
-char *errStr[255];					// static buffer to hold an error message string
 
 
 unsigned char *uitsReadFile		(char *filename); 

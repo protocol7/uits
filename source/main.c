@@ -15,7 +15,6 @@
 
 char *moduleName = "main.c";
 
-#define MAX_COMMAND_LINE_OPTIONS 50
 
 enum uitsActions {
 	CREATE,
@@ -160,7 +159,7 @@ void uitsPrintHelp (char *command)
 		printf("The following parameters are UITS metadata. All values are treated as text. \n");
 		printf("--nonce                 [value] (REQUIRED)\n");
 		printf("--Distributor           [value] (REQUIRED)\n");
-		printf("--Time                  [value] (REQUIRED)\n");
+		printf("--Time                  [value] (OPTIONAL) If no Time value is provided, Time will be set to current UTC time.\n");
 		printf("--ProductID             [value] (REQUIRED)\n");
 		printf("--ProductID_type        [value] (OPTIONAL) Possible values: UPC (DEFAULT)\n");
 		printf("                                                            GRID\n");
@@ -181,6 +180,12 @@ void uitsPrintHelp (char *command)
 		printf("                                                            WOAS\n");
 		printf("                                                            WORS\n");
 		printf("                                                            WPAY\n");
+		printf("--URLS                  [value] (OPTIONAL) List of multiple URL values. Either --URL or --URLS can be used, not both\n");
+		printf("                                           URLS are provided as a comma-delimited lined list.\n");
+		printf("                                               (eg. --URLS \"http://www.umusic.com,http://www.blah.com\"\n");
+		printf("--URLS_type             [value] (OPTIONAL) List of type values for multiple URLS. There must be a 1-to-1 correspondence\n");
+		printf("                                           between URLS and URLS_type. If none specified, default is WPUB for all URLS.\n");
+		printf("                                               (eg. --URLS_type \"WPUB,WCOP\"\n");
 		printf("--PA                    [value] (OPTIONAL) Possible values: unspecified\n");
 		printf("                                                            explicit\n");
 		printf("                                                            edited\n");
@@ -191,6 +196,12 @@ void uitsPrintHelp (char *command)
 		printf("                                                            other\n");
 		printf("--Extra                 [value] (OPTIONAL)\n");
 		printf("--Extra_type            [value] (OPTIONAL)\n");
+		printf("--Extras                [value] (OPTIONAL) List of multiple Extra values. Either --Extra or --Extras can be used, \n");
+		printf("                                           but not both. Extras are provided as a comma-delimited lined list.\n");
+		printf("                                               (eg. --Extras \"Extra content 1, Extra Content 2\"\n");
+		printf("--Extras_type           [value] (OPTIONAL) List of type values for multiple Extra values. There must be a 1-to-1 \n");
+		printf("                                           correspondence between Extras and Extras_type. \n");
+		printf("                                               (eg. --Extras_type \"content1 type, content 2 type\"\n");
 		
 	} else if (strcmp(command, "verify") == 0) {
 		printf("Usage: uits_tool verify [options]\n");
@@ -506,7 +517,7 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				break;
 				
 			default: 
-				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				snprintf(errStr, ERRSTR_LEN, "Error processing options: unknown option: %c\n", c);
 				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, ERR_VALUE, errStr);
 		}
 	}
@@ -565,6 +576,7 @@ int uitsGetOptVerify (int argc, const char * argv[])
 
 			case 's':		// set silent mode flag
 				silentFlag = TRUE;
+				stderr = fopen("/dev/null", "w");
 				break;
 				
 			case 'a':		// set input audio file name
@@ -615,7 +627,7 @@ int uitsGetOptVerify (int argc, const char * argv[])
 				break;
 				
 			default: 
-				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				snprintf(errStr, ERRSTR_LEN, "Error processing options: unknown option: %c\n", c);
 				uitsHandleErrorINT(moduleName, "uitsGetOptVerify", ERROR, OK, ERR_VALUE, errStr);
 		}
 	}
@@ -676,6 +688,7 @@ int uitsGetOptExtract (int argc, const char * argv[])
 				
 			case 's':		// set silent mode flag
 				silentFlag = TRUE;
+				stderr = fopen("/dev/null", "w");
 				break;
 				
 			case 'y':		// set verify flag
@@ -714,7 +727,7 @@ int uitsGetOptExtract (int argc, const char * argv[])
 				break;
 				
 			default: 
-				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				snprintf(errStr, ERRSTR_LEN, "Error processing options: unknown option: %c\n", c);
 				uitsHandleErrorINT(moduleName, "uitsGetOptExtract", ERROR, OK, ERR_VALUE, errStr);
 		}
 		
@@ -787,7 +800,7 @@ int uitsGetOptGenHash (int argc, const char * argv[])
 							
 				
 			default: 
-				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				snprintf(errStr, ERRSTR_LEN, "Error processing options: unknown option: %c\n", c);
 				uitsHandleErrorINT(moduleName, "uitsGetOptGenHash", ERROR, OK, ERR_VALUE, errStr);
 		}
 	}
@@ -847,7 +860,7 @@ int uitsGetOptGenKey (int argc, const char * argv[])
 				break;
 				
 			default: 
-				snprintf(errStr, strlen((char *)errStr), "Error processing options: unknown option: %c\n", c);
+				snprintf(errStr, ERRSTR_LEN, "Error processing options: unknown option: %c\n", c);
 				uitsHandleErrorINT(moduleName, "uitsGetOptGenKey", ERROR, OK, ERR_VALUE, errStr);
 		}
 	}
@@ -880,7 +893,7 @@ int	uitsInit() {
 	
 	// initialize the openssl functions
 	uitsOpenSSLInit();
-	
+
 	return (OK);
 
 }
@@ -904,7 +917,7 @@ unsigned char *uitsReadFile (char *filename)
 	
 	fp = fopen(filename, "r");	
 	if (!fp) {
-		snprintf(errStr, strlen((char *)errStr), "ERROR: Couldn't open file: %s\n", filename);
+		snprintf(errStr, ERRSTR_LEN, "ERROR: Couldn't open file: %s\n", filename);
 		uitsHandleErrorINT(moduleName, "uitsReadFile", ERROR, OK, ERR_FILE, errStr);
 	}
 	
@@ -917,7 +930,7 @@ unsigned char *uitsReadFile (char *filename)
 	fileData = calloc(fileLen + 1, sizeof(char));
 	
 	if(!fileData){
-		snprintf(errStr, strlen((char *)errStr),  "ERROR: Insufficient memory to read %s\n", filename);
+		snprintf(errStr, ERRSTR_LEN,  "ERROR: Insufficient memory to read %s\n", filename);
 		uitsHandleErrorINT(moduleName, "uitsReadFile", ERROR, OK, ERR_FILE, errStr);
 	}
 	

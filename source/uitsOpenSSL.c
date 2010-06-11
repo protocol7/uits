@@ -273,7 +273,7 @@ unsigned char *uitsCreateSignature(unsigned char *message,
 	
 	fp = fopen (privateKeyFileName, "r");
 	if (!fp) {
-		snprintf(errStr, strlen((char *)errStr), "ERROR: Couldn't open private key file %s\n", privateKeyFileName);
+		snprintf(errStr, ERRSTR_LEN, "ERROR: Couldn't open private key file %s\n", privateKeyFileName);
 		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, ERR_FILE, errStr);
 	}
 	
@@ -291,7 +291,7 @@ unsigned char *uitsCreateSignature(unsigned char *message,
 	} else if (!strcmp(digestName, "SHA224")) {
 		mdType = EVP_sha224();
 	} else {
-		snprintf(errStr, strlen((char *)errStr), 
+		snprintf(errStr, ERRSTR_LEN, 
 				 "ERROR: Couldn't assign digest type for signing. Unrecognized digest name: %s\n", digestName);
 		uitsHandleErrorINT(openSSLmoduleName, "uitsCreateSignature", ERROR, OK, ERR_SSL, errStr);
 	}

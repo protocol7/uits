@@ -50,6 +50,9 @@ UITS_command_line_params clParams [] = {
  *  The following data structures describe the UITS payload element and attribute data:
  */
 
+#define MAX_NUM_ATTRIBUTES 5
+#define MAX_NUM_ELEMENTS   MAX_COMMAND_LINE_OPTIONS
+
 UITS_attributes uits_product_ID_attributes [] = {
 	{"type",		"UPC"},
 	{"completed",	"false"},
@@ -93,19 +96,21 @@ UITS_attributes uits_extra_attributes [] = {
 
 
 
-UITS_element uitsMetadataDesc [] = {
-	{"nonce",		NULL, NULL},
-	{"Distributor", NULL, NULL},
-	{"Time",		NULL, NULL},
-	{"ProductID",	NULL, uits_product_ID_attributes},
-	{"AssetID",		NULL, uits_asset_ID_attributes},
-	{"TID",			NULL, uits_TID_attributes},
-	{"UID",			NULL, uits_UID_attributes},
-	{"Media",		NULL, uits_media_attributes},
-	{"URL",			NULL, uits_URL_attributes},
-	{"PA",			NULL, NULL},
-	{"Copyright",	NULL, uits_copyright_attributes},
-	{"Extra",		NULL, uits_extra_attributes},
+UITS_element uitsMetadataDesc [MAX_NUM_ELEMENTS] = {
+	{"nonce",		NULL, FALSE, NULL},
+	{"Distributor", NULL, FALSE, NULL},
+	{"Time",		NULL, FALSE, NULL},
+	{"ProductID",	NULL, FALSE, uits_product_ID_attributes},
+	{"AssetID",		NULL, FALSE, uits_asset_ID_attributes},
+	{"TID",			NULL, FALSE, uits_TID_attributes},
+	{"UID",			NULL, FALSE, uits_UID_attributes},
+	{"Media",		NULL, FALSE, uits_media_attributes},
+	{"URL",			NULL, FALSE, uits_URL_attributes},
+	{"URLS",		NULL, TRUE,  uits_URL_attributes},
+	{"PA",			NULL, FALSE, NULL},
+	{"Copyright",	NULL, FALSE, uits_copyright_attributes},
+	{"Extra",		NULL, FALSE, uits_extra_attributes},
+	{"Extras",		NULL, TRUE,  uits_extra_attributes},
 	{0,	0, 0}	// end of list	
 };
 
@@ -458,35 +463,35 @@ void uitsCheckRequiredParams (char *command)
 
 	if (strcmp(command, "create") == 0) {
 		if (!audioFileName) {
-			snprintf(errStr, strlen((char *)errStr), "Error: Can't %s UITS payload. No audio file specified.\n", command);
+			snprintf(errStr, ERRSTR_LEN, "Error: Can't %s UITS payload. No audio file specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!payloadFileName) {
-			snprintf(errStr, strlen((char *)errStr), "Error: Can't %s UITS payload. No payload file specified.\n", command);
+			snprintf(errStr, ERRSTR_LEN, "Error: Can't %s UITS payload. No payload file specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (strcmp(audioFileName, payloadFileName) == 0) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->algorithm) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. No algorithm specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->pubKeyFileName) {
-			snprintf(errStr, strlen((char *)errStr), 
+			err = snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. No public key file specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->privateKeyFileName) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. No private key file specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->pubKeyID) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. No public key ID specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
@@ -494,12 +499,12 @@ void uitsCheckRequiredParams (char *command)
 	
 	if (strcmp(command, "verify") == 0) {
 		if (!uitsSignatureDesc->algorithm) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. No algorithm specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!uitsSignatureDesc->pubKeyFileName) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. No public key file specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
@@ -515,19 +520,19 @@ void uitsCheckRequiredParams (char *command)
 		 
 		 if (!audioFileName) {
 			 if (!payloadFileName) { /* no audio file and no payload file. nothing to verify */
-				 snprintf(errStr, strlen((char *)errStr), 
+				 snprintf(errStr, ERRSTR_LEN, 
 						  "Error: Can't %s UITS payload.  No payload or audio file specified for verification.\n", command);
 				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 			 }
 			 if (!mediaHashNoVerifyFlag && !clMediaHashValue && !mediaHashFileName) {
-				 snprintf(errStr, strlen((char *)errStr), 
+				 snprintf(errStr, ERRSTR_LEN, 
 						  "Error: Can't %s UITS payload. No audio file or media hash specified.\n", command);
 				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 			 }
 		 } else {
 
 			 if (!mediaHashNoVerifyFlag && (clMediaHashValue && mediaHashFileName)) {
-				 snprintf(errStr, strlen((char *)errStr), 
+				 snprintf(errStr, ERRSTR_LEN, 
 						  "Error: Can't %s UITS payload. Multiple reference media hashes specified. Please provide either command line value or file.", 
 						  command);
 				 uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
@@ -538,29 +543,29 @@ void uitsCheckRequiredParams (char *command)
 	
 	if (strcmp(command, "extract") == 0) {
 		if (!audioFileName) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. No audio file specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (!payloadFileName) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. No payload file specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		if (strcmp(audioFileName, payloadFileName) == 0) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
 		
 		if (verifyFlag) {
 			if (!uitsSignatureDesc->algorithm) {
-				snprintf(errStr, strlen((char *)errStr), 
+				snprintf(errStr, ERRSTR_LEN, 
 						 "Error: Can't %s UITS payload. No algorithm specified\n", command);
 				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 			}
 			if (!uitsSignatureDesc->pubKeyFileName) {
-				snprintf(errStr, strlen((char *)errStr), 
+				snprintf(errStr, ERRSTR_LEN, 
 						 "Error: Can't %s UITS payload. No public key file specified.\n", command);
 				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 			}
@@ -569,7 +574,7 @@ void uitsCheckRequiredParams (char *command)
 
 	if (strcmp(command, "genkey") == 0) {
 		if (!uitsSignatureDesc->pubKeyFileName) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't generate public key ID, no public key file file specified\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
@@ -577,7 +582,7 @@ void uitsCheckRequiredParams (char *command)
 
 	if (strcmp(command, "genhash") == 0) {
 		if (!audioFileName) {
-			snprintf(errStr, strlen((char *)errStr), 
+			snprintf(errStr, ERRSTR_LEN, 
 					 "Error: Can't generate media hash, no audio file specified\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
@@ -639,10 +644,14 @@ mxml_node_t * uitsCreatePayloadXML ()
 mxml_node_t * uitsPayloadPopulateMetadata (mxml_node_t * xmlRootNode) {
 	
 	mxml_node_t * xmlMetadataNode = NULL;
-	mxml_node_t *elementNode;
-	mxml_node_t *textNode;
-	UITS_element *metadata_ptr = uitsMetadataDesc;
-	UITS_attributes *attribute_ptr;
+	mxml_node_t *elementNode = NULL;
+	UITS_element *metadataPtr = uitsMetadataDesc;
+	UITS_attributes *attributePtr;
+	
+	char *elementName;
+	char *elementValue;
+	char *attributeValue;
+	
 	
 	/* does the metadata node already exist? */
 	xmlMetadataNode = mxmlFindElement( xmlRootNode,  xmlRootNode, "metadata", NULL, NULL, MXML_DESCEND);
@@ -652,36 +661,62 @@ mxml_node_t * uitsPayloadPopulateMetadata (mxml_node_t * xmlRootNode) {
 	}
 	
 	// populate the metadata element with values set on command line
-	while (metadata_ptr->name) {
-		vprintf ("\t %s: %s\n", metadata_ptr->name, metadata_ptr->value);
+	while (metadataPtr->name) {
+		// TIME is treated specially. If the user hasn't specified, default to the currrent time
+		if ((strcmp(metadataPtr->name, "Time") == 0) && !metadataPtr->value) {
+			metadataPtr->value = uitsGetUTCTime();
+		}
+		
 		// only set the node value if there is a value
-		if (metadata_ptr->value) {
-			/* does this node already exist? */
-			elementNode = mxmlFindElement( xmlRootNode,  xmlRootNode, metadata_ptr->name, NULL, NULL, MXML_DESCEND);
-			/* create it */
-			if (!elementNode) {
-				elementNode = mxmlNewElement( xmlMetadataNode, metadata_ptr->name);
-				mxmlNewOpaque(elementNode, metadata_ptr->value);
-			} else {
-				/* update the text value */
-				textNode = mxmlWalkNext(elementNode, xmlRootNode, MXML_DESCEND);
-				uitsHandleErrorPTR(payloadModuleName, "uitsPayloadPopulateMetdata", textNode, ERR_PAYLOAD,
-								"Error: Couldn't get get text element value\n");
-				err = mxmlSetOpaque(textNode, metadata_ptr->value);
-				uitsHandleErrorINT(payloadModuleName, "uitsPayloadPopulateMetadata", err, 0, ERR_PAYLOAD,
-								"Error: Couldn't update metadata value\n");
+		if (metadataPtr->value) {
+			if (metadataPtr->multipleFlag) { /* multiple values are specified in a comma-delimited list */
 				
-			}
-			attribute_ptr = metadata_ptr->attributes;
-			if (attribute_ptr) {
-				while (attribute_ptr->name) {
-					vprintf("\t\t %s: %s\n", attribute_ptr->name, attribute_ptr->value);
-					mxmlElementSetAttr(elementNode, attribute_ptr->name, attribute_ptr->value);
-					attribute_ptr++;
+				/* turn the plural name into a singular name (URLS becomes URL, Extras becomes Extra) */
+				elementName = strdup(metadataPtr->name);
+				elementName[strlen(elementName)-1] = 0;
+								
+				// create an element for each name in the comma-delimited list */
+				elementValue = strtok(metadataPtr->value, ",");
+				while (elementValue) {
+					vprintf ("\t %s: %s\n",elementName, elementValue);
+					elementNode = mxmlNewElement( xmlMetadataNode, elementName);
+					mxmlNewOpaque(elementNode, elementValue);
+					elementValue = strtok(NULL, ",");
+				}
+				
+				// now populate the attributes for each new element
+				attributePtr = metadataPtr->attributes;
+				if (attributePtr) {
+					while (attributePtr->name) {
+						attributeValue = strtok(attributePtr->value, ",");
+						elementNode = mxmlFindElement(xmlRootNode, xmlRootNode, elementName, NULL, NULL, MXML_DESCEND);
+						while (attributeValue) {
+							vprintf("\t\t %s: %s\n", attributePtr->name, attributeValue);
+							mxmlElementSetAttr(elementNode, attributePtr->name, attributeValue);
+							elementNode = mxmlWalkNext(elementNode, xmlRootNode, MXML_NO_DESCEND);
+							attributeValue = strtok(NULL, ",");
+						}
+						attributePtr++;
+					}
+				}
+			} else {
+				vprintf ("\t %s: %s\n", metadataPtr->name, metadataPtr->value);
+				/* create the mxml element node for this value */
+				elementNode = mxmlNewElement( xmlMetadataNode, metadataPtr->name);
+				mxmlNewOpaque(elementNode, metadataPtr->value);
+
+				/* set the element attributes, if any */
+				attributePtr = metadataPtr->attributes;
+				if (attributePtr) {
+					while (attributePtr->name) {
+						vprintf("\t\t %s: %s\n", attributePtr->name, attributePtr->value);
+						mxmlElementSetAttr(elementNode, attributePtr->name, attributePtr->value);
+						attributePtr++;
+					}
 				}
 			}
 		}
-		metadata_ptr++;
+		metadataPtr++;
 	}
 	
 	return (xmlMetadataNode);
@@ -1175,21 +1210,20 @@ char *uitsMXMLToXMLString (mxml_node_t * xmlMetadataNode)
 
 int uitsSetMetadataValue (char *name, char *value) 
 {
-	
-	 UITS_element *metadata_ptr = uitsMetadataDesc;
+	UITS_element *metadataPtr = uitsMetadataDesc;
 	
 	// walk the uits_metadata array to find the named element
-	while (metadata_ptr->name) {
-		if (!strcmp(metadata_ptr->name, name)) {
-			metadata_ptr->value = value;
-			return (OK);
+	while (metadataPtr->name) {
+		if (!strcmp(metadataPtr->name, name)) {
+			metadataPtr->value = value;
+			return(OK);
 		}
-		metadata_ptr++;
+		metadataPtr++;
 	}
 	vprintf("Tried to set non-existent metadata value: name '%s' value '%s'\n", name, value);
 	return (ERROR);
-	
 }
+
 
 /*
  *
@@ -1256,7 +1290,7 @@ int uitsSetSignatureParamValue (char *name, char *value)
 		vprintf("pubKeyID value = %s\n", value);
 		uitsSignatureDesc->pubKeyID = value;
 	} else {
-		snprintf(errStr, strlen((char *)errStr), "ERROR: invalid signature parameter name=%s\n", name);
+		snprintf(errStr, ERRSTR_LEN, "ERROR: invalid signature parameter name=%s\n", name);
 		uitsHandleErrorINT(payloadModuleName, "uitsSetSignatureParamValue", ERROR, OK, ERR_VALUE, errStr);
 	}
 
@@ -1298,7 +1332,7 @@ int	 uitsSetIOFileName (int fileType, char *name)
 			break;
 			
 		default:
-			snprintf(errStr, strlen((char *)errStr), "Error uitsSetIOFileName: Invalid fileType value=%d\n", fileType);
+			snprintf(errStr, ERRSTR_LEN, "Error uitsSetIOFileName: Invalid fileType value=%d\n", fileType);
 			uitsHandleErrorINT(payloadModuleName, "uitsSetIOFileName", ERROR, OK, ERR_VALUE, errStr);
 			break;
 	}
@@ -1340,6 +1374,27 @@ void uitsSetCommandLineParam (char *paramName, int paramValue)
 void uitsSetCLMediaHashValue (char *mediaHashValue) 
 {
 	clMediaHashValue = mediaHashValue;
+}
+
+char *uitsGetUTCTime() 
+{
+	struct tm *tm_utcTime = NULL;
+	time_t t;
+	char *utcTime;
+	
+	t = time(NULL);
+	
+	/* convert to UTC */
+	tm_utcTime = gmtime(&t);
+	
+	utcTime = calloc(UITS_UTC_TIME_SIZE, 1);
+	
+	/* format the time */
+	strftime(utcTime, UITS_UTC_TIME_SIZE, "%FT%TZ", tm_utcTime);
+	
+	dprintf("UTC time and date: %s\n", utcTime);	
+	
+	return	(utcTime);
 }
 	
 // EOF

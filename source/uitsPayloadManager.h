@@ -17,6 +17,8 @@
 #ifndef _uitspayloadmanager_h_
 #  define _uitspayloadmanager_h_
 
+#define UITS_UTC_TIME_SIZE 128
+
 /*
  * UITS metadata element and attribute structure definition
  */ 
@@ -29,6 +31,7 @@ typedef struct {
 typedef struct  {
 	char *name;
 	char *value;
+	int  multipleFlag;	/* TRUE = can have multiple instances of this element */
 	UITS_attributes *attributes;
 } UITS_element;
 
@@ -107,6 +110,7 @@ void uitsCheckRequiredParams (char *command);
 void uitsSetCLMediaHashValue (char *mediaHashValue);
 int uitsCompareMediaHash (char *calculatedMediaHashValue, char *mediaHashValue); 
 int  uitsVerifyMediaHash (char *mediaHash);
+char *uitsGetUTCTime(void);
 
 
 #endif
