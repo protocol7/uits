@@ -1030,7 +1030,13 @@ int uitsValidatePayloadSchema (mxml_node_t * xmlRootNode)
 	
 	ctxt = xmlSchemaNewParserCtxt(XSDFileName);
 	
-	xmlSchemaSetParserErrors(ctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
+	if (!silentFlag) {
+		xmlSchemaSetParserErrors(ctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
+	} else {
+		xmlSchemaSetParserErrors(ctxt, NULL, NULL, NULL);
+
+	}
+
 	schema = xmlSchemaParse(ctxt);
 	xmlSchemaFreeParserCtxt(ctxt);
 	//xmlSchemaDump(stdout, schema); //To print schema dump
@@ -1046,7 +1052,12 @@ int uitsValidatePayloadSchema (mxml_node_t * xmlRootNode)
 					"Error: Couldn't parse xml buffer\n");
 	
 	ctxt = xmlSchemaNewValidCtxt(schema);
-	xmlSchemaSetValidErrors(ctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
+	if (!silentFlag) {
+		xmlSchemaSetValidErrors(ctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
+	} else {
+		xmlSchemaSetValidErrors(ctxt, NULL, NULL, NULL);
+	}
+
 	err = xmlSchemaValidateDoc(ctxt, doc);
 	uitsHandleErrorINT(payloadModuleName, "uitsValidatePayloadSchema", err, 0, ERR_SCHEMA,
 					"Error: Payload XML failed validation\n");

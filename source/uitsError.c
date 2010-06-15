@@ -54,20 +54,22 @@ void uitsHandleErrorINT(char *uitsModuleName,  // name of uitsModule where error
 	
 	if ((int) returnValue != sucessValue) {
 		gotError = TRUE;
-		if (errorMessage) {
+		if (errorMessage && !silentFlag) {
 			fprintf(stderr, "%s", errorMessage);
 		}
-		fprintf(stderr, "Error: Return value of %s in %s was %d should have been %d\n", 
-				functionName, 
-				uitsModuleName,
-				returnValue,
-				sucessValue);
+		if (!silentFlag) {
+			fprintf(stderr, "Error: Return value of %s in %s was %d should have been %d\n", 
+					functionName, 
+					uitsModuleName,
+					returnValue,
+					sucessValue);
+		}
 	}
 	
 	// Some modules have additional error messages. Print them if relevant.
 	
 	if (gotError) {
-		if (!strcmp(uitsModuleName, "uitsOpenSSL.c")) {
+		if (!silentFlag && !strcmp(uitsModuleName, "uitsOpenSSL.c")) {
 			fprintf(stderr, "OpenSSL error messages:\n");
 			ERR_print_errors_fp(stderr);
 			exit(ERR_get_error());
@@ -97,16 +99,18 @@ void uitsHandleErrorPTR (char *uitsModuleName,      // name of uitsModule where 
 	
 	if (!returnValue) {
 		gotError = TRUE;
-		if (errorMessage) {
+		if (errorMessage && !silentFlag) {
 			fprintf(stderr, "%s", errorMessage);
 		}
-		fprintf(stderr, "Error: Return value of %s in %s was NULL\n", functionName, uitsModuleName);
+		if (!silentFlag) {
+			fprintf(stderr, "Error: Return value of %s in %s was NULL\n", functionName, uitsModuleName);
+		}
 	}		
 	
 	// Some modules have additional error messages. Print them if relevant.
 	
 	if (gotError) {
-		if (!strcmp(uitsModuleName, "uitsOpenSSL.c")) {
+		if (!silentFlag && !strcmp(uitsModuleName, "uitsOpenSSL.c")) {
 			fprintf(stderr, "OpenSSL error messages:\n");
 			ERR_print_errors_fp(stderr);
 			exit(ERR_get_error());

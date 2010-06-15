@@ -429,7 +429,6 @@ int uitsGetOptCreate (int argc, const char * argv[])
 
 			case 's':		// set silent mode
 				silentFlag = TRUE;
-				stderr = fopen("/dev/null", "w");
 				break;
 				
 			case 'a':		// set input audio file name
@@ -576,7 +575,6 @@ int uitsGetOptVerify (int argc, const char * argv[])
 
 			case 's':		// set silent mode flag
 				silentFlag = TRUE;
-				stderr = fopen("/dev/null", "w");
 				break;
 				
 			case 'a':		// set input audio file name
@@ -688,7 +686,6 @@ int uitsGetOptExtract (int argc, const char * argv[])
 				
 			case 's':		// set silent mode flag
 				silentFlag = TRUE;
-				stderr = fopen("/dev/null", "w");
 				break;
 				
 			case 'y':		// set verify flag
