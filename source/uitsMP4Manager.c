@@ -228,12 +228,13 @@ int mp4EmbedPayload  (char *audioFileName,
  *
  * Function: mp4ExtractPayload
  * Purpose:	 Extract the UITS payload from an MP3 file
- *			 The payload is a leaf atom of type 'UITS' inside a top level 'udta' container atom
+ *			 The payload is a leaf atom of type 'UITS' inside a 'udta' container atom inside a 'moov' atom
  *           Typically, the top level atoms look something like this:
  *					Atom ftyp @ 0 of size: 32, ends @ 32
  *					Atom moov @ 32 of size: 44130, ends @ 44162
+ *						Atom udta @ 34 size: 2432 ends @ 2466
+ *							Atom UITS @ 38 size: 1244 ends @ 1282
  *					Atom mdat @ 51232 of size: 5466860, ends @ 5518092
- *					Atom udta @ 5518092 of size: 1205, ends @ 5519297
  *
  * Returns: pointer to payload or exit if error
  */
@@ -252,7 +253,7 @@ char *mp4ExtractPayload (char *audioFileName)
 	unsigned long	audioInFileSize;
 	char			*payloadXML;
 	unsigned long	atomSize;
-	MP4_NESTED_ATOM *chunkTable = NULL;
+	MP4_NESTED_ATOM *foundNestedAtoms = NULL;
 	
 	/* open the audio input file */
 	audioInFP = fopen(audioFileName, "rb");
@@ -261,23 +262,23 @@ char *mp4ExtractPayload (char *audioFileName)
 	audioInFileSize = uitsGetFileSize(audioInFP);
 
 	/* populate the nested atom pointers */
-	chunkTable = mp4FindAtomHeaderNested(audioInFP, nestedAtoms);
+	foundNestedAtoms = mp4FindAtomHeaderNested(audioInFP, nestedAtoms);
 	
 	/* find the chunk offset table within the nested atoms */
-	while (	strcmp(chunkTable->atomType, "UITS") != 0) {
-		chunkTable++;
+	while (	strcmp(foundNestedAtoms->atomType, "UITS") != 0) {
+		foundNestedAtoms++;
 	}
 	
 	/* seek past the udta atom header */
-	fseeko(audioInFP, chunkTable->atomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, foundNestedAtoms->atomHeader->saveSeek, SEEK_SET);
 	fseeko(audioInFP, 8, SEEK_CUR);
 	
-	atomSize = chunkTable->atomHeader->size - 8;
+	atomSize = foundNestedAtoms->atomHeader->size - 8;
 	
 	/* this is a cheat. calloc 8 bytes more than we're going to read so that the payload XML */
 	/* will be null-terminated when it's read from the file */
-	payloadXML = calloc(chunkTable->atomHeader->size, 1);	
-	atomSize = chunkTable->atomHeader->size - 8;
+	payloadXML = calloc(foundNestedAtoms->atomHeader->size, 1);	
+	atomSize = foundNestedAtoms->atomHeader->size - 8;
 
 	err = fread(payloadXML, 1L, atomSize, audioInFP);
 	uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, atomSize, ERR_MP4, "Couldn't read UITS atom data\n");
@@ -427,7 +428,8 @@ MP4_ATOM_HEADER *mp4ReadAtomHeader (FILE *fpin)
  *           hierarchy in the MP4 file:
  *           'moov' - Movie
  *              'trak'  - Track
- *                 'minf'  - Media Information
+ *				  'mdia' - Media
+ *                   'minf'  - Media Information
  *                    'stbl'  - Sample Table
  *                       'stco'  - Chunk Offset Table
  * Passed:   Input File pointer, size of UITS atom

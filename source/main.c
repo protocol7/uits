@@ -31,7 +31,7 @@ int main (int argc, const char * argv[]) {
 	
 	int uitsAction = 0;				// UITS action to perform (CREATE, VERIFY, EXTRACT, etc)
 
-	uitsInit();						// standard initializations 								
+//	uitsInit();						// standard initializations 								
 	
 	uitsAction = uitsGetCommand (argc, argv);
 	uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
@@ -163,7 +163,7 @@ void uitsPrintHelp (char *command)
 		printf("--ProductID             [value] (REQUIRED)\n");
 		printf("--ProductID_type        [value] (OPTIONAL) Possible values: UPC (DEFAULT)\n");
 		printf("                                                            GRID\n");
-		printf("--Product_ID_completed  [value] (OPTIONAL) Possible values: false (DEFAULT)\n");
+		printf("--ProductID_completed  [value] (OPTIONAL) Possible values: false (DEFAULT)\n");
 		printf("                                                            true\n");
 		printf("--AssetID               [value] (REQUIRED)\n");
 		printf("--AssetID_type          [value] (OPTIONAL) Possible values: ISRC (DEFAULT)\n");

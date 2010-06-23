@@ -242,7 +242,7 @@ char *wavExtractPayload (char *audioFileName)
 	payloadXMLSize = uitsChunkHeader->chunkSize;
 	
 	err = fread(payloadXML, 1L, payloadXMLSize, audioInFP);
-	uitsHandleErrorINT(wavModuleName, "wavExtractPayload", err, ERR_FILE, payloadXMLSize, 
+	uitsHandleErrorINT(wavModuleName, "wavExtractPayload", err, payloadXMLSize,  ERR_FILE, 
 					   "Couldn't read UITS payload\n");
 	
 	return (payloadXML);
