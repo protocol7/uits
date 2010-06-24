@@ -104,7 +104,7 @@ char *mp4GetMediaHash (char *audioFileName)
 	/* cleanup */
 	fclose(audioFP);
 	
-	vprintf("Calculated media Hash string for MP4 file: %s\n", mediaHashString);
+//	vprintf("Calculated media Hash string for MP4 file: %s\n", mediaHashString);
 
 	return (mediaHashString);
 	

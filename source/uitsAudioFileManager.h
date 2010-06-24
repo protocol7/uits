@@ -78,3 +78,5 @@ int llswap(unsigned long long *llword);
 void SetBigEndianFlag (int flag);
 
 #endif
+
+// EOF

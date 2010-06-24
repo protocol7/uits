@@ -60,4 +60,5 @@ int flacCloneAudioFile (char *audioFileName,
 						char *audioFileNameOut);
 #endif
 
+// EOF
 

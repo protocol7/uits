@@ -49,4 +49,7 @@ unsigned char	*uitsCreateSignature (unsigned char *message,  char *privateKeyFil
 int				uitsVerifySignature (char *pubKeyFileName,  unsigned char *data, char *b64Sig, char *digestName);
 unsigned char	*uitsBase64Encode (unsigned char *message, int messageLength, int b64LFFlag);
 UITS_digest		*uitsBase64Decode (unsigned char *message, int messageLength);
+
 #endif
+
+// EOF

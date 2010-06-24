@@ -64,4 +64,6 @@ int   mp4CopyAtom			(FILE *fpin, FILE *fpout);
 
 #endif
 
+// EOF
+
 

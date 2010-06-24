@@ -337,3 +337,5 @@ WAV_CHUNK_HEADER *wavFindChunkHeader (FILE *fpin, char *chunkID, unsigned long e
     return (chunkFound ? chunkHeader : NULL);
 	
 }
+
+// EOF
