@@ -154,7 +154,8 @@ void uitsPrintHelp (char *command)
 		printf("                                            DEFAULT is uits.xsd in current directory\n");
 		printf("--ml        (-m)    [file-name] (OPTIONAL): Store the base 64 encoded signature in multiple lines\n"); 
 		printf("                                            DEFAULT is a single line for signature\n");
-		printf("--b64       (-c)                   (OPTIONAL): Base 64 encode the media hash. Media hash is hex by default\n"); 
+		printf("--b64       (-c)                (OPTIONAL): Base 64 encode the media hash. Media hash is hex by default\n"); 
+		printf("--hash      (-h)    [hash-value](OPTIONAL): Use the passed hash value instead of calculating from audio frames\n"); 
 		printf("\n");
 		printf("The following parameters are UITS metadata. All values are treated as text. \n");
 		printf("--nonce                 [value] (REQUIRED)\n");
@@ -356,7 +357,7 @@ int uitsGetOptCreate (int argc, const char * argv[])
 		{"xsd",				required_argument,	0,	'x'},	// xsd file for schema validation
 		{"ml",              no_argument,		0,	'm'},	// generate a multi-line signature
 		{"b64",             no_argument,		0,	'c'},	// base64 encode media hash
-
+		{"hash",		    required_argument,	0,	'h'},	// hash value to use instead of calculating from audio frames
 		/* end of option list */
 		{0,			0,				0,				0}
 	};
@@ -411,7 +412,7 @@ int uitsGetOptCreate (int argc, const char * argv[])
 	}
 	
 	while (1) {
-		c = getopt_long (argc, argv, "vsemcoa:u:f:r:b:i:k:d:x:m:h:Y:Z:w:", long_options, &option_index);
+		c = getopt_long (argc, argv, "vsemcoa:u:f:h:r:b:i:k:d:x:m:h:Y:Z:w:", long_options, &option_index);
 		// dprintf("Got option: %c, value: %s\n", c, optarg);
 		
 		fflush(stdout);
@@ -480,6 +481,12 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				dprintf ("Public Key ID '%s'\n", option_value);
 				break;
 
+			case 'h':		// set media hash value for verification
+				option_value = strdup(optarg);
+				dprintf ("media hash value '%s'\n", option_value);
+				uitsSetCLMediaHashValue (option_value);
+				break;
+				
 			case 'd':		// set padding
 				uitsSetCommandLineParam ("pad", atoi(optarg));
 				dprintf ("padding '%s'\n", option_value);

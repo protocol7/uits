@@ -41,6 +41,7 @@ UITS_command_line_params clParams [] = {
 	{"b64_media_hash", &gpB64MediaHashFlag},
 	{"public_key_ID",  &gpPubKeyIDFlag},
 	{"nohash",		   &mediaHashNoVerifyFlag},
+	
 	{0,	0}	// end of list	
 };
 
@@ -145,7 +146,7 @@ int uitsPayloadManagerInit (void)
 	gpMediaHashFlag     = FALSE;			// genparam: Media_Hash
 	gpB64MediaHashFlag  = FALSE;			// genparam: Base64 Media_Hash
 	gpPubKeyIDFlag      = FALSE;			// genparam: Public Key ID 
-	clMediaHashValue	= 0;				// media hash value passed from the command-line
+	clMediaHashValue	= NULL;				// media hash value passed from the command-line
 	mediaHashFileName	= NULL;				// file containing pre-computed media hash
 	mediaHashNoVerifyFlag = 0;
 	return (OK);
@@ -177,20 +178,24 @@ int uitsCreate ()
 	
 	vprintf("Creating UITS payload from comand-line options ... \n");		
 	
-	/* Calculate the media hash value for the audio file */
-	dprintf("about to uitsAudioGetMediaHash");
-	fflush (stdout);
-	mediaHashValue = uitsAudioGetMediaHash(audioFileName);
-	dprintf("done uitsAudioGetMediaHash");
-	fflush (stdout);
+	if (clMediaHashValue) {	// if media hash value passed on command line, set it
+		mediaHashValue = clMediaHashValue;
+	} else {
+		/* Calculate the media hash value for the audio file */
+		dprintf("about to uitsAudioGetMediaHash");
+		fflush (stdout);
+		mediaHashValue = uitsAudioGetMediaHash(audioFileName);
+		dprintf("done uitsAudioGetMediaHash");
+		fflush (stdout);
 
-	/* base 64 encode the media hash, if requested */
-	if (gpB64MediaHashFlag) {
-		vprintf("Base 64 Encoding Media Hash ...\n");
-		mediaHashValue = uitsBase64Encode(mediaHashValue, strlen(mediaHashValue), TRUE);
-		
+		/* base 64 encode the media hash, if requested */
+		if (gpB64MediaHashFlag) {
+			vprintf("Base 64 Encoding Media Hash ...\n");
+			mediaHashValue = uitsBase64Encode(mediaHashValue, strlen(mediaHashValue), TRUE);
+			
+		}
 	}
-	
+
 	/* Set the element value in the uits metadata array */
 	
 	err = uitsSetMetadataValue ("Media", mediaHashValue);
@@ -208,6 +213,8 @@ int uitsCreate ()
 	
 	// validate the xml payload that was created
 	vprintf("Validating payload ...\n");
+	
+	mediaHashNoVerifyFlag = TRUE;	// dont' verify the media hash on create
 	
 	err =  uitsVerifyPayloadXML (xml);
 	uitsHandleErrorINT(payloadModuleName, "uitsCreate", err, OK, ERR_PAYLOAD, 

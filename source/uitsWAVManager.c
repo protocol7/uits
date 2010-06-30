@@ -148,6 +148,10 @@ int wavEmbedPayload  (char *audioFileName,
 //	intelCPUFlag = 0;	/* all WAV files are always little-endian */
 
 	vprintf("About to embed payload for %s into %s\n", audioFileName, audioFileNameOut);
+	if (numPadBytes) {
+		vprintf("WARNING: Tried to add pad bytes to WAV file. This is not supported.\n");
+	}
+	
 	payloadXMLSize = strlen(uitsPayloadXML);
 	
 	/* open the audio input and output files */

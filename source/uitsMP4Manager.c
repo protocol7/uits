@@ -143,6 +143,11 @@ int mp4EmbedPayload  (char *audioFileName,
 		
 		
 	vprintf("About to embed payload for %s into %s\n", audioFileName, audioFileNameOut);
+
+	if (numPadBytes) {
+		vprintf("WARNING: Tried to add pad bytes to MP4 file. This is not supported.\n");
+	}
+	
 	payloadXMLSize = strlen(uitsPayloadXML);
 	
 	/* open the audio input and output files */

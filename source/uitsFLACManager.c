@@ -143,6 +143,10 @@ int flacEmbedPayload  (char *audioFileName,
 	FLAC__byte			 *uitsMetadata;
 	unsigned long		 payloadSize;
 	int					 stillWalking;
+
+	if (numPadBytes) {
+		vprintf("WARNING: Tried to add pad bytes to FLAC file. This is not supported.\n");
+	}
 	
 	/* clone the input file to the output file */
 	err = flacCloneAudioFile (audioFileName, audioFileNameOut);
@@ -167,9 +171,6 @@ int flacEmbedPayload  (char *audioFileName,
 	
 	uitsMetadata = strcpy (uitsMetadata, uitsPayloadXML);
 		
-	err = FLAC__metadata_object_application_set_data (uitsFlacMetadata, uitsMetadata, payloadSize, FALSE);
-  	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, ERR_FLAC,
-					   "Couldn't add UITS payload data to FLAC metadata object\n");
 	
 	/* Set the Application block application ID */
 	
@@ -178,6 +179,10 @@ int flacEmbedPayload  (char *audioFileName,
 	uitsFlacMetadata->data.application.id[2] = 'T';
 	uitsFlacMetadata->data.application.id[3] = 'S';
 	
+	err = FLAC__metadata_object_application_set_data (uitsFlacMetadata, uitsMetadata, payloadSize, FALSE);
+  	uitsHandleErrorINT(flacModuleName, "flacEmbedPayload", err, TRUE, ERR_FLAC,
+					   "Couldn't add UITS payload data to FLAC metadata object\n");
+
 	/* now read the metadata chain from the existing FLAC file */
 	
 	flacMetadataChain = FLAC__metadata_chain_new ();
