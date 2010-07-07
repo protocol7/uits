@@ -638,7 +638,7 @@ char *mp3FindUITSPayload (FILE *audioInFP)
 
 		/* is it a UITS payload? */
 		/* look for the the uits:UITS open tag string in the priv frame data */
-		if (strstr(strPtr, "uits:UITS")) {
+		if (strstr(strPtr, ":UITS")) {
 			uitsPayloadXML = strstr(strPtr, "<?xml");
 			return (uitsPayloadXML);
 		}

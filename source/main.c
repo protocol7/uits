@@ -34,8 +34,8 @@ int main (int argc, const char * argv[]) {
 	uitsInit();						// standard initializations 								
 	
 	uitsAction = uitsGetCommand (argc, argv);
-	uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
-					"Error: Couldn't parse command-line options\n");
+//	uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
+//					"Error: Couldn't parse command-line options\n");
 	
 	switch (uitsAction) {	// uitsAction value is set in uitsGetOpt
 			
