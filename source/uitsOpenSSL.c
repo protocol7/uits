@@ -477,7 +477,7 @@ UITS_digest *uitsBase64Decode (unsigned char *message,
 	
 	BIO_free_all(bmem);
 	
-//	vprintf("base64decode buffer length: %d\n", decodedMessage->length);
+	vprintf("base64decode buffer length: %d\n", decodedMessage->length);
 	
 	decodedMessage->value = buffer;
 	return (decodedMessage);

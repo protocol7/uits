@@ -207,6 +207,9 @@ int uitsCreate ()
 	xml = uitsCreatePayloadXML ();
 	uitsHandleErrorPTR(payloadModuleName, "uitsCreate", xml, ERR_PAYLOAD,
 					"Error: Couldn't create XML payload\n");
+
+	/* convert the mxml data structure into a string containing the XML */
+	payloadXMLString = uitsMXMLToXMLString(xml);
 	
 	// TO BE IMPLEMENTED: if no metadata file specified and no command-line options specified, try to read from standard in
 	
@@ -216,7 +219,7 @@ int uitsCreate ()
 	
 	mediaHashNoVerifyFlag = TRUE;	// dont' verify the media hash on create
 	
-	err =  uitsVerifyPayloadXML (xml);
+	err =  uitsVerifyPayloadXML (xml, payloadXMLString);
 	uitsHandleErrorINT(payloadModuleName, "uitsCreate", err, OK, ERR_PAYLOAD, 
 					"Error: Couldn't validate XML payload\n");
 	
@@ -227,8 +230,6 @@ int uitsCreate ()
 	if (embedFlag) {
 		vprintf("Embedding payload and writing audio file: %s ...\n", payloadFileName);
 		
-		/* convert the mxml data structure into a string containing the XML */
-		payloadXMLString = uitsMXMLToXMLString(xml);
 
 		/* read the audio file, embed the XML into it, write the new audio file */
 		err = uitsAudioEmbedPayload (audioFileName, payloadFileName, payloadXMLString, numPadBytes);
@@ -264,12 +265,12 @@ int uitsVerify (void)
 	FILE *payloadFP;
 	char *uitsPayloadXML;
 	mxml_node_t *xml;
-
+	
 	vprintf("Verify UITS payload ...\n");
-
+	
 	/* make sure that all required parameters are non-null */
 	uitsCheckRequiredParams("verify");
-
+	
 	/* initialize the payload xml by either reading it from a standalone payload or
 	 * extracting from an audio file. If both standalone and audio file are specified,
 	 * standalone takes precedence.
@@ -278,35 +279,30 @@ int uitsVerify (void)
 	if (payloadFileName) {	/* verify standalone payload */
 		vprintf("About to verify payload in file %s ...\n", payloadFileName);
 		
-		payloadFP = fopen(payloadFileName, "rb");
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", payloadFP, ERR_FILE,
-						   "Error: Couldn't open open UITS payload file for reading\n");
-		
-		xml = mxmlLoadFile(NULL, payloadFP, MXML_OPAQUE_CALLBACK);
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", xml, ERR_FILE,
-						   "Error: Couldn't load xml payload from UITS file\n");
+		uitsPayloadXML = uitsReadFile(payloadFileName);
 		fclose(payloadFP);
 	} else {
 		vprintf("About to verify payload in file %s ...\n", audioFileName);
+		
 		uitsPayloadXML = uitsAudioExtractPayload (audioFileName);
 		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", uitsPayloadXML, ERR_PAYLOAD,
-						"Couldn't extract payload XML from audio file\n");
-
-		/*	convert the XML string to an mxml tree */
-		xml = mxmlLoadString (NULL, uitsPayloadXML, MXML_OPAQUE_CALLBACK);
-		uitsHandleErrorPTR(payloadModuleName, "uitsVerify", xml, ERR_PAYLOAD,
-						"Couldn't convert payload XML to  xml tree\n");
-	}
+						   "Couldn't extract payload XML from audio file\n");
 		
-	err =  uitsVerifyPayloadXML (xml);
+	}
+	
+	/*	convert the XML string to an mxml tree */
+	xml = mxmlLoadString (NULL, uitsPayloadXML, MXML_OPAQUE_CALLBACK);
+	uitsHandleErrorPTR(payloadModuleName, "uitsVerify", xml, ERR_PAYLOAD,
+					   "Couldn't convert payload XML to  xml tree\n");
+	
+	err =  uitsVerifyPayloadXML (xml, uitsPayloadXML);
 	uitsHandleErrorINT(payloadModuleName, "uitsVerifyPayloadFile", err, 0, ERR_VERIFY,
 					   "Error: Payload failed validation\n");
-			
+	
 	
 	vprintf("Payload verified!\n");
 	
 	return (OK);
-	
 }
 
 
@@ -791,7 +787,7 @@ mxml_node_t * uitsPayloadPopulateSignature (mxml_node_t * xmlRootNode)
 	}
 	
 	/* create signature for metadata using the private key */
-	metadataString = uitsGetMetadataString ( xmlRootNode);
+	metadataString = uitsGetMetadataStringMXML ( xmlRootNode);
 	
 	encodedSignature = uitsCreateSignature(metadataString, 
 										   uitsSignatureDesc->privateKeyFileName, 
@@ -822,7 +818,7 @@ mxml_node_t * uitsPayloadPopulateSignature (mxml_node_t * xmlRootNode)
  * Returns: OK or exit on error
  */
 
-int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode) 
+int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode, char *payloadXMLString) 
 {
 	char		*metadataString;
 	char		*signatureString;
@@ -856,9 +852,11 @@ int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode)
 	}
 	
 	// To verify the signature we need the metadata element text, the public key file, and the signature
-	metadataString	= uitsGetMetadataString ( xmlRootNode);	
+	metadataString	= uitsGetMetadataString ( payloadXMLString);	
 	signatureString = uitsGetElementText( xmlRootNode, "signature");
 	
+	vprintf("metadataString: %s\n", metadataString);
+	vprintf("signatureString: %s\n", signatureString);
 	
 	// CMA Note: Disabled until spec is clarified
 	// Verify that the public key file is the correct one for this payload
@@ -1148,12 +1146,40 @@ const char * uitsMXMLWhitespaceCB (mxml_node_t *node, int where) {
 
 /* 
  * Function: uitsGetMetadataString
+ * Purpose:	 Get the metadata XML string within a UITS payload string
+ * Returns:  Ptr to string
+ *
+ */	
+
+char * uitsGetMetadataString (char *payloadXMLString) {
+	
+	char *metadataString;
+	char *metadataStart;
+	char *metadataEnd;
+	int metadataLen;
+	
+	metadataStart = strstr(payloadXMLString, "<metadata>");
+	metadataEnd = strstr(payloadXMLString, "</metadata>");
+	metadataEnd += strlen("</metadata>");
+	
+	metadataLen = metadataEnd - metadataStart;
+	
+	metadataString = calloc(sizeof (char), metadataLen+1);
+	
+	metadataString = strncpy(metadataString, metadataStart, metadataLen);
+	
+	
+	return(metadataString);
+}	
+
+/* 
+ * Function: uitsGetMetadataStringMXML
  * Purpose:	 Get the metadata XML string from an mxml root node
  * Returns:  Ptr to node or exit on error
  *
  */	
 
-char * uitsGetMetadataString (mxml_node_t * xmlRootNode) {
+char * uitsGetMetadataStringMXML (mxml_node_t * xmlRootNode) {
 	
 	mxml_node_t * xmlMetadataNode;
 	mxml_node_t * UITS_element_next_node;
