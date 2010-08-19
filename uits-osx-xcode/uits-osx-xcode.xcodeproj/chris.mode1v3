@@ -202,7 +202,7 @@
 			<key>Content</key>
 			<dict>
 				<key>PBXProjectModuleGUID</key>
-				<string>830EFC13121DA91E0049F08C</string>
+				<string>830EFC28121DA9960049F08C</string>
 				<key>PBXProjectModuleLabel</key>
 				<string>main.c</string>
 				<key>PBXSplitModuleInNavigatorKey</key>
@@ -210,16 +210,16 @@
 					<key>Split0</key>
 					<dict>
 						<key>PBXProjectModuleGUID</key>
-						<string>830EFC14121DA91E0049F08C</string>
+						<string>830EFC29121DA9960049F08C</string>
 						<key>PBXProjectModuleLabel</key>
 						<string>main.c</string>
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>830EFC1E121DA9710049F08C</string>
+						<string>830EFC2A121DA9960049F08C</string>
 						<key>history</key>
 						<array>
-							<string>830EFC11121DA9150049F08C</string>
+							<string>830EFC26121DA98C0049F08C</string>
 						</array>
 					</dict>
 					<key>SplitCount</key>
@@ -256,7 +256,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>830EFC1F121DA9710049F08C</string>
+						<string>830EFC2B121DA9960049F08C</string>
 						<key>history</key>
 						<array>
 							<string>830EFBFE121DA2110049F08C</string>
@@ -296,7 +296,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>830EFC20121DA9710049F08C</string>
+						<string>830EFC2C121DA9960049F08C</string>
 						<key>history</key>
 						<array>
 							<string>830EFBD3121D9FB00049F08C</string>
@@ -336,7 +336,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>830EFC21121DA9710049F08C</string>
+						<string>830EFC2D121DA9960049F08C</string>
 						<key>history</key>
 						<array>
 							<string>830EFBDD121D9FB00049F08C</string>
@@ -376,7 +376,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>830EFC22121DA9710049F08C</string>
+						<string>830EFC2E121DA9960049F08C</string>
 						<key>history</key>
 						<array>
 							<string>832440EC121CAC7E004D87BE</string>
@@ -416,7 +416,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>830EFC23121DA9710049F08C</string>
+						<string>830EFC2F121DA9960049F08C</string>
 						<key>history</key>
 						<array>
 							<string>832440EE121CAC7E004D87BE</string>
@@ -456,7 +456,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>830EFC24121DA9710049F08C</string>
+						<string>830EFC30121DA9960049F08C</string>
 						<key>history</key>
 						<array>
 							<string>832440F0121CAC7E004D87BE</string>
@@ -496,7 +496,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>830EFC25121DA9710049F08C</string>
+						<string>830EFC31121DA9960049F08C</string>
 						<key>history</key>
 						<array>
 							<string>832440F2121CAC7E004D87BE</string>
@@ -552,8 +552,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -650,7 +648,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>830EFC1D121DA9710049F08C</string>
+										<string>830EFC27121DA9960049F08C</string>
 										<key>history</key>
 										<array>
 											<string>8340BEFA117CF55300BF7652</string>
@@ -697,6 +695,8 @@
 							<string>478pt</string>
 						</dict>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -887,7 +887,7 @@
 		<string>1C530D57069F1CE1000CFCEE</string>
 		<string>830EFBCE121D9FB00049F08C</string>
 		<string>/Users/chris/Work/UMG_Development/uits/uits-osx-xcode/uits-osx-xcode.xcodeproj</string>
-		<string>830EFC13121DA91E0049F08C</string>
+		<string>830EFC28121DA9960049F08C</string>
 	</array>
 	<key>WindowString</key>
 	<string>77 125 1128 744 0 0 1440 878 </string>
