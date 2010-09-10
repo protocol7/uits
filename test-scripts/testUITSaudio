@@ -1,0 +1,295 @@
+#!/bin/sh
+
+# testUITSaudio - Shell script for running the UITS_Tool audio file tests
+#
+# Created by Chris Angelli on 8/11/10.
+# Copyright 2010 Universal Music Group. All rights reserved.
+#
+#
+# usage: testUITSaudio [mp3 aac wav flac]
+
+output_dir="../test/test-output"
+
+default_xsd="../test/uits.xsd"
+default_algorithm="RSA2048"
+default_priv="../test/privateRSA2048.pem"
+default_pub="../test/pubRSA2048.pem"
+default_pubID="33dce5a4f8b67303a290dc5145037569ca38036d"
+default_nonce="QgYnkgYS"
+default_Distributor="A Distributor"
+default_ProductID="My product"
+default_ProductID_type="UPC"
+default_ProductID_completed_type="true"
+default_AssetID="ES1700800500"
+default_AssetID_type="ISRC"
+default_TID="Transaction ID"
+default_TID_version="1"
+default_UID="User ID"
+default_UID_version="1"
+default_URL="http://www.umusic.com"
+default_PA="explicit"
+default_Copyright="allrightsreserved"
+default_Extra="extra content"
+default_Extra_type="blah"
+default_Time="2008-08-30T13:15:04Z"
+
+UITS_create()
+{
+
+  create_audio_file=$1
+  create_uits_file=$2  
+  
+  if [ $3 == "embed" ]; then
+	embed="--embed"
+  else
+	embed=""
+  fi
+  
+  if [ $4 == "rsa" ]; then
+	default_algorithm="RSA2048"
+	default_priv="../test/privateRSA2048.pem"
+	default_pub="../test/pubRSA2048.pem"
+  else
+	default_algorithm="DSA2048"
+	default_priv="../test/privateDSA2048.pem"
+	default_pub="../test/pubDSA2048.pem"
+  fi
+  
+  if [ $5 == "multiline" ]; then
+    ml="--ml"
+  else
+    ml=""
+  fi
+
+   if [ $6 == "b64" ]; then
+    b64="--b64"
+  else
+    b64=""
+  fi
+ 
+  
+	`./UITS_Tool create \
+	--silent \
+	--audio $create_audio_file \
+	--xsd $default_xsd \
+	--uits $create_uits_file \
+	$embed \
+	--algorithm $default_algorithm \
+	--priv  $default_priv \
+	--pub $default_pub \
+	--pubID $default_pubID \
+	$ml \
+	$b64 \
+	--nonce $default_nonce \
+	--Distributor $default_Distributor \
+	--ProductID $default_ProductID \
+	--ProductID_type $default_ProductID_type \
+	--ProductID_completed $default_ProductID_completed_type \
+	--AssetID $default_AssetID \
+	--AssetID_type $default_AssetID_type \
+	--TID $default_TID \
+	--TID_version $default_TID_version \
+	--UID $default_UID \
+	--UID_version $default_UID_version \
+	--URL $default_URL\
+	--PA $default_PA \
+	--Copyright $default_Copyright \
+	--Extra $default_Extra \
+	--Extra_type $default_Extra_type \
+	--Time $default_Time`
+	exit_status=$?
+	if [ $exit_status != 0 ]; then
+	 echo "FAIL"
+	else
+	 echo "PASS"
+	fi
+
+}
+
+UITS_verify()
+{
+
+  verify_audio_file=$1
+  
+  if [ $2 == "rsa" ]; then
+	verify_algorithm="RSA2048"
+	verify_pub="../test/pubRSA2048.pem"
+  else
+	verify_algorithm="DSA2048"
+	verify_pub="../test/pubDSA2048.pem"
+  fi
+
+	`./UITS_Tool verify \
+	--silent \
+	--audio $verify_audio_file \
+	--xsd $default_xsd \
+	--algorithm $verify_algorithm \
+	--pub $verify_pub \
+	$3`
+	
+	exit_status=$?
+	
+	if [ $exit_status != 0 ]; then
+	 echo "FAIL"
+	else
+	 echo "PASS"
+	fi
+
+}
+
+UITS_verify_standalone()
+{
+
+	verify_uits_file=$1
+	verify_algorithm="RSA2048"
+	verify_pub="../test/pubRSA2048.pem"
+
+	`./UITS_Tool verify \
+	--silent \
+	--uits $uits_file \
+	--xsd $default_xsd \
+	--algorithm $verify_algorithm \
+	--pub $verify_pub \
+	$2`
+	exit_status=$?
+	
+	if [ $exit_status != 0 ]; then
+	 echo "FAIL"
+	else
+	 echo "PASS"
+	fi
+
+}
+
+if [ $# -lt 1 ] ; then
+	file_types=(mp3 m4a wav flac) # no arguments, test all audio file types
+elif [ $# == 1 ] ; then
+	file_types=($1) # test only requested file type
+else
+    echo "ERROR: Too many file types specified" # error
+fi
+
+# test all requested file types
+
+for type in ${file_types[@]}; do 
+	echo "Running $type file tests"
+
+	audio_file="../test/test_audio.$type"
+	
+	# CREATE tests
+	echo "Test 1: Create $type standalone payload ... \c"	
+	uits_file="$output_dir/test1_payload.$type"
+	UITS_create $audio_file $uits_file "standalone" "rsa" "singleline" "no_b64"
+	
+	echo "Test 2: Create $type embedded payload ... \c"
+	uits_file="$output_dir/test2_embed_payload.$type"
+	UITS_create $audio_file $uits_file "embed" "rsa" "singleline" "no_b64"
+		
+	echo "Test 3: Create $type with DSA key ... \c"
+	uits_file="$output_dir/test3_dsa_signature.$type"
+	UITS_create $audio_file $uits_file "embed" "dsa" "singleline" "no_b64"
+	
+	echo "Test 4: Create $type with multiline signature ... \c"
+	uits_file="$output_dir/test4_multiline_signature.$type"
+	UITS_create $audio_file $uits_file "embed" "rsa" "multiline" "no_b64"
+
+	echo "Test 5: Create $type with base-64 encoded media hash ... \c"
+	uits_file="$output_dir/test5_b64_signature.$type"
+	UITS_create $audio_file $uits_file "embed" "rsa" "singleline" "b64"
+	
+	# VERIFY tests
+	echo "Test 6: Verify $type embedded payload with hash verification, RSA signature  ... \c"	
+	audio_file="$output_dir/test2_embed_payload.$type"
+	UITS_verify $audio_file "rsa" "hash"
+
+	echo "Test 7: Verify $type embedded payload with hash verification, DSA signature  ... \c"	
+	audio_file="$output_dir/test3_dsa_signature.$type"
+	UITS_verify $audio_file "dsa" ""
+
+	echo "Test 8: Verify $type embedded payload, no hash verification ... \c"	
+	audio_file="$output_dir/test2_embed_payload.$type"
+	UITS_verify $audio_file "rsa" "--nohash" 
+
+	echo "Test 9: Verify $type embedded payload, hash verification against hash file ... \c"
+	audio_file="$output_dir/test2_embed_payload.$type"
+	hash_file="$output_dir/test2_embed_payload.hash"
+
+	`./UITS_Tool hash --audio $audio_file --output $hash_file 1>/dev/null 2>/dev/null`
+	UITS_verify $audio_file "rsa" "--hashfile $hash_file"
+
+	echo "Test 10: Verify $type embedded payload, hash verification against hash value ... \c"
+	hash_value=`cat $hash_file`
+	UITS_verify $audio_file "rsa" "--hash $hash_value"
+
+	echo "Test 11: Verify $type standalone payload, no hash verification ... \c"
+	uits_file="$output_dir/test1_payload.$type"
+	UITS_verify_standalone $uits_file "--nohash"
+	
+	echo "Test 12: Verify $type standalone payload, hash verification against audio file ... \c"
+	audio_file="../test/test_audio.$type"
+	UITS_verify_standalone $uits_file "--audio $audio_file"
+
+	echo "Test 13: Verify $type standalone payload, hash verification against hash file ... \c"
+	UITS_verify_standalone $uits_file "--hashfile $hash_file"
+
+	echo "Test 14: Verify $type standalone payload, hash verification against hash value ... \c"
+	UITS_verify_standalone $uits_file "--hash $hash_value"
+
+	echo "Test 15: Extract UITS payload from $type file ... \c"
+	audio_file="$output_dir/test3_dsa_signature.$type"
+	uits_file="$output_dir/test15_extracted_payload.$type"
+	`./UITS_Tool extract \
+	--silent \
+	--uits $uits_file \
+	--audio $audio_file`
+	exit_status=$?
+	
+	if [ $exit_status != 0 ]; then
+	 echo "FAIL"
+	else
+	 echo "PASS"
+	fi
+
+	echo "Test 16: Extract UITS payload from $type file, verify payload, RSA algorithm ...\c"
+	audio_file="$output_dir/test2_embed_payload.$type"
+	uits_file="$output_dir/test16_extracted_payload.$type"
+	`./UITS_Tool extract \
+	--silent \
+	--uits $uits_file \
+	--audio $audio_file \
+	--verify \
+	--pub $default_pub \
+	--xsd $default_xsd `
+	exit_status=$?
+	
+	if [ $exit_status != 0 ]; then
+	 echo "FAIL"
+	else
+	 echo "PASS"
+	fi
+
+	echo "Test 17: Extract UITS payload from $type file, verify payload, DSA algorithm ...\c"
+	audio_file="$output_dir/test3_dsa_signature.$type"
+	uits_file="$output_dir/test17_extracted_payload.$type"
+	verify_algorithm="DSA2048"
+	verify_pub="../test/pubDSA2048.pem"
+	`./UITS_Tool extract \
+	--silent \
+	--uits $uits_file \
+	--audio $audio_file \
+	--verify \
+	--algorithm	 $verify_algorithm\
+	--pub $verify_pub \
+	--xsd $default_xsd `
+	exit_status=$?
+	
+	if [ $exit_status != 0 ]; then
+	 echo "FAIL"
+	else
+	 echo "PASS"
+	fi
+
+done
+
+
+

@@ -939,7 +939,6 @@ unsigned char *uitsReadFile (char *filename)
 	}
 	
 	fread(fileData, fileLen, 1, fp); /* Read the entire file into fileData */
-	
 	fclose(fp);
 	return(fileData);
 	

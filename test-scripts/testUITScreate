@@ -1,0 +1,775 @@
+#!/bin/sh
+
+# testUITScreate - Shell script for running the UITS_Tool "create" tests
+#
+# Created by Chris Angelli on 8/11/10.
+# Copyright 2010 Universal Music Group. All rights reserved.
+#
+#
+# usage: testUITScreate
+
+output_dir="../test/test-output"
+
+default_audio="../test/test_audio.mp3"
+default_xsd="../test/uits.xsd"
+default_uits="$output_dir/testcreate_payload.mp3"
+default_algorithm="RSA2048"
+default_priv="../test/privateRSA2048.pem"
+default_pub="../test/pubRSA2048.pem"
+default_pubID="33dce5a4f8b67303a290dc5145037569ca38036d"
+default_nonce="QgYnkgYS"
+default_Distributor="A Distributor"
+default_ProductID="My product"
+default_ProductID_type="UPC"
+default_ProductID_completed_type="true"
+default_AssetID="ES1700800500"
+default_AssetID_type="ISRC"
+default_TID="Transaction ID"
+default_TID_version="1"
+default_UID="User ID"
+default_UID_version="1"
+default_URL="http://www.umusic.com"
+default_PA="explicit"
+default_Copyright="allrightsreserved"
+default_Extra="extra content"
+default_Extra_type="blah"
+default_Time="2008-08-30T13:15:04Z"
+
+#
+# Test 1	All arguments correct, embed payload	
+#
+
+echo "Test 1 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+
+# Test 2	All arguments correct, standalone payload	
+echo "Test 2 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 3	Silent mode					Verify that silent mode only displays an exit code
+echo "Test 3 ... \c"
+return_string=`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ "$return_string" == "" ]; then
+ echo "PASS"
+else
+ echo "FAIL"
+fi
+
+# Test 4	audio missing				Should fail
+echo "Test 4 ... \c"
+`./UITS_Tool create \
+--silent \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 132 ]; then	# should fail with an exit status of 132
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 5	uits missing				Should fail
+echo "Test 5 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 132 ]; then	# should fail with an exit status of 132
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 6	pub missing					Should fail
+echo "Test 6 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 132 ]; then	# should fail with an exit status of 132
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 7	priv missing				Should fail
+echo "Test 7 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 132 ]; then	# should fail with an exit status of 132
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 8	pubID missing				Should fail
+
+echo "Test 8 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 132 ]; then	# should fail with an exit status of 132
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 9	nonce missing				Should fail
+echo "Test 9 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time 2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 10	Distributor missing			Should fail
+echo "Test 10 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time 2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 11	Time missing				If missing, should be auto-generated
+echo "Test 11 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 12	ProductID missing			Should fail
+echo "Test 12 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time 2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 13	ProductID_type missing		if missing, should default to UPC
+echo "Test 13 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 14	ProductID_completed missing	If missing, should default to FALSE
+echo "Test 14 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 15	AssetID missing				Should fail
+echo "Test 15 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time $2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 16	AssetID_type missing		If missing, should default to ISRC
+echo "Test 16 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 17	TID missing					If missing, UID should be required
+echo "Test 17 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 18	TID_version missing			If missing, should default to 1
+echo "Test 18 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 19	UID missing					If missing, TID should be required
+echo "Test 19 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 20	UID_version missing			If missing, should default to 1
+echo "Test 20 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 21	UID and TID missing		If both missing, should fail
+echo "Test 21 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time  2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with error code of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+

@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# testUITS - Shell script for running the UITS_Tool test suite
+#
+# Created by Chris Angelli on 8/11/10.
+# Copyright 2010 Universal Music Group. All rights reserved.
+
+
+help()
+{
+    cat <<HELP
+ 
+testUITS - Run all tests in the UITS tool test suite. 
+           The UITS_Tool executable MUST be in the same directory as this script
+		   The UITS test audio files, keys, and xsd must be in the ../test directory,
+		   relative to the test-script directory.
+		   See the UITS_TEST_README doc in the test-script directory for a list of all test cases
+
+ARGUMETS:
+    testUITS create:     runs all CREATE test cases 
+    testUITS arguments:  runs all ARGUMENT VALUE test cases
+    testUITS mp3         runs test cases for mp3 files
+    testUITS m4a         runs test cases for m4a files
+    testUITS wav         runs test cases for wav files
+    testUITS flac        runs test cases for flac files
+    testUITS aif         runs test cases for aif files
+HELP
+    exit 0
+}
+
+
+if [ $# == 1 ] ; then # run only requested tests
+  if [ $1 == "help" ] ; then
+	 help
+  elif [ $1 == "create" ] ; then
+	 ./testUITScreate
+  elif [ $1 == "arguments" ] ; then
+  	 ./testUITSargs
+  else # asume mp4, wav, flac or aiff
+     ./testUITSaudio $1
+  fi 
+else				  # run all tests
+	echo "Running create tests"
+	 ./testUITScreate
+
+	echo "Running argument validation tests"
+	 ./testUITSargs
+
+	echo "Running audio file tests"
+	./testUITSaudio 
+	echo "Test suite complete"
+fi
+
+

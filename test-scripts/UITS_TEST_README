@@ -1,0 +1,102 @@
+UITS_TEST_README
+     $Author$
+     $Revision$
+     $Date$
+-------------------
+
+LICENSING
+   Licensing information for this project is contained in the file LICENSE included with
+   this distribution.
+
+INTRODUCTION
+
+    This README file describes the UITS_Tool test cases for the version 2.0 distribution. 
+	
+	It is assumed that users of this tool have a familiarity with the Universal 
+	Music Group's Unique Identifier Technology Solution (UITS). This version of
+	the UITS_Tool supports the UITS Technical Specification, v1.1. For further 
+	information on UITS, contact Universal Music Group.
+
+
+The UITS test suite will run the following list of tests in the following flavors of the UITS_Tool executable:
+1. The OSX xcode created executable.
+2. The OSX command line (Makefile) created executable.
+3. The Windows executable under MINGW.
+4. The Windows executable under DOS.		
+
+The UITS test suite will support running the following subsets of the tests
+    testUITS create:     runs all CREATE test cases 
+    testUITS arguments:  runs all ARGUMENT VALUE test cases
+    testUITS mp3         runs test cases for mp3 files
+    testUITS m4a         runs test cases for m4a files
+    testUITS wav         runs test cases for wav files
+    testUITS flac        runs test cases for flac files
+    testUITS aif         runs test cases for aif files
+
+
+UITS_Tool Version 2.0 Test Cases		
+
+CREATE	
+1	All arguments correct, embed payload	
+2	All arguments correct, standalone payload
+3	Silent mode	Verify that silent mode only displays an exit code
+	Missing required arguments:	
+4	audio missing	Should fail
+5	uits missing	Should fail
+6	pub missing	Should fail
+7	priv missing	Should fail
+8	pubID missing	Should fail
+9	nonce missing	Should fail
+10	Distributor missing	Should fail
+11	Time missing	If missing, should be auto-generated
+12	ProductID missing	Should fail
+13	ProductID_type missing	if missing, should default to UPC
+14	ProductID_completed missing	If missing, should default to FALSE
+15	AssetID missing	Should fail
+16	AssetID_type missing	If missing, should default to ISRC
+17	TID missing	"If missing, UID should be required"
+18	TID_version missing	If missing, should default to 1
+19	UID missing	"If missing, TID should be required
+20	UID_version missing	If missing, should default to 1
+21	UID and TID misssing	If both are missing, should fail
+		
+
+ARGUMENTS	
+22	audio file doesn't exist	
+23	algorithm	valid values:
+                    RSA2048(DEFAULT)
+                    DSA2048
+24	pub file doesn't exist	
+25	priv file doesn't exist	
+26	xsd file doesn't exist	
+27	nonce	must be 8 bit base-64 encoded value
+28	Time	must be ISO8601 format
+29	ProductID_type	"valid values:
+                     UPC(DEFAULT)
+                  GRID"
+30	AssetID	dashes not included
+		
+AUDIO FILE FORMAT TESTING (mp3, m4a, wav, flac)
+    Create
+1	Standalone UITS File	
+2	Embedded UITS File	Verify that file with embedded payload can play
+3	Sign with DSA key	
+4	Multiline signature	
+5	Base64 encode media hash
+	
+	Verify	
+6	"Embedded payload with hash verification, RSA signature, SILENT MODE"	options:  --audio  --pub --xsd --silent
+7	"Embedded payload with hash verification, DSA signature"	options:  --audio  --pub --xsd --algorithm DSA2048
+8	"Embedded payload, no hash verification"	options: --audio --nohash --pub --xsd
+9	"Embedded payload, hash verification against hash file"	options: --audio --hashfile --pub --xsd
+10	"Embedded payload, hash verification against hash value"	options: --uits --hash --pub --xsd
+11	"Standalone payload, no hash verification"	options: --uits --nohash --pub --xsd
+12	"Standalone payload, hash verification against audio file"	options: --uits --audio --pub --xsd
+13	"Standalone payload, hash verification against hash file"	options: --uits --hashfile --pub --xsd
+14	"Standalone payload, hash verification against hash value"	options: --uits --hash --pub --xsd
+
+	Extract	
+15	"Extract, SILENT MODE"	options: --audio --uits --silent
+16	"Extract, verify RSA algorithm"	options: --audio --uits --pub --xsd
+17	"Extract, verify DSA algorithm"	options: --audio --uits --pub --xsd --algorithm DSA2048
+		

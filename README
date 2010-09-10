@@ -10,14 +10,14 @@ LICENSING
 
 INTRODUCTION
 
-    This README file describes the UITS_Tool version 1.0 distribution. 
+    This README file describes the UITS_Tool version 2.0 distribution. 
 	
 	It is assumed that users of this tool have a familiarity with the Universal 
 	Music Group's Unique Identifier Technology Solution (UITS). This version of
 	the UITS_Tool supports the UITS Technical Specification, v1.1. For further 
 	information on UITS, contact Universal Music Group.
 
-    	UITS_Tool is a command-line tool that creates, validates, and extracts UITS
+	UITS_Tool is a command-line tool that creates, validates, and extracts UITS
 	payloads. Version 2.0 suports MP3, AAC, WAV, FLAC and AIFF file formats.
 	
 	This distribution includes the following directories:
@@ -26,8 +26,9 @@ INTRODUCTION
 		  trunk/    The Subversion trunk
                         doc/          UITS documentation
 			source/       The source (.c) and header (.h) files used for both MacOS and Windows
-			test/         Platform-independent test files that are used by scripts in each of the
-                                      platform-specific build directories.
+			test-scripts/ Platform-independent test scripts
+			test/         Platform-independent test files that are used by the scripts 
+			              in the test-scriptsdirectory
 			uits-osx-make/
 				The Makefile, executable (UITS_Tool), libraries, shell script, and test files
 				for building and running the tool from the Unix command line.
@@ -74,4 +75,19 @@ BUILDING UITS_Tool
 		3. cd to uits-win-mingw
 		4. make -f windows.mak
 	
+TESTING UITS_Tool
+   The test-scripts directory contains a UITS_TEST_README file which lists all of the test cases. 
+   It also contains the scripts for running the tests:
+       testUITS	
+       testUITSargs	
+       testUITSaudio	
+       testUITScreate	
+	   
+	The testUITS script calls each of the other scripts. It will test whatever version of
+	the UITS_tool is in the test-script directory. 
 	
+	To run all tests:
+		1. cd to test-scripts
+		2. ./testUITS (or ./testUITS help)
+		
+		

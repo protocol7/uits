@@ -1,0 +1,466 @@
+#!/bin/sh
+
+# testUITSargs - Shell script for running the UITS_Tool "argument value" tests
+#
+# Created by Chris Angelli on 8/11/10.
+# Copyright 2010 Universal Music Group. All rights reserved.
+
+#
+# The default correct variable values
+#
+
+output_dir="../test/test-output"
+
+default_audio="../test/test_audio.mp3"
+default_xsd="../test/uits.xsd"
+default_uits="$output_dir/testargs_payload.mp3"
+default_algorithm="RSA2048"
+default_priv="../test/privateRSA2048.pem"
+default_pub="../test/pubRSA2048.pem"
+default_pubID="33dce5a4f8b67303a290dc5145037569ca38036d"
+default_nonce="QgYnkgYS"
+default_Distributor="A Distributor"
+default_ProductID="My product"
+default_ProductID_type="UPC"
+default_ProductID_completed_type="true"
+default_AssetID="ES1700800500"
+default_AssetID_type="ISRC"
+default_TID="Transaction ID"
+default_TID_version="1"
+default_UID="User ID"
+default_UID_version="1"
+default_URL="http://www.umusic.com"
+default_PA="explicit"
+default_Copyright="allrightsreserved"
+default_Extra="extra content"
+default_Extra_type="blah"
+default_Time="2008-08-30T13:15:04Z"
+
+
+# Test 22	audio file doesn't exist	
+
+echo "Test 22 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio blah \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 129 ]; then	# should return error 129
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 23	algorithm	valid values:
+#						 RSA2048(DEFAULT)
+#						 DSA2048
+echo "Test 23 ... \c"
+
+test_result="PASS"
+
+# valid values
+for test_algorithm in RSA2048 DSA2048; do
+	`./UITS_Tool create \
+	--silent \
+	--audio $default_audio \
+	--xsd $default_xsd \
+	--uits $default_uits \
+	--embed \
+	--algorithm $test_algorithm \
+	--priv  $default_priv \
+	--pub $default_pub \
+	--pubID $default_pubID \
+	--nonce $default_nonce \
+	--Distributor $default_Distributor \
+	--ProductID $default_ProductID \
+	--ProductID_type $default_ProductID_type \
+	--ProductID_completed $default_ProductID_completed_type \
+	--AssetID $default_AssetID \
+	--AssetID_type $default_AssetID_type \
+	--TID $default_TID \
+	--TID_version $default_TID_version \
+	--UID $default_UID \
+	--UID_version $default_UID_version \
+	--URL $default_URL\
+	--PA $default_PA \
+	--Copyright $default_Copyright \
+	--Extra $default_Extra \
+	--Extra_type $default_Extra_type \
+	--Time $default_Time 2>/dev/null`
+	exit_status=$?
+	if [ $exit_status != 0 ]; then
+	 test_result="FAIL"
+	fi
+done
+
+# invalid value
+test_algorithm="blah"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $test_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 147 ]; then	#should return error code 144
+ test_result="FAIL"
+fi
+
+echo $test_result
+
+# Test 24	pub file doesn't exist	
+echo "Test 24 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub blah \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 129 ]; then	# should return error 129
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 25	priv file doesn't exist	
+echo "Test 25 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  blah \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 129 ]; then	# should return error 129
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 26	xsd file doesn't exist	
+echo "Test 26 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd blah \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 129 ]; then	# should return error 129
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 27	nonce	must be 8 bit base-64 encoded value
+echo "Test 27 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce "abcd" \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time 2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 28	Time	must be ISO8601 format
+echo "Test 28 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID $default_AssetID \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time 12:00 2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 29	ProductID_type	"valid values:
+#						  UPC(DEFAULT)
+#						  GRID"
+#	echo "Test 29 ... \c"
+
+#	test_result="PASS"
+# valid value (GRID)
+#	`./UITS_Tool create \
+#	--verbose \
+#	--audio $default_audio \
+#	--xsd $default_xsd \
+#	--uits $default_uits \
+#	--embed \
+#	--algorithm $default_algorithm \
+#	--priv  $default_priv \
+#	--pub $default_pub \
+#	--pubID $default_pubID \
+#	--nonce $default_nonce \
+#	--Distributor $default_Distributor \
+#	--ProductID $default_ProductID \
+#	--ProductID_type $default_ProductID_type \
+#	--ProductID_completed $default_ProductID_completed_type \
+#	--AssetID $default_AssetID \
+#	--AssetID_type $default_AssetID_type \
+#	--TID $default_TID \
+#	--TID_version $default_TID_version \
+#	--UID $default_UID \
+#	--UID_version $default_UID_version \
+#	--URL $default_URL\
+#	--PA $default_PA \
+#	--Copyright $default_Copyright \
+#	--Extra $default_Extra \
+#	--Extra_type $default_Extra_type \
+#	--Time $default_Time`
+#	exit_status=$?
+#	if [ $exit_status != 0 ]; then
+#	 test_result="FAIL"
+#	fi
+
+# invalid value
+#	`./UITS_Tool create \
+#	--silent \
+#	--audio $default_audio \
+#	--xsd $default_xsd \
+#	--uits $default_uits \
+#	--embed \
+#	--algorithm $default_algorithm \
+#	--priv  $default_priv \
+#	--pub $default_pub \
+#	--pubID $default_pubID \
+#	--nonce $default_nonce \
+#	--Distributor $default_Distributor \
+#	--ProductID $default_ProductID \
+#	--ProductID_type blah \
+#	--ProductID_completed $default_ProductID_completed_type \
+#	--AssetID $default_AssetID \
+#	--AssetID_type $default_AssetID_type \
+#	--TID $default_TID \
+#	--TID_version $default_TID_version \
+#	--UID $default_UID \
+#	--UID_version $default_UID_version \
+#	--URL $default_URL\
+#	--PA $default_PA \
+#	--Copyright $default_Copyright \
+#	--Extra $default_Extra \
+#	--Extra_type $default_Extra_type \
+#	--Time $default_Time`
+#	exit_status=$?
+#	if [ $exit_status != 144 ]; then	#should return error code 144
+#	 test_result="FAIL"
+#	fi
+
+#	echo $test_result
+
+# Test 30	AssetID	dashes not included
+echo "Test 30 ... \c"
+`./UITS_Tool create \
+--silent \
+--audio $default_audio \
+--xsd $default_xsd \
+--uits $default_uits \
+--embed \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed_type \
+--AssetID USUV70-603512 \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time 2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 31	AssetID_type	valid value: ISRC
+# Test 32	TransactionID_type	valid value: 1
+# Test 33	UserID_type	valid value: 1
+# Test 34	URL_type	"valid values:
+#						   WPUB(DEFAULT)
+#						   WCOM
+#						   WCOP
+#						   WOAF
+#						   WOAR
+#						   WOAS
+#						   WORS
+#						   WPAY"
+# Test 35	PA	"valid values:
+#						   unspecified (DEFAULT)
+#						   explicit
+#						   edited"
+# Test 36	Copyright_value	"valid values:
+#						   unspecified
+#						   allrightsreserved (DEFAULT)
+#						   prerelease
+#						   other"
+		

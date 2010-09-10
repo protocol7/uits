@@ -278,9 +278,8 @@ int uitsVerify (void)
 	
 	if (payloadFileName) {	/* verify standalone payload */
 		vprintf("About to verify payload in file %s ...\n", payloadFileName);
-		
+
 		uitsPayloadXML = uitsReadFile(payloadFileName);
-		fclose(payloadFP);
 	} else {
 		vprintf("About to verify payload in file %s ...\n", audioFileName);
 		

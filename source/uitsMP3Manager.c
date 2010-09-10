@@ -374,7 +374,6 @@ int mp3CheckFileVersion (char *audioFileName)
 	uitsHandleErrorPTR(mp3ModuleName, "mp3ExtractUITSPayload", id3Header, ERR_MP3, "Couldn't read ID3 header\n");
 	
 	if (id3Header->majorVersion != 3) {
-		exit(OK);
 		snprintf(errStr, ERRSTR_LEN, 
 				 "MP3 file ID3 Tag format ID3V2.%d.%d not supported.\n", 
 				 id3Header->majorVersion, 
