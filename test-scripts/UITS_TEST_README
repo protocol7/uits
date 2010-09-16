@@ -15,7 +15,7 @@ INTRODUCTION
 	It is assumed that users of this tool have a familiarity with Universal 
 	Music Group's Unique Identifier Technology Solution (UITS). This version of
 	the UITS_Tool supports the UITS Technical Specification, v1.1. For further 
-	information on UITS, contact Universal Music Group.
+	information on UITS, contact Universal Music Group at uits.umusic.com.
 
 
 The UITS test suite will run the following list of tests in the following flavors of the UITS_Tool executable:
