@@ -12,7 +12,7 @@ INTRODUCTION
 
     This README file describes the UITS_Tool test cases for the version 2.0 distribution. 
 	
-	It is assumed that users of this tool have a familiarity with the Universal 
+	It is assumed that users of this tool have a familiarity with Universal 
 	Music Group's Unique Identifier Technology Solution (UITS). This version of
 	the UITS_Tool supports the UITS Technical Specification, v1.1. For further 
 	information on UITS, contact Universal Music Group.
@@ -22,9 +22,13 @@ The UITS test suite will run the following list of tests in the following flavor
 1. The OSX xcode created executable.
 2. The OSX command line (Makefile) created executable.
 3. The Windows executable under MINGW.
-4. The Windows executable under DOS.		
+4. The Windows executable under DOS.	
+
+To test the tool, copy the version to be tested into this directory and run the testUITS script.
 
 The UITS test suite will support running the following subsets of the tests
+    testUITS             run all test cases for all file formats
+    testUITS help:       print help for script
     testUITS create:     runs all CREATE test cases 
     testUITS arguments:  runs all ARGUMENT VALUE test cases
     testUITS mp3         runs test cases for mp3 files
@@ -40,30 +44,35 @@ CREATE
 1	All arguments correct, embed payload	
 2	All arguments correct, standalone payload
 3	Silent mode	Verify that silent mode only displays an exit code
+
 	Missing required arguments:	
-4	audio missing	Should fail
-5	uits missing	Should fail
-6	pub missing	Should fail
-7	priv missing	Should fail
-8	pubID missing	Should fail
-9	nonce missing	Should fail
-10	Distributor missing	Should fail
-11	Time missing	If missing, should be auto-generated
-12	ProductID missing	Should fail
-13	ProductID_type missing	if missing, should default to UPC
-14	ProductID_completed missing	If missing, should default to FALSE
-15	AssetID missing	Should fail
+4	audio missing	        Test PASS if tool returns correct error code
+5	uits missing	        Test PASS if tool returns correct error code
+6	pub missing	        Test PASS if tool returns correct error code
+7	priv missing	        Test PASS if tool returns correct error code
+8	pubID missing	        Test PASS if tool returns correct error code
+9	nonce missing	        Test PASS if tool returns correct error code
+10	Distributor missing	Test PASS if tool returns correct error code
+11	Time missing	         If missing, should be auto-generated
+12	ProductID missing	Test PASS if tool returns correct error codel
+13	ProductID_type missing	If missing, should default to UPC
+14	ProductID_completed missing   If missing, should default to FALSE
+15	AssetID missing	        Test PASS if tool returns correct error code 
+                                There is a known bug in the uits.xsd that does not
+                                require AssetID, therefore this test will FAIL.
 16	AssetID_type missing	If missing, should default to ISRC
-17	TID missing	"If missing, UID should be required"
+17	TID missing	        If missing, UID should be required
 18	TID_version missing	If missing, should default to 1
-19	UID missing	"If missing, TID should be required
+19	UID missing	        If missing, TID should be required
 20	UID_version missing	If missing, should default to 1
-21	UID and TID misssing	If both are missing, should fail
+21	UID and TID misssing	If both are missing, tool should return error code
 		
 
 ARGUMENTS	
-22	audio file doesn't exist	
-23	algorithm	valid values:
+Note that the tool does not currently enforce that enum attribute values are correct.
+
+22	audio file doesn't exist 	
+23	algorithm  valid values:
                     RSA2048(DEFAULT)
                     DSA2048
 24	pub file doesn't exist	
@@ -71,32 +80,37 @@ ARGUMENTS
 26	xsd file doesn't exist	
 27	nonce	must be 8 bit base-64 encoded value
 28	Time	must be ISO8601 format
-29	ProductID_type	"valid values:
+29	ProductID_type	valid values:
                      UPC(DEFAULT)
-                  GRID"
+                     GRID"
 30	AssetID	dashes not included
 		
 AUDIO FILE FORMAT TESTING (mp3, m4a, wav, flac)
+Note that these test scripts only test that the output files are created successfully.
+They do not test audio playback.
     Create
 1	Standalone UITS File	
-2	Embedded UITS File	Verify that file with embedded payload can play
+2	Embedded UITS File	
 3	Sign with DSA key	
 4	Multiline signature	
 5	Base64 encode media hash
 	
-	Verify	
-6	"Embedded payload with hash verification, RSA signature, SILENT MODE"	options:  --audio  --pub --xsd --silent
-7	"Embedded payload with hash verification, DSA signature"	options:  --audio  --pub --xsd --algorithm DSA2048
-8	"Embedded payload, no hash verification"	options: --audio --nohash --pub --xsd
-9	"Embedded payload, hash verification against hash file"	options: --audio --hashfile --pub --xsd
-10	"Embedded payload, hash verification against hash value"	options: --uits --hash --pub --xsd
-11	"Standalone payload, no hash verification"	options: --uits --nohash --pub --xsd
-12	"Standalone payload, hash verification against audio file"	options: --uits --audio --pub --xsd
-13	"Standalone payload, hash verification against hash file"	options: --uits --hashfile --pub --xsd
-14	"Standalone payload, hash verification against hash value"	options: --uits --hash --pub --xsd
+   Verify	
+6	Embedded payload with hash verification, RSA signature, SILENT MODE"	options:  --audio  --pub --xsd --silent
+7	Embedded payload with hash verification, DSA signature"	options:  --audio  --pub --xsd --algorithm DSA2048
+8	Embedded payload, no hash verification"	options: --audio --nohash --pub --xsd
+9	Embedded payload, hash verification against hash file"	options: --audio --hashfile --pub --xsd
+10	Embedded payload, hash verification against hash value"	options: --uits --hash --pub --xsd
+11	Standalone payload, no hash verification"	options: --uits --nohash --pub --xsd
+12	Standalone payload, hash verification against audio file"	options: --uits --audio --pub --xsd
+13	Standalone payload, hash verification against hash file"	options: --uits --hashfile --pub --xsd
+14	Standalone payload, hash verification against hash value"	options: --uits --hash --pub --xsd
 
-	Extract	
-15	"Extract, SILENT MODE"	options: --audio --uits --silent
-16	"Extract, verify RSA algorithm"	options: --audio --uits --pub --xsd
-17	"Extract, verify DSA algorithm"	options: --audio --uits --pub --xsd --algorithm DSA2048
+    Extract	
+15	Extract, SILENT MODE"	options: --audio --uits --silent
+16	Extract, verify RSA algorithm"	options: --audio --uits --pub --xsd
+17	Extract, verify DSA algorithm"	options: --audio --uits --pub --xsd --algorithm DSA2048
+
+
+-------------------
 		

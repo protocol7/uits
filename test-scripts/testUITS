@@ -4,6 +4,9 @@
 #
 # Created by Chris Angelli on 8/11/10.
 # Copyright 2010 Universal Music Group. All rights reserved.
+#
+# $Date$
+# $Revision$
 
 
 help()
@@ -16,7 +19,7 @@ testUITS - Run all tests in the UITS tool test suite.
 		   relative to the test-script directory.
 		   See the UITS_TEST_README doc in the test-script directory for a list of all test cases
 
-ARGUMETS:
+ARGUMENTS:
     testUITS create:     runs all CREATE test cases 
     testUITS arguments:  runs all ARGUMENT VALUE test cases
     testUITS mp3         runs test cases for mp3 files

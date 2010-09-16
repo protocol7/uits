@@ -4,6 +4,8 @@
 #
 # Created by Chris Angelli on 8/11/10.
 # Copyright 2010 Universal Music Group. All rights reserved.
+# $Date$
+# $Revision$
 
 #
 # The default correct variable values
@@ -332,81 +334,7 @@ else
  echo "PASS"
 fi
 
-# Test 29	ProductID_type	"valid values:
-#						  UPC(DEFAULT)
-#						  GRID"
-#	echo "Test 29 ... \c"
-
-#	test_result="PASS"
-# valid value (GRID)
-#	`./UITS_Tool create \
-#	--verbose \
-#	--audio $default_audio \
-#	--xsd $default_xsd \
-#	--uits $default_uits \
-#	--embed \
-#	--algorithm $default_algorithm \
-#	--priv  $default_priv \
-#	--pub $default_pub \
-#	--pubID $default_pubID \
-#	--nonce $default_nonce \
-#	--Distributor $default_Distributor \
-#	--ProductID $default_ProductID \
-#	--ProductID_type $default_ProductID_type \
-#	--ProductID_completed $default_ProductID_completed_type \
-#	--AssetID $default_AssetID \
-#	--AssetID_type $default_AssetID_type \
-#	--TID $default_TID \
-#	--TID_version $default_TID_version \
-#	--UID $default_UID \
-#	--UID_version $default_UID_version \
-#	--URL $default_URL\
-#	--PA $default_PA \
-#	--Copyright $default_Copyright \
-#	--Extra $default_Extra \
-#	--Extra_type $default_Extra_type \
-#	--Time $default_Time`
-#	exit_status=$?
-#	if [ $exit_status != 0 ]; then
-#	 test_result="FAIL"
-#	fi
-
-# invalid value
-#	`./UITS_Tool create \
-#	--silent \
-#	--audio $default_audio \
-#	--xsd $default_xsd \
-#	--uits $default_uits \
-#	--embed \
-#	--algorithm $default_algorithm \
-#	--priv  $default_priv \
-#	--pub $default_pub \
-#	--pubID $default_pubID \
-#	--nonce $default_nonce \
-#	--Distributor $default_Distributor \
-#	--ProductID $default_ProductID \
-#	--ProductID_type blah \
-#	--ProductID_completed $default_ProductID_completed_type \
-#	--AssetID $default_AssetID \
-#	--AssetID_type $default_AssetID_type \
-#	--TID $default_TID \
-#	--TID_version $default_TID_version \
-#	--UID $default_UID \
-#	--UID_version $default_UID_version \
-#	--URL $default_URL\
-#	--PA $default_PA \
-#	--Copyright $default_Copyright \
-#	--Extra $default_Extra \
-#	--Extra_type $default_Extra_type \
-#	--Time $default_Time`
-#	exit_status=$?
-#	if [ $exit_status != 144 ]; then	#should return error code 144
-#	 test_result="FAIL"
-#	fi
-
-#	echo $test_result
-
-# Test 30	AssetID	dashes not included
+# Test 29	AssetID	dashes not included
 echo "Test 30 ... \c"
 `./UITS_Tool create \
 --silent \
@@ -424,7 +352,6 @@ echo "Test 30 ... \c"
 --ProductID_type $default_ProductID_type \
 --ProductID_completed $default_ProductID_completed_type \
 --AssetID USUV70-603512 \
---AssetID_type $default_AssetID_type \
 --TID $default_TID \
 --TID_version $default_TID_version \
 --UID $default_UID \
@@ -441,26 +368,3 @@ if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
 else
  echo "PASS"
 fi
-
-# Test 31	AssetID_type	valid value: ISRC
-# Test 32	TransactionID_type	valid value: 1
-# Test 33	UserID_type	valid value: 1
-# Test 34	URL_type	"valid values:
-#						   WPUB(DEFAULT)
-#						   WCOM
-#						   WCOP
-#						   WOAF
-#						   WOAR
-#						   WOAS
-#						   WORS
-#						   WPAY"
-# Test 35	PA	"valid values:
-#						   unspecified (DEFAULT)
-#						   explicit
-#						   edited"
-# Test 36	Copyright_value	"valid values:
-#						   unspecified
-#						   allrightsreserved (DEFAULT)
-#						   prerelease
-#						   other"
-		
