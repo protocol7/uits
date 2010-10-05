@@ -22,7 +22,6 @@ The UITS test suite will run the following list of tests in the following flavor
 1. The OSX xcode created executable.
 2. The OSX command line (Makefile) created executable.
 3. The Windows executable under MINGW.
-4. The Windows executable under DOS.	
 
 To test the tool, copy the version to be tested into this directory and run the testUITS script.
 
@@ -96,20 +95,20 @@ They do not test audio playback.
 5	Base64 encode media hash
 	
    Verify	
-6	Embedded payload with hash verification, RSA signature, SILENT MODE"	options:  --audio  --pub --xsd --silent
-7	Embedded payload with hash verification, DSA signature"	options:  --audio  --pub --xsd --algorithm DSA2048
-8	Embedded payload, no hash verification"	options: --audio --nohash --pub --xsd
-9	Embedded payload, hash verification against hash file"	options: --audio --hashfile --pub --xsd
-10	Embedded payload, hash verification against hash value"	options: --uits --hash --pub --xsd
-11	Standalone payload, no hash verification"	options: --uits --nohash --pub --xsd
-12	Standalone payload, hash verification against audio file"	options: --uits --audio --pub --xsd
-13	Standalone payload, hash verification against hash file"	options: --uits --hashfile --pub --xsd
-14	Standalone payload, hash verification against hash value"	options: --uits --hash --pub --xsd
+6	Embedded payload with hash verification, RSA signature    options:  --audio  --pub --xsd --silent
+7	Embedded payload with hash verification, DSA signature    options:  --audio  --pub --xsd --algorithm DSA2048
+8	Embedded payload, no hash verification                    options: --audio --nohash --pub --xsd
+9	Embedded payload, hash verification against hash file     options: --audio --hashfile --pub --xsd
+10	Embedded payload, hash verification against hash value    options: --uits --hash --pub --xsd
+11	Standalone payload, no hash verification                  options: --uits --nohash --pub --xsd
+12	Standalone payload, hash verification against audio file  options: --uits --audio --pub --xsd
+13	Standalone payload, hash verification against hash file   options: --uits --hashfile --pub --xsd
+14	Standalone payload, hash verification against hash value  options: --uits --hash --pub --xsd
 
     Extract	
-15	Extract, SILENT MODE"	options: --audio --uits --silent
-16	Extract, verify RSA algorithm"	options: --audio --uits --pub --xsd
-17	Extract, verify DSA algorithm"	options: --audio --uits --pub --xsd --algorithm DSA2048
+15	Extract                        options: --audio --uits --silent
+16	Extract, verify RSA algorithm  options: --audio --uits --pub --xsd
+17	Extract, verify DSA algorithm  options: --audio --uits --pub --xsd --algorithm DSA2048
 
 
 -------------------

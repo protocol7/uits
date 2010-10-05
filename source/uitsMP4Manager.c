@@ -114,7 +114,6 @@ char *mp4GetMediaHash (char *audioFileName)
  *
  * Function: mp4EmbedPayload
  * Purpose:	 Embed the UITS payload into an MP4 file
- *			 The UITS payload is added in a top-level 'skip' atom.
  *			 After the UITS payload is embedded, the atom hierarchy will look something like this:
  *				'ftyp'
  *				'moov'
