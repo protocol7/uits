@@ -398,6 +398,9 @@ int mp3CheckFileVersion (char *audioFileName)
 int mp3HandleID3Tag (FILE *audioInFP, FILE *audioOutFP)
 
 {
+	int extendedHeaderSize = 0;
+	char *extendedHeader;
+
 	
 	err = fread(header, 1L, MP3_HEADER_SIZE, audioInFP);
 	uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, MP3_HEADER_SIZE, ERR_FILE,
@@ -420,6 +423,38 @@ int mp3HandleID3Tag (FILE *audioInFP, FILE *audioOutFP)
 		err = fwrite(header, 1L, MP3_HEADER_SIZE, audioOutFP);
 		uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, MP3_HEADER_SIZE, ERR_FILE, 
 						"Couldn't write MP3 ID3 header to audio output file\n");
+	}
+	
+	/* handle possible Extended Header here */
+
+	/* the header flag byte is the 6th byte */
+	//printf("CHECKING for extended header : %x\n", header[5]);
+	
+	if (header[5] & EXTENDED_HEADER_FLAG) {	
+		vprintf("WARNING: MP3 file contains extended header\n");
+		
+		err = fread(&extendedHeaderSize, 1L, 4, audioInFP);
+		uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, 4, ERR_FILE,
+						   "Couldn't read MP3 ID3 extended header from audio input file\n");
+	
+		vprintf("Extended header size: %d\n", extendedHeaderSize);
+		extendedHeader = calloc(extendedHeaderSize, 1);
+		
+		err = fread(extendedHeader, 1L, extendedHeaderSize, audioInFP);
+		uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, extendedHeaderSize, ERR_FILE,
+						   "Couldn't read MP3 ID3 extended header from audio input file\n");
+		if (audioOutFP) {
+			/* write the extended header size */
+			err = fwrite(extendedHeaderSize, 1L, 4, audioOutFP);
+			uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, 4, ERR_FILE, 
+							   "Couldn't write MP3 ID3 extended header size\n");
+			/* write the extended header data */
+			err = fwrite(extendedHeader, 1L, extendedHeaderSize, audioOutFP);
+			uitsHandleErrorINT(mp3ModuleName, "mp3HandleID3Tag", err, extendedHeaderSize, ERR_FILE, 
+							   "Couldn't write MP3 ID3 extended header\n");
+		}
+
+			
 	}
 	
 	return(OK);
@@ -737,6 +772,11 @@ MP3_ID3_HEADER *mp3ReadID3Header(FILE *fpin)
 		mp3Header->size = tagsize;
 		// dprintf("Greater Tag size: %ld\n", tagsize);
 		fflush(stdout);
+		
+		/* print a warning for the extended header, if it is there */
+		if (mp3Header->flags & EXTENDED_HEADER_FLAG) {
+			vprintf("WARNING: MP3 file contains an extended header\n");
+		}
 		
 		// return file pointer to original location
 		fseeko(fpin, saveSeek, SEEK_SET);

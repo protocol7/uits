@@ -42,11 +42,16 @@
 #define ID3V1TAG		6L
 
 /*
+ * Extended Header Flag
+ */
+
+#define EXTENDED_HEADER_FLAG 0x40	// bit 6 set indicates extended header
+
+/*
  * IO Buffer for reading/writing MP3 files
  */
 
 #define MP3_HEADER_SIZE 10
-
 
 /* 
  * Structures
@@ -58,6 +63,7 @@ typedef struct {
 	char			flags;
 	unsigned long	size;
 } MP3_ID3_HEADER;
+
 
 typedef struct {
 	int mpeg1Flag;		// 1= "MPEG1"	0= "NOMP1"
