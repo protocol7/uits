@@ -1000,9 +1000,10 @@ int mp3GetID3V1TagCount (FILE *fpin)
 	while (!done) {	
 		fseeko(fpin, -id3v1TagSize, SEEK_CUR);		// seek back 128 bytes 
 		fread(audiobuf, 1L, id3v1TagSize, fpin);
-	
+		
+		fseeko(fpin, -id3v1TagSize, SEEK_CUR);		// seek back 128 bytes 
+
 		if (audiobuf[0] == 'T' && audiobuf[1] == 'A' && audiobuf[2] == 'G') {
-			// vprintf("MP3: ID3 v1 tag found at end of file\n");
 			id3v1TagCount++;
 		} else {
 			done = TRUE;
@@ -1014,6 +1015,9 @@ int mp3GetID3V1TagCount (FILE *fpin)
 	free(audiobuf);
 	fseeko(fpin, saveSeek, SEEK_SET);	// back up to where we were
 	
+	if (id3v1TagCount > 1) {
+		vprintf("WARNING: found more than 1 ID3V1 tags at end of file\n");
+	}
 	return (id3v1TagCount);
 }
 	
