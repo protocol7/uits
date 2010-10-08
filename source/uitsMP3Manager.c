@@ -115,6 +115,7 @@ char *mp3GetMediaHash (char *audioFileName)
 	UITS_digest *mediaHash;
 	char *mediaHashString;
 	int foundPadBytes;
+	int id3v1TagCount;
 	
 
 	audioFP = fopen(audioFileName, "rb");
@@ -159,9 +160,11 @@ char *mp3GetMediaHash (char *audioFileName)
 	fseeko(audioFP, audioFrameStart, SEEK_SET);
 	
 	/* skip the 128 byte ID3v1 tag at the end of the file, if it's there */
-	if (mp3HasID3v1Tag(audioFP)) {
-		audioFrameEnd -= id3v1TagSize;
-	}
+	/* note that some files have been found to have more than 1 ID3V1 tag, so don't include any of them */
+	id3v1TagCount = mp3GetID3V1TagCount(audioFP);
+	
+	audioFrameEnd -= (id3v1TagCount * id3v1TagSize);
+	
 	
 	audioFrameLength = audioFrameEnd - audioFrameStart;
 	
@@ -970,39 +973,48 @@ int mp3IsVBRFrame (FILE *fpin, MP3_AUDIO_FRAME_HEADER *frameHeader)
 
 
 /*
- * Function: mp3HasID3v1Tag
- * Purpose:  Read the last 128 bytes of the file and determine whether or not it's an MP3 ID3v1 tag
-  *           The file pointer is left at its original position after writing
+ * Function: mp3GetID3V1TagCount
+ * Purpose:  Read chunks of 128 bytes at the end of the file and determine whether there are any MP3 ID3v1 tags
+*           The file pointer is left at its original position after writing
  * Passed:   File pointer
  * Returns:  TRUE or FALSE
  *
  */
 
 
-int mp3HasID3v1Tag (FILE *fpin)
+int mp3GetID3V1TagCount (FILE *fpin)
 {
+
+	int id3v1TagCount = 0;
 	int saveSeek;	// always leave the file pointer where it was when the function was called
 	char *audiobuf;
-	int returnValue = FALSE;
+	int done = FALSE;
 	
 	saveSeek = ftello(fpin);	// save the starting position
 	
-	fseeko(fpin, -id3v1TagSize, SEEK_END);	// seek back 128 bytes from end of file
+	fseeko(fpin, 0, SEEK_END);	// seek to end of file
 	
 	audiobuf = calloc(id3v1TagSize, 1);
+
+	// keep looking for id3v1 tags until there are no more
+	while (!done) {	
+		fseeko(fpin, -id3v1TagSize, SEEK_CUR);		// seek back 128 bytes 
+		fread(audiobuf, 1L, id3v1TagSize, fpin);
 	
-	fread(audiobuf, 1L, id3v1TagSize, fpin);
-	
-	if (audiobuf[0] == 'T' && audiobuf[1] == 'A' && audiobuf[2] == 'G') {
-		// vprintf("MP3: ID3 v1 tag found at end of file\n");
-		returnValue = TRUE;
+		if (audiobuf[0] == 'T' && audiobuf[1] == 'A' && audiobuf[2] == 'G') {
+			// vprintf("MP3: ID3 v1 tag found at end of file\n");
+			id3v1TagCount++;
+		} else {
+			done = TRUE;
+		}
+
 	}
 	
 	/* cleanup */
 	free(audiobuf);
 	fseeko(fpin, saveSeek, SEEK_SET);	// back up to where we were
 	
-	return (returnValue);
+	return (id3v1TagCount);
 }
 	
 

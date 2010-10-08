@@ -797,7 +797,7 @@ int uitsGetOptGenHash (int argc, const char * argv[])
 				uitsSetIOFileName (OUTPUT, option_value);
 				break;
 
-			case 'c':		// set base 4 encode media hash flag
+			case 'c':		// set base 64 encode media hash flag
 				uitsSetCommandLineParam ("b64_media_hash", TRUE);
 				dprintf ("Media hash will be base 64 encoded\n");
 				break;

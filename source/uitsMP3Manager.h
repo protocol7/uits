@@ -120,7 +120,7 @@ char *mp3GetMediaHash		(char *audioFileName);
 int mp3CheckFileVersion		(char *audioFileName);
 
 int mp3IdentifyFrame		(FILE *fpin);
-int mp3HasID3v1Tag			(FILE *fpin);
+int mp3GetID3V1TagCount		(FILE *fpin);
 int mp3IsVBRFrame			(FILE *fpin, 
 							 MP3_AUDIO_FRAME_HEADER *frameHeader);
 
