@@ -5,8 +5,8 @@
  *  Created by Chris Angelli on 4/2/10.
  *  Copyright 2010 Universal Music Group. All rights reserved.
  *
- *  $Date$
- *  $Revision$
+ *  $Date: 2010-10-08 14:28:52 -0700 (Fri, 08 Oct 2010) $
+ *  $Revision: 79 $
  *
  */
 

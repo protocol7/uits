@@ -165,6 +165,11 @@
 			831E7B2D127609EF0095EB66 /* PBXTextBookmark */ = 831E7B2D127609EF0095EB66 /* PBXTextBookmark */;
 			831E7B2E127609EF0095EB66 /* PBXTextBookmark */ = 831E7B2E127609EF0095EB66 /* PBXTextBookmark */;
 			831E7B2F127609EF0095EB66 /* PBXTextBookmark */ = 831E7B2F127609EF0095EB66 /* PBXTextBookmark */;
+			831E7B3C12760A660095EB66 /* PBXTextBookmark */ = 831E7B3C12760A660095EB66 /* PBXTextBookmark */;
+			831E7B3D12760A660095EB66 /* PBXTextBookmark */ = 831E7B3D12760A660095EB66 /* PBXTextBookmark */;
+			831E7B3F12760A660095EB66 /* PBXTextBookmark */ = 831E7B3F12760A660095EB66 /* PBXTextBookmark */;
+			831E7B4012760A660095EB66 /* PBXTextBookmark */ = 831E7B4012760A660095EB66 /* PBXTextBookmark */;
+			831E7B4112760A660095EB66 /* PBXTextBookmark */ = 831E7B4112760A660095EB66 /* PBXTextBookmark */;
 			8336B1C711D3F132006BA2BE = 8336B1C711D3F132006BA2BE /* PBXTextBookmark */;
 			8336B1C811D3F132006BA2BE = 8336B1C811D3F132006BA2BE /* PBXTextBookmark */;
 			8336B1C911D3F132006BA2BE = 8336B1C911D3F132006BA2BE /* PBXTextBookmark */;
@@ -261,7 +266,7 @@
 		fRef = 83EB938F115AD18C005F460F /* main.c */;
 		name = "main.c: 915";
 		rLen = 29;
-		rLoc = 35875;
+		rLoc = 35873;
 		rType = 0;
 		vrLen = 900;
 		vrLoc = 35856;
@@ -313,7 +318,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 70";
 		rLen = 0;
-		rLoc = 2200;
+		rLoc = 2252;
 		rType = 0;
 		vrLen = 904;
 		vrLoc = 1301;
@@ -323,7 +328,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 44";
 		rLen = 0;
-		rLoc = 1342;
+		rLoc = 1394;
 		rType = 0;
 		vrLen = 1449;
 		vrLoc = 687;
@@ -333,7 +338,7 @@
 		fRef = 83EB938F115AD18C005F460F /* main.c */;
 		name = "main.c: 345";
 		rLen = 5;
-		rLoc = 17761;
+		rLoc = 17759;
 		rType = 0;
 		vrLen = 2068;
 		vrLoc = 17172;
@@ -353,7 +358,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 70";
 		rLen = 0;
-		rLoc = 2200;
+		rLoc = 2252;
 		rType = 0;
 		vrLen = 904;
 		vrLoc = 1301;
@@ -373,9 +378,59 @@
 		fRef = 83EB938F115AD18C005F460F /* main.c */;
 		name = "main.c: 34";
 		rLen = 0;
-		rLoc = 622;
+		rLoc = 620;
 		rType = 0;
 		vrLen = 1053;
+		vrLoc = 0;
+	};
+	831E7B3C12760A660095EB66 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 8385F4FE116684D300277C6E /* uitsMP4Manager.h */;
+		name = "uitsMP4Manager.h: 76";
+		rLen = 0;
+		rLoc = 1514;
+		rType = 0;
+		vrLen = 630;
+		vrLoc = 681;
+	};
+	831E7B3D12760A660095EB66 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 83EB938F115AD18C005F460F /* main.c */;
+		name = "main.c: 34";
+		rLen = 0;
+		rLoc = 620;
+		rType = 0;
+		vrLen = 1051;
+		vrLoc = 0;
+	};
+	831E7B3F12760A660095EB66 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 83EB9394115AD18C005F460F /* uitsMP3Manager.c */;
+		name = "uitsMP3Manager.c: 8";
+		rLen = 78;
+		rLoc = 148;
+		rType = 0;
+		vrLen = 827;
+		vrLoc = 0;
+	};
+	831E7B4012760A660095EB66 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
+		name = "uitsMP4Manager.c: 8";
+		rLen = 0;
+		rLoc = 148;
+		rType = 0;
+		vrLen = 1105;
+		vrLoc = 0;
+	};
+	831E7B4112760A660095EB66 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
+		name = "uitsMP4Manager.c: 10";
+		rLen = 0;
+		rLoc = 225;
+		rType = 0;
+		vrLen = 1157;
 		vrLoc = 0;
 	};
 	831F3CC61190BB26000A685A /* uitsAIFFManager.h */ = {
@@ -640,7 +695,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 74";
 		rLen = 0;
-		rLoc = 2200;
+		rLoc = 2252;
 		rType = 0;
 		vrLen = 748;
 		vrLoc = 1493;
@@ -660,7 +715,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 45";
 		rLen = 0;
-		rLoc = 1070;
+		rLoc = 1122;
 		rType = 0;
 		vrLen = 1432;
 		vrLoc = 453;
@@ -670,7 +725,7 @@
 		fRef = 83EB938F115AD18C005F460F /* main.c */;
 		name = "main.c: 345";
 		rLen = 5;
-		rLoc = 17761;
+		rLoc = 17759;
 		rType = 0;
 		vrLen = 2068;
 		vrLoc = 17172;
@@ -690,7 +745,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 75";
 		rLen = 0;
-		rLoc = 2200;
+		rLoc = 2252;
 		rType = 0;
 		vrLen = 860;
 		vrLoc = 1310;
@@ -700,7 +755,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 47";
 		rLen = 0;
-		rLoc = 1176;
+		rLoc = 1228;
 		rType = 0;
 		vrLen = 1541;
 		vrLoc = 453;
@@ -710,7 +765,7 @@
 		fRef = 83EB938F115AD18C005F460F /* main.c */;
 		name = "main.c: 345";
 		rLen = 5;
-		rLoc = 17761;
+		rLoc = 17759;
 		rType = 0;
 		vrLen = 2068;
 		vrLoc = 17172;
@@ -730,7 +785,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 76";
 		rLen = 0;
-		rLoc = 2200;
+		rLoc = 2252;
 		rType = 0;
 		vrLen = 919;
 		vrLoc = 1267;
@@ -740,7 +795,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 52";
 		rLen = 0;
-		rLoc = 1440;
+		rLoc = 1492;
 		rType = 0;
 		vrLen = 1589;
 		vrLoc = 453;
@@ -750,7 +805,7 @@
 		fRef = 83EB938F115AD18C005F460F /* main.c */;
 		name = "main.c: 345";
 		rLen = 5;
-		rLoc = 17761;
+		rLoc = 17759;
 		rType = 0;
 		vrLen = 2068;
 		vrLoc = 17172;
@@ -770,7 +825,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 77";
 		rLen = 0;
-		rLoc = 2200;
+		rLoc = 2252;
 		rType = 0;
 		vrLen = 938;
 		vrLoc = 1267;
@@ -780,7 +835,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 49";
 		rLen = 0;
-		rLoc = 1342;
+		rLoc = 1394;
 		rType = 0;
 		vrLen = 1639;
 		vrLoc = 453;
@@ -790,7 +845,7 @@
 		fRef = 83EB938F115AD18C005F460F /* main.c */;
 		name = "main.c: 345";
 		rLen = 5;
-		rLoc = 17761;
+		rLoc = 17759;
 		rType = 0;
 		vrLen = 2068;
 		vrLoc = 17172;
@@ -818,7 +873,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 362";
 		rLen = 0;
-		rLoc = 11504;
+		rLoc = 11556;
 		rType = 0;
 		vrLen = 429;
 		vrLoc = 11290;
@@ -1057,9 +1112,9 @@
 	};
 	8385F557116688CE00277C6E /* uitsMP4Manager.c */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {922, 9035}}";
-			sepNavSelRange = "{1342, 0}";
-			sepNavVisRange = "{18874, 1256}";
+			sepNavIntBoundsRect = "{{0, 0}, {860, 9074}}";
+			sepNavSelRange = "{225, 0}";
+			sepNavVisRange = "{0, 1157}";
 			sepNavWindowFrame = "{{347, 202}, {919, 644}}";
 		};
 	};
@@ -1535,8 +1590,8 @@
 	83EB938F115AD18C005F460F /* main.c */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {1021, 12961}}";
-			sepNavSelRange = "{622, 0}";
-			sepNavVisRange = "{0, 1053}";
+			sepNavSelRange = "{620, 0}";
+			sepNavVisRange = "{0, 1051}";
 			sepNavWindowFrame = "{{146, -158}, {1080, 710}}";
 		};
 	};
@@ -1566,9 +1621,9 @@
 	};
 	83EB9394115AD18C005F460F /* uitsMP3Manager.c */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {955, 14053}}";
-			sepNavSelRange = "{22894, 46}";
-			sepNavVisRange = "{0, 1090}";
+			sepNavIntBoundsRect = "{{0, 0}, {901, 14079}}";
+			sepNavSelRange = "{148, 78}";
+			sepNavVisRange = "{0, 827}";
 			sepNavWindowFrame = "{{426, 38}, {1014, 813}}";
 		};
 	};
@@ -1787,7 +1842,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 165";
 		rLen = 42;
-		rLoc = 7383;
+		rLoc = 7435;
 		rType = 0;
 		vrLen = 1447;
 		vrLoc = 3980;
@@ -1827,7 +1882,7 @@
 		fRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */;
 		name = "uitsMP4Manager.c: 74";
 		rLen = 0;
-		rLoc = 2200;
+		rLoc = 2252;
 		rType = 0;
 		vrLen = 815;
 		vrLoc = 1492;
@@ -1847,7 +1902,7 @@
 		fRef = 83EB938F115AD18C005F460F /* main.c */;
 		name = "main.c: 345";
 		rLen = 5;
-		rLoc = 17761;
+		rLoc = 17759;
 		rType = 0;
 		vrLen = 2111;
 		vrLoc = 17172;

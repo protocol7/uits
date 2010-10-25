@@ -31,7 +31,7 @@ int main (int argc, const char * argv[]) {
 	
 	int uitsAction = 0;				// UITS action to perform (CREATE, VERIFY, EXTRACT, etc)
 
-//	uitsInit();						// standard initializations 								
+	uitsInit();						// standard initializations 								
 	
 	uitsAction = uitsGetCommand (argc, argv);
 	uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
