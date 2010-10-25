@@ -35,6 +35,13 @@ typedef struct {
 	MP4_ATOM_HEADER *atomHeader;
 } MP4_NESTED_ATOM;
 
+#define MAX_MP4_SUBTYPES 20
+
+typedef struct {
+	char *mp4Subtype;
+	char *mp4subtypeDescription;
+} MP4_SUBTYPES;
+
 /* 
  * PUBLIC Functions 
  */
@@ -47,6 +54,7 @@ int mp4EmbedPayload		    (char *audioFileName,
 							 int  numPadBytes);
 
 char *mp4ExtractPayload		(char *audioFileName); 
+char *mp4ExtractPayload_UITS1 (char *audioFileName);
 
 char *mp4GetMediaHash		(char *audioFileName);
 

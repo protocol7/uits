@@ -15,13 +15,16 @@
 
 char *mp4ModuleName = "uitsMP4Manager.c";
 
-
 /*
  *
  * Function: mp4IsValidFile
  * Purpose:	 Determine if an audio file is an MP4 file
  *           Valid MP4 files start with 4-bytes containing the file size
- *           followed by 4-bytes containing 'ftyp'.
+ *           followed by 4-bytes containing 'ftyp', followed by 4-bytes
+ *			 containing the compatable brand designation. All compatable
+ *			 brands are supported, however the tool will display an informational
+ *			 message for file types that are explicitly recognized.
+ *			 
  *
  * Returns:   TRUE if MP4, FALSE otherwise
  */
@@ -30,7 +33,20 @@ int mp4IsValidFile (char *audioFileName)
 {
 	FILE *audioFP;
 	MP4_ATOM_HEADER *atomHeader = calloc(sizeof(MP4_ATOM_HEADER), 1);
-		
+	char *mp4Type = calloc(1, 5);
+	MP4_SUBTYPES *subType;
+	// Subtypes that are explicitly supported (informational message only)
+	MP4_SUBTYPES recognizedSubTypes [MAX_MP4_SUBTYPES] = {
+		{"qt  ",           "Apple QuickTime (.MOV/QT) File"},	
+		{"M4A ",           "Apple iTunes AAC-LC (.M4A) Audio File"},	
+		{"M4B ",           "Apple iTunes AAC-LC (.M4B) Audio Book File"},	
+		{"M4V ",           "Apple iTunes Video (.M4V) Video File"},	
+		{"M4VP",           "Apple iPhone (.M4V) File"},	
+		{"mp42",           "MP4 v2 [ISO 14496-14]"},	
+		/* end of list */
+		{NULL,			NULL}
+	};
+
 	audioFP = fopen(audioFileName, "rb");
 	uitsHandleErrorPTR(mp4ModuleName, "mp4IsValidFile", audioFP, ERR_FILE, "Couldn't open audio file for reading\n");
 	
@@ -39,10 +55,30 @@ int mp4IsValidFile (char *audioFileName)
 	
 	atomHeader = mp4ReadAtomHeader(audioFP);
 
+	/* seek past size and 'ftype' */
+	fseeko(audioFP, MP4_HEADER_SIZE, SEEK_SET); 
+	
+	/* read the sub-type */
+	err = fread(mp4Type, 1L, 4, audioFP);
+	uitsHandleErrorINT(mp4ModuleName, "mp4IsValidFile", err, 4, ERR_MP4, "Couldn't read MP4 file sub-type\n");
+
 	fclose (audioFP);	
 
  	if (strncmp(atomHeader->type, "ftyp", 4) == 0) {
-		vprintf("Audio file is MP4\n");
+		
+		/* determine the sub-type */
+		subType = recognizedSubTypes;
+		
+		/* compare subtype with recognized subtypes */
+		while (subType->mp4Subtype) {
+			if (strcmp(subType->mp4Subtype, mp4Type) == 0) {
+				vprintf("%s\n", subType->mp4subtypeDescription);
+				return(TRUE);
+			}
+			subType++;
+		}
+		
+		vprintf("Audio file is MP4, unknown subtype ");
 		return (TRUE);
 	} else {
 		return (FALSE);
@@ -114,16 +150,81 @@ char *mp4GetMediaHash (char *audioFileName)
  *
  * Function: mp4EmbedPayload
  * Purpose:	 Embed the UITS payload into an MP4 file
+ *			 The UITS payload is embedded by adding it to the end of the file in it's own UITS atom (box).
+ *
+ *
+ * Returns:   OK or ERROR
+ */
+
+int mp4EmbedPayload  (char *audioFileName, 
+					  char *audioFileNameOut, 
+					  char *uitsPayloadXML,
+					  int  numPadBytes) 
+{
+	FILE			*audioInFP, *audioOutFP;
+	MP4_ATOM_HEADER *atomHeader = NULL;
+	unsigned long	audioInFileSize;
+	unsigned long   payloadXMLSize;
+	unsigned long	bytesLeftInFile, bytesCopied;
+	
+	MP4_ATOM_HEADER *moovAtomHeader = NULL;
+	MP4_ATOM_HEADER *udtaAtomHeader = NULL;
+	unsigned long	endSeek;
+	unsigned long	atomSize;
+	
+	
+	vprintf("About to embed payload for %s into %s\n", audioFileName, audioFileNameOut);
+	
+	if (numPadBytes) {
+		vprintf("WARNING: Tried to add pad bytes to MP4 file. This is not supported.\n");
+	}
+	
+	payloadXMLSize = strlen(uitsPayloadXML);
+	
+	/* open the audio input and output files */
+	audioInFP = fopen(audioFileName, "rb");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
+	
+	audioOutFP = fopen(audioFileNameOut, "w+b");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioOutFP, ERR_FILE, "Couldn't open audio file for writing\n");
+	
+	/* calculate how long the input audio file is by seeking to EOF and saving size  */
+	audioInFileSize = uitsGetFileSize(audioInFP);	
+	/* now do the data copy and modification */
+	rewind(audioInFP);
+	
+	/* copy input file to output file */
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, audioInFileSize);
+	
+	/* write the UITS atom */
+	atomSize = payloadXMLSize + 8;
+	lswap(&atomSize);
+	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
+	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
+	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
+	
+	/* cleanup */
+	fclose(audioInFP);
+	fclose(audioOutFP);
+	
+	return(OK);
+}
+
+/*
+ *
+ * NOTE: This is the UITS_Tool 1.0 implementation and is left here for reference purposes only
+ *
+ * Function: mp4EmbedPayload
+ * Purpose:	 Embed the UITS payload into an MP4 file
  *			 After the UITS payload is embedded, the atom hierarchy will look something like this:
  *				'ftyp'
  *				'moov'
  *					'udta'
  *						'UITS'
  *
- *
  * Returns:   OK or ERROR
  */
-
+#ifdef UITS_TOOL_1
 int mp4EmbedPayload  (char *audioFileName, 
 					  char *audioFileNameOut, 
 					  char *uitsPayloadXML,
@@ -227,11 +328,16 @@ int mp4EmbedPayload  (char *audioFileName,
 	
 	return(OK);
 }
+#endif
+
 
 /*
  *
  * Function: mp4ExtractPayload
- * Purpose:	 Extract the UITS payload from an MP3 file
+ * Purpose:	 Extract the UITS payload from an MP4 file
+ *			This supports both the UITS_Tool 1.x method and the UITS_Tool 2.x method
+ *			The 2.x method appends a UITS atom to the end of the file
+ *			The 1.x method uses the following algorithm:
  *			 The payload is a leaf atom of type 'UITS' inside a 'udta' container atom inside a 'moov' atom
  *           Typically, the top level atoms look something like this:
  *					Atom ftyp @ 0 of size: 32, ends @ 32
@@ -244,6 +350,56 @@ int mp4EmbedPayload  (char *audioFileName,
  */
 
 char *mp4ExtractPayload (char *audioFileName) 
+
+{
+	FILE			*audioFP;
+	unsigned long	fileLength;
+	char			*payloadXML;
+	unsigned long	atomSize;
+	MP4_ATOM_HEADER *atomHeader;
+
+	/* open the audio input file */
+	audioFP = fopen(audioFileName, "rb");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", audioFP, ERR_FILE, "Couldn't open audio file for reading\n");
+		
+	/* get file size */
+	fileLength = uitsGetFileSize(audioFP);
+	
+	atomHeader = mp4FindAtomHeader(audioFP, "UITS", fileLength);
+	
+	if (atomHeader) {	// found UITS root atom, extract data and return
+		/* move fp to start of UITS atom */
+		fseeko(audioFP, atomHeader->saveSeek, SEEK_SET);
+	
+		/*skip past size and type */
+		fseeko(audioFP, 8L, SEEK_CUR);
+		
+		/* this is a cheat. calloc 8 bytes more than we're going to read so that the payload XML */
+		/* will be null-terminated when it's read from the file */
+		payloadXML = calloc(atomHeader->size, 1);	
+		atomSize = atomHeader->size - 8;
+	
+		err = fread(payloadXML, 1L, atomSize, audioFP);
+		uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, atomSize, ERR_MP4, "Couldn't read UITS atom data\n");
+	
+		return (payloadXML);
+	} else {	// See if there's a UITS 1.0 payload
+		payloadXML = mp4ExtractPayload_UITS1(audioFileName);
+		
+		if (payloadXML) {
+			fprintf(stderr, "WARNING: Found UITS payload in moov atom. This method of UITS insertion is deprecated\n");
+			return(payloadXML);
+		} else {
+			uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", NULL, ERR_MP4, "Couldn't find UITS payload in file\n");
+		}
+
+	}
+	
+	
+	
+}
+
+char *mp4ExtractPayload_UITS1 (char *audioFileName) 
 
 {
 	MP4_NESTED_ATOM nestedAtoms [] = {
