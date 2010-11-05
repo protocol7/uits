@@ -13,6 +13,7 @@
 		834F80A5119C753F009B4EA0 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 834F80A4119C753F009B4EA0 /* libxml2.dylib */; };
 		834F813E11A1B0BD009B4EA0 /* uitsWAVManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 834F813D11A1B0BC009B4EA0 /* uitsWAVManager.c */; };
 		8385F558116688CE00277C6E /* uitsMP4Manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */; };
+		83A7851212849F4500F48954 /* uitsGenericManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 83A7851012849F4400F48954 /* uitsGenericManager.c */; };
 		83D0F54A115AC6A7003129FF /* libssl_1.0.0-beta4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */; };
 		83D0F54C115AC6AD003129FF /* libcrypto_1.0.0-beta4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */; };
 		83D0F54E115AC6B4003129FF /* libmxml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F54D115AC6B4003129FF /* libmxml.a */; };
@@ -49,6 +50,8 @@
 		834F813D11A1B0BC009B4EA0 /* uitsWAVManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsWAVManager.c; path = ../source/uitsWAVManager.c; sourceTree = SOURCE_ROOT; };
 		8385F4FE116684D300277C6E /* uitsMP4Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsMP4Manager.h; path = ../source/uitsMP4Manager.h; sourceTree = SOURCE_ROOT; };
 		8385F557116688CE00277C6E /* uitsMP4Manager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsMP4Manager.c; path = ../source/uitsMP4Manager.c; sourceTree = SOURCE_ROOT; };
+		83A7851012849F4400F48954 /* uitsGenericManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsGenericManager.c; path = ../source/uitsGenericManager.c; sourceTree = SOURCE_ROOT; };
+		83A7851112849F4500F48954 /* uitsGenericManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsGenericManager.h; path = ../source/uitsGenericManager.h; sourceTree = SOURCE_ROOT; };
 		83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libssl_1.0.0-beta4.a"; path = "openssl/lib/libssl_1.0.0-beta4.a"; sourceTree = SOURCE_ROOT; };
 		83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcrypto_1.0.0-beta4.a"; path = "openssl/lib/libcrypto_1.0.0-beta4.a"; sourceTree = SOURCE_ROOT; };
 		83D0F54D115AC6B4003129FF /* libmxml.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; name = libmxml.a; path = mxml/lib/libmxml.a; sourceTree = SOURCE_ROOT; };
@@ -102,6 +105,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				83A7851012849F4400F48954 /* uitsGenericManager.c */,
+				83A7851112849F4500F48954 /* uitsGenericManager.h */,
 				83EFC6B511B5AAE9000482DB /* uitsError.c */,
 				83EFC6A111B5A631000482DB /* uitsError.h */,
 				83EB938F115AD18C005F460F /* main.c */,
@@ -170,7 +175,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "uits-osx-xcode" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* uits-osx-xcode */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -195,6 +207,7 @@
 				831F3CC81190BB26000A685A /* uitsAIFFManager.c in Sources */,
 				834F813E11A1B0BD009B4EA0 /* uitsWAVManager.c in Sources */,
 				83EFC6B611B5AAE9000482DB /* uitsError.c in Sources */,
+				83A7851212849F4500F48954 /* uitsGenericManager.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

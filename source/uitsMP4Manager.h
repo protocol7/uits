@@ -17,7 +17,9 @@
 #ifndef _uitsmp4manager_h_
 #  define _uitsmp4manager_h_
 
+#include <uuid/uuid.h>	 /*for storing the UITS payload in a uuid atom */
 
+#define UUID_SIZE 16	/* 16 hex bytes in a uuid */
 /*
  * IO Buffer for reading/writing MP4 files
  */

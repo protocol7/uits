@@ -25,11 +25,12 @@
 char *audioModuleName = "uitsAudioFileManager.c";
 
 UITS_AUDIO_CALLBACKS uitsAudioCB [] = {
-	{ MP3,  mp3IsValidFile,  mp3GetMediaHash,  mp3EmbedPayload,  mp3ExtractPayload },
-	{ MP4,  mp4IsValidFile,  mp4GetMediaHash,  mp4EmbedPayload,  mp4ExtractPayload },
-	{ FLAC, flacIsValidFile, flacGetMediaHash, flacEmbedPayload, flacExtractPayload },
-	{ AIFF, aiffIsValidFile, aiffGetMediaHash, aiffEmbedPayload, aiffExtractPayload },
-	{ WAV,  wavIsValidFile,  wavGetMediaHash,  wavEmbedPayload,  wavExtractPayload },
+	{ MP3,		mp3IsValidFile,		mp3GetMediaHash,	 mp3EmbedPayload,		mp3ExtractPayload },
+	{ MP4,		mp4IsValidFile,		mp4GetMediaHash,	 mp4EmbedPayload,		mp4ExtractPayload },
+	{ FLAC,		flacIsValidFile,	flacGetMediaHash,	 flacEmbedPayload,		flacExtractPayload },
+	{ AIFF,		aiffIsValidFile,	aiffGetMediaHash,	 aiffEmbedPayload,		aiffExtractPayload },
+	{ WAV,		wavIsValidFile,		wavGetMediaHash,	 wavEmbedPayload,		wavExtractPayload },
+	{ GENERIC,  genericIsValidFile, genericGetMediaHash, genericEmbedPayload,	genericExtractPayload },
 	{ 0, 0, 0, 0, 0}
 };
 

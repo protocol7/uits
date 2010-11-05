@@ -1,4 +1,4 @@
-#!/bin/sh
+--input#!/bin/sh
 
 # testUITSaudio - Shell script for running the UITS_Tool audio file tests
 #
@@ -72,7 +72,7 @@ UITS_create()
   
 	`./UITS_Tool create \
 	--silent \
-	--audio $create_audio_file \
+	--input $create_audio_file \
 	--xsd $default_xsd \
 	--uits $create_uits_file \
 	$embed \
@@ -123,7 +123,7 @@ UITS_verify()
 
 	`./UITS_Tool verify \
 	--silent \
-	--audio $verify_audio_file \
+	--input $verify_audio_file \
 	--xsd $default_xsd \
 	--algorithm $verify_algorithm \
 	--pub $verify_pub \
@@ -216,7 +216,7 @@ for type in ${file_types[@]}; do
 	audio_file="$output_dir/test2_embed_payload.$type"
 	hash_file="$output_dir/test2_embed_payload.hash"
 
-	`./UITS_Tool hash --audio $audio_file --output $hash_file 1>/dev/null 2>/dev/null`
+	`./UITS_Tool hash --input $audio_file --output $hash_file 1>/dev/null 2>/dev/null`
 	UITS_verify $audio_file "rsa" "--hashfile $hash_file"
 
 	echo "Test 10: Verify $type embedded payload, hash verification against hash value ... \c"
@@ -229,7 +229,7 @@ for type in ${file_types[@]}; do
 	
 	echo "Test 12: Verify $type standalone payload, hash verification against audio file ... \c"
 	audio_file="../test/test_audio.$type"
-	UITS_verify_standalone $uits_file "--audio $audio_file"
+	UITS_verify_standalone $uits_file "--input $audio_file"
 
 	echo "Test 13: Verify $type standalone payload, hash verification against hash file ... \c"
 	UITS_verify_standalone $uits_file "--hashfile $hash_file"
@@ -243,7 +243,7 @@ for type in ${file_types[@]}; do
 	`./UITS_Tool extract \
 	--silent \
 	--uits $uits_file \
-	--audio $audio_file`
+	--input $audio_file`
 	exit_status=$?
 	
 	if [ $exit_status != 0 ]; then
@@ -258,7 +258,7 @@ for type in ${file_types[@]}; do
 	`./UITS_Tool extract \
 	--silent \
 	--uits $uits_file \
-	--audio $audio_file \
+	--input $audio_file \
 	--verify \
 	--pub $default_pub \
 	--xsd $default_xsd `
@@ -278,7 +278,7 @@ for type in ${file_types[@]}; do
 	`./UITS_Tool extract \
 	--silent \
 	--uits $uits_file \
-	--audio $audio_file \
+	--input $audio_file \
 	--verify \
 	--algorithm	 $verify_algorithm\
 	--pub $verify_pub \

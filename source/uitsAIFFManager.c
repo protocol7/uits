@@ -47,7 +47,7 @@ int aiffIsValidFile (char *audioFileName)
 		
 		if ((strncmp(formType, "AIFF", 4) == 0) ||
 			(strncmp(formType, "AIFC", 4) == 0)) {
-				vprintf("Audio file is AIFF\n");
+				vprintf("Input file is audio AIFF\n");
 				isAIFF = TRUE;
 		}
 	} 

@@ -44,7 +44,7 @@ default_Time="2008-08-30T13:15:04Z"
 echo "Test 1 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -81,7 +81,7 @@ fi
 echo "Test 2 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --algorithm $default_algorithm \
@@ -116,7 +116,7 @@ fi
 echo "Test 3 ... \c"
 return_string=`./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --algorithm $default_algorithm \
@@ -186,7 +186,7 @@ fi
 echo "Test 5 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --embed \
 --algorithm $default_algorithm \
@@ -221,7 +221,7 @@ fi
 echo "Test 6 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -256,7 +256,7 @@ fi
 echo "Test 7 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -292,7 +292,7 @@ fi
 echo "Test 8 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -327,7 +327,7 @@ fi
 echo "Test 9 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -362,7 +362,7 @@ fi
 echo "Test 10 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -397,7 +397,7 @@ fi
 echo "Test 11 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -432,7 +432,7 @@ fi
 echo "Test 12 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -467,7 +467,7 @@ fi
 echo "Test 13 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -502,7 +502,7 @@ fi
 echo "Test 14 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -537,7 +537,7 @@ fi
 echo "Test 15 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -572,7 +572,7 @@ fi
 echo "Test 16 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -607,7 +607,7 @@ fi
 echo "Test 17 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -642,7 +642,7 @@ fi
 echo "Test 18 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -677,7 +677,7 @@ fi
 echo "Test 19 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -712,7 +712,7 @@ fi
 echo "Test 20 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -747,7 +747,7 @@ fi
 echo "Test 21 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \

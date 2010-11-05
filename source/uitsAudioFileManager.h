@@ -30,7 +30,8 @@ enum uitsAudioFileTypes {
 	MP4,
 	FLAC,
 	AIFF,
-	WAV
+	WAV,
+	GENERIC
 };
 
 /* The audio callbacks */

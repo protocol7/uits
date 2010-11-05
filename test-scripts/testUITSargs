@@ -44,7 +44,7 @@ default_Time="2008-08-30T13:15:04Z"
 echo "Test 22 ... \c"
 `./UITS_Tool create \
 --silent \
---audio blah \
+--input blah \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -87,7 +87,7 @@ test_result="PASS"
 for test_algorithm in RSA2048 DSA2048; do
 	`./UITS_Tool create \
 	--silent \
-	--audio $default_audio \
+	--input $default_audio \
 	--xsd $default_xsd \
 	--uits $default_uits \
 	--embed \
@@ -122,7 +122,7 @@ done
 test_algorithm="blah"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -158,7 +158,7 @@ echo $test_result
 echo "Test 24 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -194,7 +194,7 @@ fi
 echo "Test 25 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -230,7 +230,7 @@ fi
 echo "Test 26 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd blah \
 --uits $default_uits \
 --embed \
@@ -266,7 +266,7 @@ fi
 echo "Test 27 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -302,7 +302,7 @@ fi
 echo "Test 28 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \
@@ -338,7 +338,7 @@ fi
 echo "Test 30 ... \c"
 `./UITS_Tool create \
 --silent \
---audio $default_audio \
+--input $default_audio \
 --xsd $default_xsd \
 --uits $default_uits \
 --embed \

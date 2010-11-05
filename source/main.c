@@ -120,7 +120,7 @@ void uitsPrintHelp (char *command)
 		printf("\n");
 		printf("Usage: uits_tool hash [options]\n");
 		printf("--verbose   (-v)\n");
-		printf("--audio     (-a)   [file-name] (REQUIRED): Audio file for which to generate media hash\n");
+		printf("--input     (-i)   [file-name] (REQUIRED): Input file for which to generate media hash\n");
 		printf("--b64       (-c)               (OPTIONAL): Base-64 encode the media hash (DEFAULT is hex)\n");
 		printf("--output    (-o)   [file-name] (OPTIONAL): Output file to write the hash to (DEFAULT is stdout)\n");
 
@@ -135,14 +135,14 @@ void uitsPrintHelp (char *command)
 		printf("\n");
 		printf("--verbose   (-v)                            Run in verbose mode (DEFAULT)\n");
 		printf("--silent    (-s)                            Run in silent mode \n");
-		printf("--audio     (-a)    [file-name] (REQUIRED): Name of the audio file for which to create payload\n");
+		printf("--input     (-i)    [file-name] (REQUIRED): Name of the input file for which to create payload\n");
 		printf("--uits      (-u)    [file-name] (REQUIRED): Name of UITS payload file\n");
 		printf("--embed     (-e)                (OPTIONAL): Embed UITS payload into the audio and write to payload file\n");
 		printf("--algorithm (-r)    [name]      (OPTIONAL): Name of the algorithm to use for signing. \n");
 		printf("                                            Possible values: RSA2048 (DEFAULT)\n"); 
 		printf("                                                             DSA2048\n");
 		printf("--pub       (-b)    [file-name] (REQUIRED): Name of the file containing the public key\n");
-		printf("--priv      (-i)    [file-name] (REQUIRED): Name of the file contianing the private key for signing\n");
+		printf("--priv      (-p)    [file-name] (REQUIRED): Name of the file contianing the private key for signing\n");
 		printf("--pubID     (-k)    [value]     (REQUIRED): The SHA1 hash of the public key needed to \n");
 		printf("                                            validate the signature\n");
 //		printf("--metadata_file     [file-name] (OPTIONAL): Name of a file containing the metadtata. This file is an XML\n");
@@ -210,9 +210,9 @@ void uitsPrintHelp (char *command)
 		printf("--verbose    (-v)                           Run in verbose mode (DEFAULT)\n");
 		printf("--silent     (-s)                           Run in silent mode \n");
 		printf("--nohash     (-n)				 (OPTIONAL) Disable media hash validation.\n");
-		printf("--audio      (-a)   [file-name]  (REQUIRED if hash validation enabled and no hash or hashfile specified)\n");
-		printf("                                            Name of the audio file for which to verify payload\n");
-		printf("                                            If the audio file contains a UITS payload, that \n");
+		printf("--input      (-i)   [file-name]  (REQUIRED if hash validation enabled and no hash or hashfile specified)\n");
+		printf("                                            Name of the input file for which to verify payload\n");
+		printf("                                            If the input file contains a UITS payload, that \n");
 		printf("                                            payload will be verified.\n");
 		printf("--uits       (-u)   [file-name]  (REQUIRED if no audio file with embedded UITS payload)\n");
 		printf("                                            Name of a file containing a UITS payload ONLY.\n");
@@ -236,7 +236,7 @@ void uitsPrintHelp (char *command)
 		printf("\n");
 		printf("--verbose   (-v)                              Run in verbose mode (DEFAULT)\n");
 		printf("--silent    (-s)                              Run in silent mode \n");
-		printf("--audio     (-a)      [file-name] (REQUIRED): Name of the audio file from which to extract payload\n");
+		printf("--input     (-i)      [file-name] (REQUIRED): Name of the input file from which to extract payload\n");
 		printf("--uits      (-u)      [file-name] (REQUIRED): Name of the standalone file to write payload\n");
 		printf("--verify    (-v)    			  (OPTIONAL): If specified, verify the payload after it is extracted from the audio file\n");
 		printf("--algorithm (-r)      [name]      (OPTIONAL): If verifying, name of the algorithm to use for signing. \n");
@@ -255,12 +255,12 @@ void uitsPrintHelp (char *command)
 		printf("help        Display general help\n");
 		printf("version     Dislay the tool version number\n");
 		printf("errors      Display exit error codes and message list\n");
-		printf("create      Create a UITS payload for an audio file. \n");
-		printf("            Payload can be embedded into the audio file or written to a separate file\n");
+		printf("create      Create a UITS payload for a media file. \n");
+		printf("            Payload can be embedded into the media file or written to a separate file\n");
 		printf("verify      Verify a UITS payload\n");
-		printf("            Payload can be within an audio file or in a separate file\n");
-		printf("extract     Extract a UITS payload from an audio file and write to a separate file\n");
-		printf("hash        Generate a media hash for an audio file\n");
+		printf("            Payload can be within a media file or in a separate file\n");
+		printf("extract     Extract a UITS payload from a media file and write to a separate file\n");
+		printf("hash        Generate a media hash for a media file\n");
 		printf("key         Generate a key ID for a public key file\n");
 		printf("\n");
 		printf("Usage: uits_tool help command	- provides detailed help for a command\n");
@@ -345,13 +345,14 @@ int uitsGetOptCreate (int argc, const char * argv[])
 		{"debug",           no_argument,		0,	'w'},	// turn on debug printing (hidden option!)
 		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode
 		{"silent",			no_argument,		0,	's'},	// turn on silent mode
-		{"audio",   		required_argument,	0,	'a'},	// audio file
+		{"audio",   		required_argument,	0,	'a'},	// audio file (DEPRECATED, but still supported)
+		{"input",   		required_argument,	0,	'i'},	// input file
 		{"uits",	        required_argument,	0,	'u'},	// uits payload file
 		{"embed",			no_argument,		0,	'e'},	// embed audio into audio file
 		{"metadata_file",	required_argument,	0,	'f'},	// metadata file
 		{"algorithm",		required_argument,	0,	'r'},	// algorithm for signature encryption file: 'DSA2048' or 'RSA2048'
 		{"pub",	            required_argument,	0,	'b'},	// public key file
-		{"priv",            required_argument,	0,	'i'},	// private key file
+		{"priv",            required_argument,	0,	'p'},	// private key file
 		{"pubID",	        required_argument,	0,	'k'},	// public key id (sha1 hash of pub key file)
 		{"pad",				required_argument,	0,	'd'},	// pad bytes for MP3 payload injection
 		{"xsd",				required_argument,	0,	'x'},	// xsd file for schema validation
@@ -432,13 +433,13 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				silentFlag = TRUE;
 				break;
 				
-			case 'a':		// set input audio file name
+			case 'a':		// set input audio file name (DEPRECATED, but still supported)
+			case 'i':		// set input  file name (WAS audio file in version 1.0)
 				option_value = strdup(optarg);
 				dprintf ("audio file '%s'\n", option_value);
 				uitsSetIOFileName (AUDIO, option_value);
 				break;
-				
-				
+								
 			case 'u':		// set payload file name
 				option_value = strdup(optarg);
 				dprintf ("UITS payload file '%s'\n", option_value);
@@ -469,7 +470,7 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				dprintf ("public key file '%s'\n", option_value);
 				break;
 				
-			case 'i':		// set private key file name
+			case 'p':		// set private key file name
 				option_value = strdup(optarg);
 				uitsSetSignatureParamValue ("privateKeyFileName", option_value);
 				dprintf ("private key file '%s'\n", option_value);
@@ -492,7 +493,7 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				dprintf ("padding '%s'\n", option_value);
 				break;
 				
-			case 'm':		// set b65 line feed flag
+			case 'm':		// set b64 line feed flag
 				uitsSetSignatureParamValue ("b64LFFlag", "TRUE");
 				dprintf ("base 64 linefeeds enabled\n");
 				break;
@@ -515,7 +516,6 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				break;
 				
 				// the UITS metadata element attributes all have a short option of "A"	
-				// NOTE: if a metadata file is specified, command-line parameters are ignored
 			case 'Z':
 				option_value = strdup(optarg);
 				uitsSetMetadataAttributeValue ((char *)long_options[option_index].name, option_value);
@@ -553,6 +553,7 @@ int uitsGetOptVerify (int argc, const char * argv[])
 		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode
 		{"silent",			no_argument,		0,	's'},	// turn on silent mode
 		{"audio",		    required_argument,	0,	'a'},	// audio file
+		{"input",		    required_argument,	0,	'i'},	// media file
 		{"uits",			required_argument,	0,	'u'},	// payload file
 		{"hash",			required_argument,	0,	'h'},	// media hash value against which to verify
 		{"hashfile",		required_argument,	0,	'f'},	// file containing media hash value against which to verify
@@ -584,9 +585,10 @@ int uitsGetOptVerify (int argc, const char * argv[])
 				silentFlag = TRUE;
 				break;
 				
-			case 'a':		// set input audio file name
+			case 'a':		// set input audio file name (DEPRECATED, but still supported)
+			case 'i':		// set input media file name (was audio file name in version 1.0)
 				option_value = strdup(optarg);
-				dprintf ("audio file '%s'\n", option_value);
+				dprintf ("media file '%s'\n", option_value);
 				uitsSetIOFileName (AUDIO, option_value);
 				break;
 				
@@ -664,7 +666,8 @@ int uitsGetOptExtract (int argc, const char * argv[])
 		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode (DEFAULT)
 		{"silent",			no_argument,		0,	's'},	// turn on silent mode
 		{"verify",			no_argument,		0,  'y'},	// verify payload after extraction
-		{"audio",		    required_argument,	0,	'a'},	// audio file
+		{"audio",		    required_argument,	0,	'a'},	// audio file (DEPRECATED)
+		{"input",		    required_argument,	0,	'i'},	// input file
 		{"uits",			required_argument,	0,	'u'},	// payload file
 		{"algorithm",		required_argument,	0,	'r'},	// algorithm for signature encryption file: 'DSA2048' or 'RSA2048'
 		{"pub",				required_argument,	0,	'b'},	// public key file
@@ -700,7 +703,8 @@ int uitsGetOptExtract (int argc, const char * argv[])
 				dprintf("Verify extracted payload\n");
 				break;
 				
-			case 'a':		// set input audio file name
+			case 'a':		// set input audio file name (DEPRECATED, but still supported)
+			case 'i':		// set input media file name (was audio file name in version 1.0)
 				option_value = strdup(optarg);
 				dprintf ("audio file '%s'\n", option_value);
 				uitsSetIOFileName (AUDIO, option_value);
@@ -763,6 +767,7 @@ int uitsGetOptGenHash (int argc, const char * argv[])
 		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode
 		{"b64",				no_argument,	    0,	'c'},	// generate base 64 encoded media hash (hex default)
 		{"audio",			required_argument,	0,	'a'},	// audio file		
+		{"input",			required_argument,	0,	'i'},	// input file		
 		{"output",			required_argument,	0,	'o'},	// output file		
 		/* end of option list */
 		{0,			0,				0,				0}
@@ -785,7 +790,8 @@ int uitsGetOptGenHash (int argc, const char * argv[])
 				verboseFlag = TRUE;
 				break;
 				
-			case 'a':		// set input audio file name
+			case 'a':		// set input audio file name (DEPRECATED, but still supported)
+			case 'i':		// set input media file name (was audio file name in version 1.0)
 				option_value = strdup(optarg);
 				dprintf ("audio file '%s'\n", option_value);
 				uitsSetIOFileName (AUDIO, option_value);

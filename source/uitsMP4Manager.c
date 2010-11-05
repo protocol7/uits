@@ -5,8 +5,8 @@
  *  Created by Chris Angelli on 4/2/10.
  *  Copyright 2010 Universal Music Group. All rights reserved.
  *
- *  $Date: 2010-10-08 14:28:52 -0700 (Fri, 08 Oct 2010) $
- *  $Revision: 79 $
+ *  $Date$
+ *  $Revision$
  *
  */
 
@@ -14,6 +14,8 @@
 
 
 char *mp4ModuleName = "uitsMP4Manager.c";
+
+char *uitsUUIDString = "99454E27-963A-4B56-8E76-1DB68C899CD4";
 
 /*
  *
@@ -150,7 +152,12 @@ char *mp4GetMediaHash (char *audioFileName)
  *
  * Function: mp4EmbedPayload
  * Purpose:	 Embed the UITS payload into an MP4 file
- *			 The UITS payload is embedded by adding it to the end of the file in it's own UITS atom (box).
+ *			 The UITS payload is embedded by adding it to the end of the file in a uuid atom (box).
+ *			 The uuid atom has the following format:
+ *				size
+ *				'uuid'
+ *				16-bytes of uuid value
+ *				UITS payload
  *
  *
  * Returns:   OK or ERROR
@@ -162,15 +169,10 @@ int mp4EmbedPayload  (char *audioFileName,
 					  int  numPadBytes) 
 {
 	FILE			*audioInFP, *audioOutFP;
-	MP4_ATOM_HEADER *atomHeader = NULL;
 	unsigned long	audioInFileSize;
 	unsigned long   payloadXMLSize;
-	unsigned long	bytesLeftInFile, bytesCopied;
-	
-	MP4_ATOM_HEADER *moovAtomHeader = NULL;
-	MP4_ATOM_HEADER *udtaAtomHeader = NULL;
-	unsigned long	endSeek;
 	unsigned long	atomSize;
+	uuid_t uuid;
 	
 	
 	vprintf("About to embed payload for %s into %s\n", audioFileName, audioFileNameOut);
@@ -195,14 +197,22 @@ int mp4EmbedPayload  (char *audioFileName,
 	
 	/* copy input file to output file */
 	uitsAudioBufferedCopy(audioInFP, audioOutFP, audioInFileSize);
-	
-	/* write the UITS atom */
-	atomSize = payloadXMLSize + 8;
+		
+	/* write the UITS payload in a uuid atom */
+	atomSize = payloadXMLSize + 8 + UUID_SIZE;
 	lswap(&atomSize);
 	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
-	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
-	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
+
+	fwrite("uuid",    1, 4, audioOutFP);					/* 4-bytes 'uuid' */
+
+	/* now write the UUID as hex */
+	err= uuid_parse(uitsUUIDString, uuid);
+	uitsHandleErrorINT(mp4ModuleName, "mp4EmbedPayload", err, 0, ERR_MP4, "Couldn't convert uuid to hex\n");
 	
+	fwrite(uuid, 1, UUID_SIZE, audioOutFP);
+
+	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
+
 	/* cleanup */
 	fclose(audioInFP);
 	fclose(audioOutFP);
@@ -210,125 +220,6 @@ int mp4EmbedPayload  (char *audioFileName,
 	return(OK);
 }
 
-/*
- *
- * NOTE: This is the UITS_Tool 1.0 implementation and is left here for reference purposes only
- *
- * Function: mp4EmbedPayload
- * Purpose:	 Embed the UITS payload into an MP4 file
- *			 After the UITS payload is embedded, the atom hierarchy will look something like this:
- *				'ftyp'
- *				'moov'
- *					'udta'
- *						'UITS'
- *
- * Returns:   OK or ERROR
- */
-#ifdef UITS_TOOL_1
-int mp4EmbedPayload  (char *audioFileName, 
-					  char *audioFileNameOut, 
-					  char *uitsPayloadXML,
-					  int  numPadBytes) 
-{
-	FILE			*audioInFP, *audioOutFP;
-	MP4_ATOM_HEADER *atomHeader = NULL;
-	unsigned long	audioInFileSize;
-	unsigned long   payloadXMLSize;
-	unsigned long	bytesLeftInFile, bytesCopied;
-	
-	MP4_ATOM_HEADER *moovAtomHeader = NULL;
-	MP4_ATOM_HEADER *udtaAtomHeader = NULL;
-	unsigned long	endSeek;
-	unsigned long	atomSize;
-		
-		
-	vprintf("About to embed payload for %s into %s\n", audioFileName, audioFileNameOut);
-
-	if (numPadBytes) {
-		vprintf("WARNING: Tried to add pad bytes to MP4 file. This is not supported.\n");
-	}
-	
-	payloadXMLSize = strlen(uitsPayloadXML);
-	
-	/* open the audio input and output files */
-	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
-	
-	audioOutFP = fopen(audioFileNameOut, "w+b");
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioOutFP, ERR_FILE, "Couldn't open audio file for writing\n");
-
-	/* calculate how long the input audio file is by seeking to EOF and saving size  */
-	audioInFileSize = uitsGetFileSize(audioInFP);
-
-	/* find the 'moov' atom header */	
-	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", moovAtomHeader, ERR_MP4, "Coudln't find 'moov' atom header\n");
-
-	/* seek past the moov atom header */
-	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
-	fseeko(audioInFP, 8, SEEK_CUR);
-
-	atomSize = moovAtomHeader->size - 8;
-
-	/* find the 'udta' atom header that is a child the 'moov' atom container */
-	udtaAtomHeader = mp4FindAtomHeader(audioInFP, "udta", atomSize);
-	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", udtaAtomHeader, ERR_MP4, "Coudln't find 'udta' atom header\n");
-
-	/* now do the data copy and modification */
-	rewind(audioInFP);
-
-	/* copy from beginning of file to beginning of 'moov' atom */
-	uitsAudioBufferedCopy(audioInFP, audioOutFP, moovAtomHeader->saveSeek);
-	
-	atomSize = moovAtomHeader->size + payloadXMLSize + 8;
-	lswap(&atomSize);
-	
-	/* write the moov atom header */
-	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
-	fwrite("moov",    1, 4, audioOutFP);   /* 4-bytes ID */
-	
-	/* seek past the moov atom header */
-	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
-	fseeko(audioInFP, 8, SEEK_CUR);
-	
-	/* write the moov atom until the start of the 'udta' atom */
-	atomSize = udtaAtomHeader->saveSeek - ftello(audioInFP);
-	uitsAudioBufferedCopy(audioInFP, audioOutFP, atomSize);
-
-	/* write the udta atom header */
-	atomSize = udtaAtomHeader->size + payloadXMLSize + 8;
-	lswap(&atomSize);
-	
-	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
-	fwrite("udta",    1, 4, audioOutFP);   /* 4-bytes ID */
-	fseeko(audioInFP, 8, SEEK_CUR);
-	
-	/* write the UITS atom */
-	atomSize = payloadXMLSize + 8;
-	lswap(&atomSize);
-	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
-	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
-	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
-
-	/* write the rest of the file */
-	endSeek = audioInFileSize - ftello(audioInFP);			/* save the size of the rest of the data */
-	uitsAudioBufferedCopy(audioInFP, audioOutFP, endSeek);
-	
-	/* the output file now has the UITS payload inserted into the 'udta' chunk */
-	/* one last bit of housekeeping is reqyired: */
-	/* update the chunk offset table to skip past the new chunk */
-	atomSize = payloadXMLSize + 8;
-	err = mp4UpdateChunkOffsetTable(audioOutFP, atomSize);
-	uitsHandleErrorINT(mp4ModuleName, "mp4EmbedPayload", err, OK, ERR_MP4,
-					   "Couldn't update chunk offset table\n");
-			
-	/* cleanup */
-	fclose(audioInFP);
-	fclose(audioOutFP);
-	
-	return(OK);
-}
-#endif
 
 
 /*
@@ -336,7 +227,7 @@ int mp4EmbedPayload  (char *audioFileName,
  * Function: mp4ExtractPayload
  * Purpose:	 Extract the UITS payload from an MP4 file
  *			This supports both the UITS_Tool 1.x method and the UITS_Tool 2.x method
- *			The 2.x method appends a UITS atom to the end of the file
+ *			The 2.x method looks for a uuid atom with the UITS uuid value at the end of the file
  *			The 1.x method uses the following algorithm:
  *			 The payload is a leaf atom of type 'UITS' inside a 'udta' container atom inside a 'moov' atom
  *           Typically, the top level atoms look something like this:
@@ -358,6 +249,14 @@ char *mp4ExtractPayload (char *audioFileName)
 	unsigned long	atomSize;
 	MP4_ATOM_HEADER *atomHeader;
 
+	uuid_t  fileUUID;
+	uuid_t	uitsUUID;
+
+	
+	/* convert the char UITS uuid to hex */
+	err= uuid_parse(uitsUUIDString, uitsUUID);
+	uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, 0, ERR_MP4, "Couldn't convert UITS uuid to hex\n");
+	
 	/* open the audio input file */
 	audioFP = fopen(audioFileName, "rb");
 	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", audioFP, ERR_FILE, "Couldn't open audio file for reading\n");
@@ -365,87 +264,54 @@ char *mp4ExtractPayload (char *audioFileName)
 	/* get file size */
 	fileLength = uitsGetFileSize(audioFP);
 	
-	atomHeader = mp4FindAtomHeader(audioFP, "UITS", fileLength);
+	atomHeader = mp4FindAtomHeader(audioFP, "uuid", fileLength);
 	
-	if (atomHeader) {	// found UITS root atom, extract data and return
+	/* there could be multiple uuid's so keep searching until no more */
+	
+	while (atomHeader) {	// found uuid root atom, check uuid value, extract UITS data and return
 		/* move fp to start of UITS atom */
 		fseeko(audioFP, atomHeader->saveSeek, SEEK_SET);
 	
 		/*skip past size and type */
 		fseeko(audioFP, 8L, SEEK_CUR);
 		
-		/* this is a cheat. calloc 8 bytes more than we're going to read so that the payload XML */
-		/* will be null-terminated when it's read from the file */
-		payloadXML = calloc(atomHeader->size, 1);	
-		atomSize = atomHeader->size - 8;
-	
-		err = fread(payloadXML, 1L, atomSize, audioFP);
-		uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, atomSize, ERR_MP4, "Couldn't read UITS atom data\n");
-	
-		return (payloadXML);
-	} else {	// See if there's a UITS 1.0 payload
-		payloadXML = mp4ExtractPayload_UITS1(audioFileName);
+		/* read the uuid value */
+		fread(fileUUID, 1, UUID_SIZE, audioFP);
 		
-		if (payloadXML) {
-			fprintf(stderr, "WARNING: Found UITS payload in moov atom. This method of UITS insertion is deprecated\n");
-			return(payloadXML);
-		} else {
-			uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", NULL, ERR_MP4, "Couldn't find UITS payload in file\n");
+		/* compare the uuid value in the file to the UITS uuid */
+		err = uuid_compare(fileUUID, uitsUUID);
+		
+		if (err == 0) {	/* found the UITS uuid atom */
+		
+			/* this is a cheat. calloc 8 + UUID_SIZE bytes more than we're going to read so that the payload XML */
+			/* will be null-terminated when it's read from the file */
+			payloadXML = calloc(atomHeader->size, 1);	
+			atomSize = atomHeader->size - 8 - UUID_SIZE;
+	
+			err = fread(payloadXML, 1L, atomSize, audioFP);
+			uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, atomSize, ERR_MP4, "Couldn't read UITS atom data\n");
+	
+			return (payloadXML);
 		}
+		
+		atomHeader = mp4FindAtomHeader(audioFP, "uuid", fileLength);
 
-	}
+	} 
 	
+	// See if there's a UITS 1.0 payload
+	payloadXML = mp4ExtractPayload_UITS1(audioFileName);
 	
+	if (payloadXML) {
+		fprintf(stderr, "WARNING: Found UITS payload in moov atom. This method of UITS insertion is deprecated.\n");
+		return(payloadXML);
+	} 
 	
+	// no payload found
+	
+	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", NULL, ERR_MP4, "Couldn't find UITS payload in file\n");
+
 }
 
-char *mp4ExtractPayload_UITS1 (char *audioFileName) 
-
-{
-	MP4_NESTED_ATOM nestedAtoms [] = {
-		{ "moov", NULL },
-		{ "udta", NULL },
-		{ "UITS", NULL },
-		{ NULL, 0}
-	};
-	
-	FILE			*audioInFP;
-	unsigned long	audioInFileSize;
-	char			*payloadXML;
-	unsigned long	atomSize;
-	MP4_NESTED_ATOM *foundNestedAtoms = NULL;
-	
-	/* open the audio input file */
-	audioInFP = fopen(audioFileName, "rb");
-	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
-
-	audioInFileSize = uitsGetFileSize(audioInFP);
-
-	/* populate the nested atom pointers */
-	foundNestedAtoms = mp4FindAtomHeaderNested(audioInFP, nestedAtoms);
-	
-	/* find the chunk offset table within the nested atoms */
-	while (	strcmp(foundNestedAtoms->atomType, "UITS") != 0) {
-		foundNestedAtoms++;
-	}
-	
-	/* seek past the udta atom header */
-	fseeko(audioInFP, foundNestedAtoms->atomHeader->saveSeek, SEEK_SET);
-	fseeko(audioInFP, 8, SEEK_CUR);
-	
-	atomSize = foundNestedAtoms->atomHeader->size - 8;
-	
-	/* this is a cheat. calloc 8 bytes more than we're going to read so that the payload XML */
-	/* will be null-terminated when it's read from the file */
-	payloadXML = calloc(foundNestedAtoms->atomHeader->size, 1);	
-	atomSize = foundNestedAtoms->atomHeader->size - 8;
-
-	err = fread(payloadXML, 1L, atomSize, audioInFP);
-	uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, atomSize, ERR_MP4, "Couldn't read UITS atom data\n");
-	
-	return (payloadXML);
-	
-}
 
 /*
  *
@@ -689,6 +555,172 @@ int mp4CopyAtom (FILE *fpin, FILE *fpout)
 	}
 
 	return (atomSize);
+	
+}
+
+/*
+ *
+ * NOTE: This is the UITS_Tool 1.0 implementation and is left here for reference purposes only
+ *
+ * Function: mp4EmbedPayload
+ * Purpose:	 Embed the UITS payload into an MP4 file
+ *			 After the UITS payload is embedded, the atom hierarchy will look something like this:
+ *				'ftyp'
+ *				'moov'
+ *					'udta'
+ *						'UITS'
+ *
+ * Returns:   OK or ERROR
+ */
+int mp4EmbedPayload_UITS1  (char *audioFileName, 
+					  char *audioFileNameOut, 
+					  char *uitsPayloadXML,
+					  int  numPadBytes) 
+{
+	FILE			*audioInFP, *audioOutFP;
+	MP4_ATOM_HEADER *atomHeader = NULL;
+	unsigned long	audioInFileSize;
+	unsigned long   payloadXMLSize;
+	unsigned long	bytesLeftInFile, bytesCopied;
+	
+	MP4_ATOM_HEADER *moovAtomHeader = NULL;
+	MP4_ATOM_HEADER *udtaAtomHeader = NULL;
+	unsigned long	endSeek;
+	unsigned long	atomSize;
+	
+	
+	vprintf("About to embed payload for %s into %s\n", audioFileName, audioFileNameOut);
+	
+	if (numPadBytes) {
+		vprintf("WARNING: Tried to add pad bytes to MP4 file. This is not supported.\n");
+	}
+	
+	payloadXMLSize = strlen(uitsPayloadXML);
+	
+	/* open the audio input and output files */
+	audioInFP = fopen(audioFileName, "rb");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
+	
+	audioOutFP = fopen(audioFileNameOut, "w+b");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", audioOutFP, ERR_FILE, "Couldn't open audio file for writing\n");
+	
+	/* calculate how long the input audio file is by seeking to EOF and saving size  */
+	audioInFileSize = uitsGetFileSize(audioInFP);
+	
+	/* find the 'moov' atom header */	
+	moovAtomHeader = mp4FindAtomHeader(audioInFP, "moov", audioInFileSize);
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", moovAtomHeader, ERR_MP4, "Coudln't find 'moov' atom header\n");
+	
+	/* seek past the moov atom header */
+	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, 8, SEEK_CUR);
+	
+	atomSize = moovAtomHeader->size - 8;
+	
+	/* find the 'udta' atom header that is a child the 'moov' atom container */
+	udtaAtomHeader = mp4FindAtomHeader(audioInFP, "udta", atomSize);
+	uitsHandleErrorPTR(mp4ModuleName, "mp4EmbedPayload", udtaAtomHeader, ERR_MP4, "Coudln't find 'udta' atom header\n");
+	
+	/* now do the data copy and modification */
+	rewind(audioInFP);
+	
+	/* copy from beginning of file to beginning of 'moov' atom */
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, moovAtomHeader->saveSeek);
+	
+	atomSize = moovAtomHeader->size + payloadXMLSize + 8;
+	lswap(&atomSize);
+	
+	/* write the moov atom header */
+	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
+	fwrite("moov",    1, 4, audioOutFP);   /* 4-bytes ID */
+	
+	/* seek past the moov atom header */
+	fseeko(audioInFP, moovAtomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, 8, SEEK_CUR);
+	
+	/* write the moov atom until the start of the 'udta' atom */
+	atomSize = udtaAtomHeader->saveSeek - ftello(audioInFP);
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, atomSize);
+	
+	/* write the udta atom header */
+	atomSize = udtaAtomHeader->size + payloadXMLSize + 8;
+	lswap(&atomSize);
+	
+	fwrite(&atomSize, 1, 4, audioOutFP);   /* 4-bytes size */
+	fwrite("udta",    1, 4, audioOutFP);   /* 4-bytes ID */
+	fseeko(audioInFP, 8, SEEK_CUR);
+	
+	/* write the UITS atom */
+	atomSize = payloadXMLSize + 8;
+	lswap(&atomSize);
+	fwrite(&atomSize, 1, 4, audioOutFP);					/* 4-bytes size */
+	fwrite("UITS",    1, 4, audioOutFP);					/* 4-bytes ID */
+	fwrite(uitsPayloadXML, 1, payloadXMLSize, audioOutFP);	/* UITS payload */
+	
+	/* write the rest of the file */
+	endSeek = audioInFileSize - ftello(audioInFP);			/* save the size of the rest of the data */
+	uitsAudioBufferedCopy(audioInFP, audioOutFP, endSeek);
+	
+	/* the output file now has the UITS payload inserted into the 'udta' chunk */
+	/* one last bit of housekeeping is reqyired: */
+	/* update the chunk offset table to skip past the new chunk */
+	atomSize = payloadXMLSize + 8;
+	err = mp4UpdateChunkOffsetTable(audioOutFP, atomSize);
+	uitsHandleErrorINT(mp4ModuleName, "mp4EmbedPayload", err, OK, ERR_MP4,
+					   "Couldn't update chunk offset table\n");
+	
+	/* cleanup */
+	fclose(audioInFP);
+	fclose(audioOutFP);
+	
+	return(OK);
+}
+
+char *mp4ExtractPayload_UITS1 (char *audioFileName) 
+
+{
+	MP4_NESTED_ATOM nestedAtoms [] = {
+		{ "moov", NULL },
+		{ "udta", NULL },
+		{ "UITS", NULL },
+		{ NULL, 0}
+	};
+	
+	FILE			*audioInFP;
+	unsigned long	audioInFileSize;
+	char			*payloadXML;
+	unsigned long	atomSize;
+	MP4_NESTED_ATOM *foundNestedAtoms = NULL;
+	
+	/* open the audio input file */
+	audioInFP = fopen(audioFileName, "rb");
+	uitsHandleErrorPTR(mp4ModuleName, "mp4ExtractPayload", audioInFP, ERR_FILE, "Couldn't open audio file for reading\n");
+	
+	audioInFileSize = uitsGetFileSize(audioInFP);
+	
+	/* populate the nested atom pointers */
+	foundNestedAtoms = mp4FindAtomHeaderNested(audioInFP, nestedAtoms);
+	
+	/* find the chunk offset table within the nested atoms */
+	while (	strcmp(foundNestedAtoms->atomType, "UITS") != 0) {
+		foundNestedAtoms++;
+	}
+	
+	/* seek past the udta atom header */
+	fseeko(audioInFP, foundNestedAtoms->atomHeader->saveSeek, SEEK_SET);
+	fseeko(audioInFP, 8, SEEK_CUR);
+	
+	atomSize = foundNestedAtoms->atomHeader->size - 8;
+	
+	/* this is a cheat. calloc 8 bytes more than we're going to read so that the payload XML */
+	/* will be null-terminated when it's read from the file */
+	payloadXML = calloc(foundNestedAtoms->atomHeader->size, 1);	
+	atomSize = foundNestedAtoms->atomHeader->size - 8;
+	
+	err = fread(payloadXML, 1L, atomSize, audioInFP);
+	uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, atomSize, ERR_MP4, "Couldn't read UITS atom data\n");
+	
+	return (payloadXML);
 	
 }
 
