@@ -12,7 +12,7 @@
 #include "uits.h"
 
 
-char *genericModuleName = "uitsAIFFManager.c";
+char *genericModuleName = "uitsGenericManager.c";
 
 
 /*

@@ -854,7 +854,7 @@ int  uitsVerifyPayloadXML (mxml_node_t * xmlRootNode, char *payloadXMLString)
 	metadataString	= uitsGetMetadataString ( payloadXMLString);	
 	signatureString = uitsGetElementText( xmlRootNode, "signature");
 	
-	vprintf("metadataString: %s\n", metadataString);
+	vprintf("metadataString length: %d metadataString: %s\n", strlen(metadataString), metadataString);
 	vprintf("signatureString: %s\n", signatureString);
 	
 	// CMA Note: Disabled until spec is clarified

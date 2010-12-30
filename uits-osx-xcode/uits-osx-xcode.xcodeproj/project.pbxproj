@@ -14,6 +14,7 @@
 		834F813E11A1B0BD009B4EA0 /* uitsWAVManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 834F813D11A1B0BC009B4EA0 /* uitsWAVManager.c */; };
 		8385F558116688CE00277C6E /* uitsMP4Manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 8385F557116688CE00277C6E /* uitsMP4Manager.c */; };
 		83A7851212849F4500F48954 /* uitsGenericManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 83A7851012849F4400F48954 /* uitsGenericManager.c */; };
+		83B604F2128D0EB900658292 /* uitsHTMLManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 83B604F1128D0EB900658292 /* uitsHTMLManager.c */; };
 		83D0F54A115AC6A7003129FF /* libssl_1.0.0-beta4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */; };
 		83D0F54C115AC6AD003129FF /* libcrypto_1.0.0-beta4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */; };
 		83D0F54E115AC6B4003129FF /* libmxml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F54D115AC6B4003129FF /* libmxml.a */; };
@@ -52,6 +53,8 @@
 		8385F557116688CE00277C6E /* uitsMP4Manager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsMP4Manager.c; path = ../source/uitsMP4Manager.c; sourceTree = SOURCE_ROOT; };
 		83A7851012849F4400F48954 /* uitsGenericManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsGenericManager.c; path = ../source/uitsGenericManager.c; sourceTree = SOURCE_ROOT; };
 		83A7851112849F4500F48954 /* uitsGenericManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsGenericManager.h; path = ../source/uitsGenericManager.h; sourceTree = SOURCE_ROOT; };
+		83B604F0128D0EB900658292 /* uitsHTMLManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uitsHTMLManager.h; path = ../source/uitsHTMLManager.h; sourceTree = SOURCE_ROOT; };
+		83B604F1128D0EB900658292 /* uitsHTMLManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsHTMLManager.c; path = ../source/uitsHTMLManager.c; sourceTree = SOURCE_ROOT; };
 		83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libssl_1.0.0-beta4.a"; path = "openssl/lib/libssl_1.0.0-beta4.a"; sourceTree = SOURCE_ROOT; };
 		83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcrypto_1.0.0-beta4.a"; path = "openssl/lib/libcrypto_1.0.0-beta4.a"; sourceTree = SOURCE_ROOT; };
 		83D0F54D115AC6B4003129FF /* libmxml.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; name = libmxml.a; path = mxml/lib/libmxml.a; sourceTree = SOURCE_ROOT; };
@@ -127,6 +130,8 @@
 				831F3CC71190BB26000A685A /* uitsAIFFManager.c */,
 				834F813C11A1B0BC009B4EA0 /* uitsWAVManager.h */,
 				834F813D11A1B0BC009B4EA0 /* uitsWAVManager.c */,
+				83B604F0128D0EB900658292 /* uitsHTMLManager.h */,
+				83B604F1128D0EB900658292 /* uitsHTMLManager.c */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -208,6 +213,7 @@
 				834F813E11A1B0BD009B4EA0 /* uitsWAVManager.c in Sources */,
 				83EFC6B611B5AAE9000482DB /* uitsError.c in Sources */,
 				83A7851212849F4500F48954 /* uitsGenericManager.c in Sources */,
+				83B604F2128D0EB900658292 /* uitsHTMLManager.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

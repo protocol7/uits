@@ -42,6 +42,7 @@
 #include "uitsFLACManager.h"
 #include "uitsAIFFManager.h"
 #include "uitsWAVManager.h"
+#include "uitsHTMLManager.h"
 #include "uitsGenericManager.h"
 
 

@@ -164,7 +164,7 @@ UITS_verify_standalone()
 }
 
 if [ $# -lt 1 ] ; then
-	file_types=(mp3 m4a wav flac) # no arguments, test all audio file types
+	file_types=(mp3 m4a wav flac html) # no arguments, test all audio file types
 elif [ $# == 1 ] ; then
 	file_types=($1) # test only requested file type
 else

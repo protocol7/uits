@@ -27,6 +27,7 @@ ARGUMENTS:
     testUITS wav         runs test cases for wav files
     testUITS flac        runs test cases for flac files
     testUITS aif         runs test cases for aif files
+    testUITS html        runs test cases for html files
 HELP
     exit 0
 }

@@ -214,7 +214,7 @@ void uitsPrintHelp (char *command)
 		printf("                                            Name of the input file for which to verify payload\n");
 		printf("                                            If the input file contains a UITS payload, that \n");
 		printf("                                            payload will be verified.\n");
-		printf("--uits       (-u)   [file-name]  (REQUIRED if no audio file with embedded UITS payload)\n");
+		printf("--uits       (-u)   [file-name]  (REQUIRED if no input file with embedded UITS payload)\n");
 		printf("                                            Name of a file containing a UITS payload ONLY.\n");
 		printf("                                            in the audio file. \n");
 		printf("--hash       (-h)   [hash value] (REQUIRED if hash validation enabled and no audio or hashfile specified)\n");
@@ -706,7 +706,7 @@ int uitsGetOptExtract (int argc, const char * argv[])
 			case 'a':		// set input audio file name (DEPRECATED, but still supported)
 			case 'i':		// set input media file name (was audio file name in version 1.0)
 				option_value = strdup(optarg);
-				dprintf ("audio file '%s'\n", option_value);
+				dprintf ("input file '%s'\n", option_value);
 				uitsSetIOFileName (AUDIO, option_value);
 				break;
 								
