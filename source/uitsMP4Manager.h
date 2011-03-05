@@ -17,7 +17,14 @@
 #ifndef _uitsmp4manager_h_
 #  define _uitsmp4manager_h_
 
+#ifdef NO_UUID			/* hack for windows: no uuid lib installed there so hardcode some stuff */
+#include "uitsWindows_uuid_parse.h"
+
+#else
+
 #include <uuid/uuid.h>	 /*for storing the UITS payload in a uuid atom */
+
+#endif
 
 #define UUID_SIZE 16	/* 16 hex bytes in a uuid */
 /*
@@ -71,7 +78,6 @@ MP4_ATOM_HEADER *mp4FindAtomHeaderNested (FILE *fpin, MP4_NESTED_ATOM *nestedAto
 MP4_ATOM_HEADER *mp4FindAtomHeader (FILE *fpin,  char *atomType, unsigned long endSeek);
 MP4_ATOM_HEADER *mp4ReadAtomHeader  (FILE *fpin);
 int   mp4CopyAtom			(FILE *fpin, FILE *fpout);
-
 #endif
 
 // EOF

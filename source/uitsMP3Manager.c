@@ -130,7 +130,9 @@ char *mp3GetMediaHash (char *audioFileName)
 	fseeko(audioFP, audioFrameStart, SEEK_CUR);
 	
 	/* skip pad bytes if any */
-	mp3SkipPadBytes (audioFP);
+	err = mp3SkipPadBytes (audioFP);
+	uitsHandleErrorINT(mp3ModuleName, "mp3GetMediaHash", err, OK, ERR_MP3,
+					   "Warning: Illegal MP3 file. Expected Audio Frame data, but found only pad (0) bytes.\n");
 	
 	foundPadBytes = ftello(audioFP) - audioFrameStart;
 	
@@ -517,14 +519,19 @@ int mp3SkipPadBytes (FILE *audioInFP)
 
 {
 	unsigned char c = 0;
-	int seekStart, padcount;
+	int seekStart, padcount=0;
+	int fileSize;
 	
 	seekStart = ftello(audioInFP);
+	fileSize = uitsGetFileSize(audioInFP);
 	
 	while (!c)
 	{
 		fread(&c, 1, 1, audioInFP);
 		padcount++;
+		if ((padcount + seekStart) >= fileSize) {
+			return (ERROR);
+		}
 	}
 	padcount--;
 	fseeko(audioInFP, -1, SEEK_CUR);

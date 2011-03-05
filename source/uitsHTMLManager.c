@@ -63,7 +63,7 @@ char *htmlGetMediaHash (char *inputFileName)
 	
 		
 	inputHTMLString = uitsReadFile(inputFileName);
-	uitsHandleErrorPTR(htmlModuleName, "htmlGetMediaHash", inputHTMLString, ERR_FILE, "Couldn't open input file for reading\n");
+	uitsHandleErrorPTR(htmlModuleName, "htmlGetMediaHash", inputHTMLString, ERR_FILE, "Couldn't read input file\n");
 	
 	/* strip out the uits payload, if necessary */
 	uitsPayloadStart = strstr (inputHTMLString, "<uits:UITS");
@@ -75,9 +75,11 @@ char *htmlGetMediaHash (char *inputFileName)
 		uitsPayloadStart = strstr (hashHTMLString, "<uits:UITS");
 
 		/* search for the end of the uits payload in the input string */
+		printf("About to search for /head\n");
 		uitsPayloadEnd = strcasestr (inputHTMLString, "</head>");
-		uitsHandleErrorPTR(htmlModuleName, "htmlGetMediaHash", hashHTMLString, ERR_FILE, 
+		uitsHandleErrorPTR(htmlModuleName, "htmlGetMediaHash", uitsPayloadEnd, ERR_FILE, 
 						   "Couldn't find end of UITS payload in input file\n");
+		printf("uitsPayloadEnd: %s", uitsPayloadEnd);
 
 		/* overwrite the payload with the contents of the original html file */
 		strcpy (uitsPayloadStart, uitsPayloadEnd);
@@ -98,7 +100,8 @@ char *htmlGetMediaHash (char *inputFileName)
 /*
  *
  * Function:htmlEmbedPayload
- * Purpose:	Embed uits payload in an HTML file
+ * Purpose:	Embed uits payload in an HTML file. The payload is embedded
+ *			at the end of the <HEAD> element, right before the </HEAD> tag.
  *
  * Returns:  ERROR
  */
@@ -117,7 +120,8 @@ int htmlEmbedPayload  (char *inputFileName,
 	char			*uitsPayloadStart;
 	int				inputHTMLHeaderSize, inputHTMLBodySize;
 	
-	vprintf("Embedding payload in file %s\n", outputFileName)
+	vprintf("Embedding payload in file %s\n", outputFileName);
+	vprintf("Input file is: %s\n", inputFileName);
 
 	/* make sure input file doesn't already have a UITS payload */
 	existingPayload = htmlExtractPayload(inputFileName);
@@ -135,7 +139,7 @@ int htmlEmbedPayload  (char *inputFileName,
 	uitsHandleErrorPTR(htmlModuleName, "htmlEmbedPayload", outputFP, ERR_FILE, "Couldn't open output file for writing\n");
 		
 	inputHTMLString = uitsReadFile(inputFileName);
-	uitsHandleErrorPTR(htmlModuleName, "htmlEmbedPayload", inputFP, ERR_FILE, "Couldn't open input file for reading\n");
+	uitsHandleErrorPTR(htmlModuleName, "htmlEmbedPayload", inputHTMLString, ERR_FILE, "Couldn't read input file f\n");
 	
 	/* insert the payload right before the closing header tag */
 	uitsPayloadStart = strcasestr (inputHTMLString, "</head>");
@@ -175,7 +179,7 @@ char *htmlExtractPayload (char *inputFileName)
 	
 	
 	inputHTMLString = uitsReadFile(inputFileName);
-	uitsHandleErrorPTR(htmlModuleName, "htmlEmbedPayload", inputFP, ERR_FILE, "Couldn't open input file for reading\n");
+	uitsHandleErrorPTR(htmlModuleName, "htmlEmbedPayload", inputHTMLString, ERR_FILE, "Couldn't read input file\n");
 	
 	/* search for the start of the uits payload */
 	uitsPayloadStart = strstr (inputHTMLString, "<uits:UITS");

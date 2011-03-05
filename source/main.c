@@ -943,7 +943,7 @@ unsigned char *uitsReadFile (char *filename)
 		snprintf(errStr, ERRSTR_LEN,  "ERROR: Insufficient memory to read %s\n", filename);
 		uitsHandleErrorINT(moduleName, "uitsReadFile", ERROR, OK, ERR_FILE, errStr);
 	}
-	
+
 	fread(fileData, fileLen, 1, fp); /* Read the entire file into fileData */
 	fclose(fp);
 	return(fileData);

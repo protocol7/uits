@@ -173,6 +173,8 @@ int mp4EmbedPayload  (char *audioFileName,
 	unsigned long   payloadXMLSize;
 	unsigned long	atomSize;
 	uuid_t uuid;
+	char *strPtr, *strPtr2;
+	int i;
 	
 	
 	vprintf("About to embed payload for %s into %s\n", audioFileName, audioFileNameOut);
@@ -208,6 +210,17 @@ int mp4EmbedPayload  (char *audioFileName,
 	/* now write the UUID as hex */
 	err= uuid_parse(uitsUUIDString, uuid);
 	uitsHandleErrorINT(mp4ModuleName, "mp4EmbedPayload", err, 0, ERR_MP4, "Couldn't convert uuid to hex\n");
+	
+	
+	// strPtr = calloc(((UUID_SIZE+1)*2), 1);
+	// strPtr2 = strPtr;
+	
+	// for(i = 0; i < UUID_SIZE; i++) {
+	// 	sprintf(strPtr, "%02x", uuid[i]);
+	// 	strPtr +=2;
+	// }
+	
+	// printf("UUID: %s\n", strPtr2);
 	
 	fwrite(uuid, 1, UUID_SIZE, audioOutFP);
 
@@ -252,7 +265,7 @@ char *mp4ExtractPayload (char *audioFileName)
 	uuid_t  fileUUID;
 	uuid_t	uitsUUID;
 
-	
+	int i;
 	/* convert the char UITS uuid to hex */
 	err= uuid_parse(uitsUUIDString, uitsUUID);
 	uitsHandleErrorINT(mp4ModuleName, "mp4ExtractPayload", err, 0, ERR_MP4, "Couldn't convert UITS uuid to hex\n");
@@ -279,10 +292,16 @@ char *mp4ExtractPayload (char *audioFileName)
 		fread(fileUUID, 1, UUID_SIZE, audioFP);
 		
 		/* compare the uuid value in the file to the UITS uuid */
-		err = uuid_compare(fileUUID, uitsUUID);
+//		err = uuid_compare(fileUUID, uitsUUID);
+		
+//		err = strncmp(fileUUID, uitsUUID, UUID_SIZE);
+		err=0;
+		for (i=0; i<UUID_SIZE;i++) {
+			if (fileUUID[i] != uitsUUID[i]) err=1;
+		}
+	
 		
 		if (err == 0) {	/* found the UITS uuid atom */
-		
 			/* this is a cheat. calloc 8 + UUID_SIZE bytes more than we're going to read so that the payload XML */
 			/* will be null-terminated when it's read from the file */
 			payloadXML = calloc(atomHeader->size, 1);	
@@ -723,5 +742,8 @@ char *mp4ExtractPayload_UITS1 (char *audioFileName)
 	return (payloadXML);
 	
 }
+
+
+
 
 // EOF
