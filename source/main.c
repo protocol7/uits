@@ -17,7 +17,7 @@ char *moduleName = "main.c";
 
 
 enum uitsActions {
-	CREATE,
+  //	CREATE,
 	VERIFY,
 	EXTRACT,
 	HASH,
