@@ -169,7 +169,7 @@ int uitsCreate ()
 	FILE		*payloadFP;
 	char		*payloadXMLString;
 	
-	char *mediaHashValue;
+	char *mediaHashValue = NULL;
 
 	vprintf("Create UITS payload ...\n");
 
@@ -464,18 +464,31 @@ void uitsCheckRequiredParams (char *command)
 		
 
 	if (strcmp(command, "create") == 0) {
-		if (!audioFileName) {
-			snprintf(errStr, ERRSTR_LEN, "Error: Can't %s UITS payload. No audio file specified.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
-		}
+		
 		if (!payloadFileName) {
 			snprintf(errStr, ERRSTR_LEN, "Error: Can't %s UITS payload. No payload file specified.\n", command);
 			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
 		}
-		if (strcmp(audioFileName, payloadFileName) == 0) {
-			snprintf(errStr, ERRSTR_LEN, 
-					 "Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
-			uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
+		if (!audioFileName) {
+			// if there is no audio file we cannot embed the hash
+			if (embedFlag) {
+				snprintf(errStr, ERRSTR_LEN, 
+						 "Error: Can't %s UITS payload. Embed option selected and no audio file specified.\n", command);
+				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
+			}
+			// if media hash value passed on command line and no audio file specified, we cannot create a hash
+			if (!clMediaHashValue) {
+				snprintf(errStr, ERRSTR_LEN, 
+						 "Error: Can't %s UITS payload. No hash value and no audio file specified.\n", command);
+				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
+				
+			}
+		} else {
+			if (strcmp(audioFileName, payloadFileName) == 0) {
+				snprintf(errStr, ERRSTR_LEN, 
+						 "Error: Can't %s UITS payload. Payload file must have different name than audio file.\n", command);
+				uitsHandleErrorINT(payloadModuleName, "uitsCheckRequiredParams", ERROR, OK, ERR_PARAM, errStr);
+			}
 		}
 		if (!uitsSignatureDesc->algorithm) {
 			snprintf(errStr, ERRSTR_LEN, 

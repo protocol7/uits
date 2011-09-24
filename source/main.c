@@ -135,7 +135,8 @@ void uitsPrintHelp (char *command)
 		printf("\n");
 		printf("--verbose   (-v)                            Run in verbose mode (DEFAULT)\n");
 		printf("--silent    (-s)                            Run in silent mode \n");
-		printf("--input     (-i)    [file-name] (REQUIRED): Name of the input file for which to create payload\n");
+		printf("--input     (-i)    [file-name] (REQUIRED if embed selected or no hash specified)\n");
+		printf("                                            Name of the input file for which to create payload\n");
 		printf("--uits      (-u)    [file-name] (REQUIRED): Name of UITS payload file\n");
 		printf("--embed     (-e)                (OPTIONAL): Embed UITS payload into the audio and write to payload file\n");
 		printf("--algorithm (-r)    [name]      (OPTIONAL): Name of the algorithm to use for signing. \n");

@@ -19,10 +19,11 @@
 #
 
 CC      = gcc
-OPTIM   = -Os -g -Dfseeko=fseek -Dftello=ftell
+OPTIM   = -Os -g -Dfseeko=fseek -Dftello=ftell -DNO_UUID
 CFLAGS  = $(OPTIM) -I libxml2/include -I ssl/include -I mxml/include -I FLAC/include
-LDFLAGS = $(OPTIM)
-OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsMP4Manager.o uitsPayloadManager.o uitsOpenSSL.o uitsAIFFManager.o uitsFLACManager.o uitsWAVManager.o uitsError.o uitsGenericManager.o uitsHTMLManager.o
+LDFLAGS = $(OPTIM) -luuid
+OBJECTS = main.o uitsAudioFileManager.o uitsMP3Manager.o uitsMP4Manager.o uitsPayloadManager.o uitsOpenSSL.o uitsAIFFManager.o uitsFLACManager.o uitsWAVManager.o uitsError.o uitsGenericManager.o uitsHTMLManager.o uitsWindows_uuid_parse.o uitsWindows_strcasestr.o
+
 RM = rm
 
 #
