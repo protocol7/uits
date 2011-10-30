@@ -18,6 +18,8 @@
 		83D0F54A115AC6A7003129FF /* libssl_1.0.0-beta4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */; };
 		83D0F54C115AC6AD003129FF /* libcrypto_1.0.0-beta4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */; };
 		83D0F54E115AC6B4003129FF /* libmxml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D0F54D115AC6B4003129FF /* libmxml.a */; };
+		83D76888145525CB00801EB0 /* cmePayloadManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 83D76887145525CB00801EB0 /* cmePayloadManager.c */; };
+		83D768CB145663E900801EB0 /* xmlManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 83D768CA145663E900801EB0 /* xmlManager.c */; };
 		83EB939A115AD18C005F460F /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 83EB938F115AD18C005F460F /* main.c */; };
 		83EB939B115AD18C005F460F /* uitsAudioFileManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 83EB9392115AD18C005F460F /* uitsAudioFileManager.c */; };
 		83EB939C115AD18C005F460F /* uitsMP3Manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 83EB9394115AD18C005F460F /* uitsMP3Manager.c */; };
@@ -58,6 +60,10 @@
 		83D0F549115AC6A7003129FF /* libssl_1.0.0-beta4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libssl_1.0.0-beta4.a"; path = "openssl/lib/libssl_1.0.0-beta4.a"; sourceTree = SOURCE_ROOT; };
 		83D0F54B115AC6AD003129FF /* libcrypto_1.0.0-beta4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libcrypto_1.0.0-beta4.a"; path = "openssl/lib/libcrypto_1.0.0-beta4.a"; sourceTree = SOURCE_ROOT; };
 		83D0F54D115AC6B4003129FF /* libmxml.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; name = libmxml.a; path = mxml/lib/libmxml.a; sourceTree = SOURCE_ROOT; };
+		83D76886145525CB00801EB0 /* cmePayloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cmePayloadManager.h; path = ../source/cmePayloadManager.h; sourceTree = SOURCE_ROOT; };
+		83D76887145525CB00801EB0 /* cmePayloadManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cmePayloadManager.c; path = ../source/cmePayloadManager.c; sourceTree = SOURCE_ROOT; };
+		83D768C9145663E900801EB0 /* xmlManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xmlManager.h; path = ../source/xmlManager.h; sourceTree = SOURCE_ROOT; };
+		83D768CA145663E900801EB0 /* xmlManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = xmlManager.c; path = ../source/xmlManager.c; sourceTree = SOURCE_ROOT; };
 		83EB938F115AD18C005F460F /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../source/main.c; sourceTree = SOURCE_ROOT; };
 		83EB9391115AD18C005F460F /* uits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uits.h; path = ../source/uits.h; sourceTree = SOURCE_ROOT; };
 		83EB9392115AD18C005F460F /* uitsAudioFileManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uitsAudioFileManager.c; path = ../source/uitsAudioFileManager.c; sourceTree = SOURCE_ROOT; };
@@ -123,8 +129,12 @@
 				83EB9395115AD18C005F460F /* uitsMP3Manager.h */,
 				83EB9396115AD18C005F460F /* uitsOpenSSL.c */,
 				83EB9397115AD18C005F460F /* uitsOpenSSL.h */,
-				83EB9398115AD18C005F460F /* uitsPayloadManager.c */,
+				83D768C9145663E900801EB0 /* xmlManager.h */,
+				83D768CA145663E900801EB0 /* xmlManager.c */,
+				83D76886145525CB00801EB0 /* cmePayloadManager.h */,
+				83D76887145525CB00801EB0 /* cmePayloadManager.c */,
 				83EB9399115AD18C005F460F /* uitsPayloadManager.h */,
+				83EB9398115AD18C005F460F /* uitsPayloadManager.c */,
 				8340BE82117CE5E600BF7652 /* uitsFLACManager.h */,
 				8340BE83117CE5E600BF7652 /* uitsFLACManager.c */,
 				831F3CC61190BB26000A685A /* uitsAIFFManager.h */,
@@ -214,6 +224,8 @@
 				83A7851212849F4500F48954 /* uitsGenericManager.c in Sources */,
 				83B604F2128D0EB900658292 /* uitsHTMLManager.c in Sources */,
 				833A051F12F292B900A60E66 /* uitsWAVManager.c in Sources */,
+				83D76888145525CB00801EB0 /* cmePayloadManager.c in Sources */,
+				83D768CB145663E900801EB0 /* xmlManager.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

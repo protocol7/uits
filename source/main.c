@@ -24,6 +24,8 @@ enum uitsActions {
 	KEY,
 	HELP,
 	ERRORS,
+	CME_CREATE,
+	CME_VERIFY,
 };
 
 
@@ -92,6 +94,27 @@ int main (int argc, const char * argv[]) {
 			
 		case ERRORS:
 			uitsListErrorCodes();
+			break;
+
+		case CME_CREATE:
+			dprintf ("Create CME payload\n");
+			err = cmeGetOptCreate(argc, argv);		// parse the command-line options 
+			fflush(stdout);
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
+							   "Error: Couldn't parse command line options for CME create\n");
+			err = cmeCreate();
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_CREATE,
+							   "Error: Couldn't create CME payload\n");
+			break;
+			
+		case CME_VERIFY:
+			dprintf ("Verify CME payload\n");
+			err = cmeGetOptVerify(argc, argv);		// parse the command-line options 
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_PARSE,
+							   "Error: Couldn't parse command line options for CME verify\n");
+			err = cmeVerify();
+			uitsHandleErrorINT(moduleName, "main", err, OK, ERR_VERIFY,
+							   "Error: Couldn't verify CME payload\n");
 			break;
 			
 		default:
@@ -249,6 +272,78 @@ void uitsPrintHelp (char *command)
 	} else if (strcmp(command, "errors") == 0) {
 		printf("\n");
 		printf("Usage: uits_tool errors \n");		
+	} else if(strcmp(command, "cme_create") == 0) {
+		printf("Usage: uits_tool cme_create [options]\n");
+		printf("\n");
+		printf("--verbose   (-v)                            Run in verbose mode (DEFAULT)\n");
+		printf("--silent    (-s)                            Run in silent mode \n");
+		printf("--cme_uits  (-u)    [file-name] (REQUIRED): Name of CME UITS payload file\n");
+		printf("--algorithm (-r)    [name]      (OPTIONAL): Name of the algorithm to use for signing. \n");
+		printf("                                            Possible values: RSA2048 (DEFAULT)\n"); 
+		printf("                                                             DSA2048\n");
+		printf("--pub       (-b)    [file-name] (REQUIRED): Name of the file containing the public key\n");
+		printf("--priv      (-p)    [file-name] (REQUIRED): Name of the file contianing the private key for signing\n");
+		printf("--pubID     (-k)    [value]     (REQUIRED): The SHA1 hash of the public key needed to \n");
+		printf("                                            validate the signature\n");
+		printf("--xsd       (-x)    [file-name] (OPTIONAL): Name of the schema to use for validation\n"); 
+		printf("                                            DEFAULT is cme_uits.xsd in current directory\n");
+		printf("--ml        (-m)    [file-name] (OPTIONAL): Store the base 64 encoded signature in multiple lines\n"); 
+		printf("                                            DEFAULT is a single line for signature\n");
+		printf("--b64       (-c)                (OPTIONAL): Base 64 encode the media hash. Media hash is hex by default\n"); 
+		printf("\n");
+		printf("The following parameters are CME UITS metadata. All values are treated as text. \n");
+		printf("--nonce                 [value] (REQUIRED)\n");
+		printf("--Distributor           [value] (REQUIRED)\n");
+		printf("--Time                  [value] (OPTIONAL) If no Time value is provided, Time will be set to current UTC time.\n");
+		printf("--ProductID             [value] (REQUIRED)\n");
+		printf("--ProductID_type        [value] (OPTIONAL) Possible values: UPC (DEFAULT)\n");
+		printf("                                                            GRID\n");
+		printf("--TID                   [value] (REQUIRED if no UID)\n");
+		printf("--TID_version           [value] (OPTIONAL) Possible values: 1 (DEFAULT)\n");
+		printf("--URL                   [value] (OPTIONAL)\n");
+		printf("--URL_type              [value] (OPTIONAL) Possible values: WPUB (DEFAULT)\n");
+		printf("                                                            WCOM\n");
+		printf("                                                            WCOP\n");
+		printf("                                                            WOAF\n");
+		printf("                                                            WOAR\n");
+		printf("                                                            WOAS\n");
+		printf("                                                            WORS\n");
+		printf("                                                            WPAY\n");
+		printf("--URLS                  [value] (OPTIONAL) List of multiple URL values. Either --URL or --URLS can be used, not both\n");
+		printf("                                           URLS are provided as a comma-delimited lined list.\n");
+		printf("                                               (eg. --URLS \"http://www.umusic.com,http://www.blah.com\"\n");
+		printf("--URLS_type             [value] (OPTIONAL) List of type values for multiple URLS. There must be a 1-to-1 correspondence\n");
+		printf("                                           between URLS and URLS_type. If none specified, default is WPUB for all URLS.\n");
+		printf("                                               (eg. --URLS_type \"WPUB,WCOP\"\n");
+		printf("--PA                    [value] (OPTIONAL) Possible values: unspecified\n");
+		printf("                                                            explicit\n");
+		printf("                                                            edited\n");
+		printf("--Copyright             [value] (OPTIONAL)\n");
+		printf("--Copyright_value       [value] (OPTIONAL) Possible values: allrightsreserved (DEFAULT)\n");
+		printf("                                                            unspecified\n");
+		printf("                                                            prerelease\n");
+		printf("                                                            other\n");
+		printf("--Extra                 [value] (OPTIONAL)\n");
+		printf("--Extra_type            [value] (OPTIONAL)\n");
+		printf("--Extras                [value] (OPTIONAL) List of multiple Extra values. Either --Extra or --Extras can be used, \n");
+		printf("                                           but not both. Extras are provided as a comma-delimited lined list.\n");
+		printf("                                               (eg. --Extras \"Extra content 1, Extra Content 2\"\n");
+		printf("--Extras_type           [value] (OPTIONAL) List of type values for multiple Extra values. There must be a 1-to-1 \n");
+		printf("                                           correspondence between Extras and Extras_type. \n");
+		printf("                                               (eg. --Extras_type \"content1 type, content 2 type\"\n");
+		
+	} else if (strcmp(command, "cme_verify") == 0) {
+		printf("Usage: uits_tool verify [options]\n");
+		printf("\n");
+		printf("--verbose    (-v)                           Run in verbose mode (DEFAULT)\n");
+		printf("--silent     (-s)                           Run in silent mode \n");
+		printf("--cme_uits  (-u)    [file-name] (REQUIRED): Name of CME UITS payload file\n");
+		printf("--algorithm  (-r)   [name]      (OPTIONAL): Name of the algorithm to use for signing. \n");
+		printf("                                            Possible values: RSA2048 (DEFAULT)\n");
+		printf("                                                             DSA2048\n");
+		printf("--pub        (-b)   [file-name] (REQUIRED): Name of the file containing the public key for validating\n");
+		printf("--xsd        (-x)   [file-name] (OPTIONAL): Name of the schema to use for validation\n"); 
+		printf("                                            DEFAULT is uits.xsd in current directory\n");
 	} else {	/* print the general help */
 		printf ("\nUsage: uits_tool command [options]\n");
 		printf("\n");
@@ -263,6 +358,8 @@ void uitsPrintHelp (char *command)
 		printf("extract     Extract a UITS payload from a media file and write to a separate file\n");
 		printf("hash        Generate a media hash for a media file\n");
 		printf("key         Generate a key ID for a public key file\n");
+		printf("cme_create  Create a CME UITS payload. \n");
+		printf("cme_verify  Verify a CME UITS payload. \n");
 		printf("\n");
 		printf("Usage: uits_tool help command	- provides detailed help for a command\n");
 		printf("\n");
@@ -304,6 +401,10 @@ int uitsGetCommand (int argc, const char * argv[]) {
 		action = ERRORS;
 	} else if (strcmp(command, "version") == 0) {
 		uitsPrintHelp(command);	// print version  and exit 
+	} else if (strcmp(command, "cme_create") == 0) {
+		action = CME_CREATE;
+	} else if (strcmp(command, "cme_verify") == 0) {
+		action = CME_VERIFY;
 	} else if (strcmp(command, "help") == 0) {
 		/* check to see if the usage was "uits_tool help action" */
 		command = (char *)argv[2];
@@ -338,7 +439,9 @@ int uitsGetOptCreate (int argc, const char * argv[])
 	char			*attributeOptionName;
 	int				attributeOptionNameLen;
 	
-	UITS_element *metadataPtr  = uitsGetMetadataDesc();
+	UITS_element *uitsMetadata = uitsGetMetadataDesc();
+	UITS_element *metadataPtr  = uitsMetadata;
+	
 //	UITS_signature_desc *signaturePtr = uitsGetSignatureDesc();	
 	
 	// command-line option definition for option parsing
@@ -414,8 +517,8 @@ int uitsGetOptCreate (int argc, const char * argv[])
 	}
 	
 	while (1) {
-		c = getopt_long (argc, argv, "vsemcoa:u:f:h:r:b:i:k:d:x:m:h:Y:Z:w:", long_options, &option_index);
-		// dprintf("Got option: %c, value: %s\n", c, optarg);
+		c = getopt_long (argc, argv, "wvsemcoa:u:f:h:r:b:i:k:d:x:m:h:Y:Z:", long_options, &option_index);
+		dprintf("Got option: %c, value: %s\n", c, optarg);
 		
 		fflush(stdout);
 		if (c == -1) { break; }
@@ -512,14 +615,14 @@ int uitsGetOptCreate (int argc, const char * argv[])
 				// the UITS metadata parameters all have a short option of "Y"	
 			case 'Y':
 				option_value = strdup(optarg);
-				uitsSetMetadataValue ((char *)long_options[option_index].name, option_value);
+				uitsSetMetadataValue ((char *)long_options[option_index].name, option_value, uitsMetadata);
 				dprintf ("Setting metadata element: %s value: %s\n", long_options[option_index].name, option_value);
 				break;
 				
 				// the UITS metadata element attributes all have a short option of "A"	
 			case 'Z':
 				option_value = strdup(optarg);
-				uitsSetMetadataAttributeValue ((char *)long_options[option_index].name, option_value);
+				uitsSetMetadataAttributeValue ((char *)long_options[option_index].name, option_value, uitsMetadata);
 				dprintf ("Setting metadata attribute: %s value: %s\n", long_options[option_index].name, option_value);
 				break;
 				
@@ -568,7 +671,7 @@ int uitsGetOptVerify (int argc, const char * argv[])
 	};
 		
 	while (1) {
-		c = getopt_long (argc, argv, "vsa:u:h:f:r:b:x:w:", long_options, &option_index);
+		c = getopt_long (argc, argv, "wvsa:u:h:f:r:b:x:", long_options, &option_index);
 		
 		if (c == -1) { break; }
 		
@@ -637,6 +740,274 @@ int uitsGetOptVerify (int argc, const char * argv[])
 			default: 
 				snprintf(errStr, ERRSTR_LEN, "Error processing options: unknown option: %c\n", c);
 				uitsHandleErrorINT(moduleName, "uitsGetOptVerify", ERROR, OK, ERR_VALUE, errStr);
+		}
+	}
+	
+	//	vprintf ("Got verbose flag\n");
+	return (OK);
+	
+}
+
+/*
+ *
+ * Function: cmeGetOptCreate
+ * Purpose:  Parse the options for
+ *			 Usage: uits_tool cme_create [options]
+ * Returns:	 OK or ERROR
+ *
+ */
+
+
+int cmeGetOptCreate (int argc, const char * argv[]) 
+{
+	int				option_index = 0;
+	int				c;		// character for command-line processing
+	struct			option *option_ptr;
+	int				option_count = 0;
+	char			*option_value;
+	UITS_attributes *attributePtr;
+	char			*attributeOptionName;
+	int				attributeOptionNameLen;
+	
+	UITS_element *cmeMetadata = cmeGetMetadataDesc();
+	UITS_element *metadataPtr  = cmeMetadata;
+
+	//	UITS_signature_desc *signaturePtr = uitsGetSignatureDesc();	
+	
+	// command-line option definition for option parsing
+	static struct option long_options [MAX_COMMAND_LINE_OPTIONS] = {
+		{"debug",           no_argument,		0,	'w'},	// turn on debug printing (hidden option!)
+		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode
+		{"silent",			no_argument,		0,	's'},	// turn on silent mode
+		{"cme_uits",	    required_argument,	0,	'u'},	// uits payload file
+		{"algorithm",		required_argument,	0,	'r'},	// algorithm for signature encryption file: 'DSA2048' or 'RSA2048'
+		{"pub",	            required_argument,	0,	'b'},	// public key file
+		{"priv",            required_argument,	0,	'p'},	// private key file
+		{"pubID",	        required_argument,	0,	'k'},	// public key id (sha1 hash of pub key file)
+		{"xsd",				required_argument,	0,	'x'},	// xsd file for schema validation
+		{"ml",              no_argument,		0,	'm'},	// generate a multi-line signature
+		{"b64",             no_argument,		0,	'c'},	// base64 encode media hash
+		/* end of option list */
+		{0,			0,				0,				0}
+	};
+	
+	
+	// Add the UITS metadata to the list of options. This allows the metadata to be added to options processing
+	// dynamically so that the metadata definition lives only in the uits_metadata array.
+	
+	// find the end of the long_options array
+	option_ptr = long_options;
+	
+	while (option_ptr->name) {
+		option_count++;
+		option_ptr++;
+	}
+	
+	// now add the uits_metadata elements and attributes to the long_options array
+	// only long options can be entered on the command-line (eg. --nonce)
+	// the short option for all elements is converted internal to -Y 
+	// the short option for all element attributes is converted to -Z
+	
+	while ( metadataPtr->name) {
+		long_options[option_count].name =  metadataPtr->name;
+		long_options[option_count].has_arg = required_argument;
+		long_options[option_count].flag = 0;
+		long_options[option_count].val = 'Y';
+		attributePtr =  metadataPtr->attributes;
+		if ( attributePtr) {		// add any attributes for this element
+			while ( attributePtr->name) {				
+				// attribute option name is elementname_attributename (eg. "productID_type")
+				attributeOptionNameLen = strlen( metadataPtr->name) + strlen( attributePtr->name) + 2;
+				attributeOptionName = calloc(attributeOptionNameLen, sizeof(char));
+				uitsHandleErrorPTR(moduleName, "cmeGetOptCreate", attributeOptionName, ERR_UITS, "Error allocting attributeOptionName\n");		
+				attributeOptionName = strcat( attributeOptionName,  metadataPtr->name);
+				attributeOptionName = strcat( attributeOptionName, "_");
+				attributeOptionName = strcat( attributeOptionName,  attributePtr->name);
+				option_count++;
+				long_options[option_count].name =  attributeOptionName;
+				long_options[option_count].has_arg = required_argument;
+				long_options[option_count].flag = 0;
+				long_options[option_count].val = 'Z';
+				attributePtr++;
+			}
+			
+		}
+		metadataPtr++;
+		option_count++;
+		if (option_count > MAX_COMMAND_LINE_OPTIONS) {
+			uitsHandleErrorINT(moduleName, "cmeGetOptCreate", ERROR, OK, ERR_UITS,  
+							   "ERROR cmeGetOpt: too many CME UITS metadata parameters. Increase MAX_COMMAND_LINE_OPTIONS.\n");
+		}
+	}
+	
+	while (1) {
+		c = getopt_long (argc, argv, "wvsmcou:h:r:b:k:x:m:Y:Z:", long_options, &option_index);
+		// dprintf("Got option: %c, value: %s\n", c, optarg);
+		
+		fflush(stdout);
+		if (c == -1) { break; }
+		
+		switch (c) {				
+			case 'w':		// hidden debug flag
+				debugFlag = TRUE;
+				dprintf("Debug printing enabled\n");
+				break;
+				
+			case 'v':		// set verbose flag
+				verboseFlag = TRUE;
+				break;
+				
+			case 's':		// set silent mode
+				silentFlag = TRUE;
+				break;
+							
+			case 'u':		// set payload file name
+				option_value = strdup(optarg);
+				dprintf ("UITS payload file '%s'\n", option_value);
+				cmeSetIOFileName (CME_PAYLOAD, option_value);
+				break;
+								
+			case 'x':		// set xsd file name
+				option_value = strdup(optarg);
+				dprintf ("xsd file '%s'\n", option_value);
+				cmeSetIOFileName (CME_XSD, option_value);
+				break;
+				
+			case 'r':		// set algorithm name
+				option_value = strdup(optarg);
+				cmeSetSignatureParamValue ("algorithm", option_value);
+				dprintf ("algorithm '%s'\n", option_value);
+				break;
+				
+			case 'b':		// set public key file name
+				option_value = strdup(optarg);
+				cmeSetSignatureParamValue ("pubKeyFileName", option_value);
+				dprintf ("public key file '%s'\n", option_value);
+				break;
+				
+			case 'p':		// set private key file name
+				option_value = strdup(optarg);
+				cmeSetSignatureParamValue ("privateKeyFileName", option_value);
+				dprintf ("private key file '%s'\n", option_value);
+				break;
+				
+			case 'k':		// set public key id 
+				option_value = strdup(optarg);
+				cmeSetSignatureParamValue ("pubKeyID", option_value);
+				dprintf ("Public Key ID '%s'\n", option_value);
+				break;
+				
+			case 'm':		// set b64 line feed flag
+				cmeSetSignatureParamValue ("b64LFFlag", "TRUE");
+				dprintf ("base 64 linefeeds enabled\n");
+				break;
+				
+			case 'c':		// set base 64 encoding for media hash
+				cmeSetCommandLineParam ("b64_media_hash", TRUE);
+				dprintf ("base 64 encode media hash\n");
+				break;
+				
+				
+				// the CME UITS metadata parameters all have a short option of "Y"	
+			case 'Y':
+				option_value = strdup(optarg);
+				uitsSetMetadataValue ((char *)long_options[option_index].name, option_value, cmeMetadata);
+				dprintf ("Setting cme metadata element: %s value: %s\n", long_options[option_index].name, option_value);
+				break;
+				
+				// the CME UITS metadata element attributes all have a short option of "A"	
+			case 'Z':
+				option_value = strdup(optarg);
+				uitsSetMetadataAttributeValue ((char *)long_options[option_index].name, option_value, cmeMetadata);
+				dprintf ("Setting cme metadata attribute: %s value: %s\n", long_options[option_index].name, option_value);
+				break;
+				
+			default: 
+				snprintf(errStr, ERRSTR_LEN, "Error processing options: unknown option: %c\n", c);
+				uitsHandleErrorINT(moduleName, "uitsGetOptCreate", ERROR, OK, ERR_VALUE, errStr);
+		}
+	}
+	
+	return (OK);
+	
+}
+
+
+/*
+ * Function: cmeGetOptVerify
+ * Purpose:  Parse the options for
+ *				uits_tool cme_verify [options]
+ * Passed:   argc, argv
+ * Returns:  OK or ERROR
+ */
+
+int cmeGetOptVerify (int argc, const char * argv[]) 
+{
+	int				option_index = 0;
+	int				c;		// character for command-line processing
+	char			*option_value;
+	
+	// command-line option definition for option parsing
+	static struct option long_options [MAX_COMMAND_LINE_OPTIONS] = {
+		{"debug",           no_argument,		0,	'w'},	// turn on debug printing (hidden option!)
+		{"verbose",			no_argument,		0,	'v'},	// turn on verbose mode
+		{"silent",			no_argument,		0,	's'},	// turn on silent mode
+		{"cme_uits",		required_argument,	0,	'u'},	// payload file
+		{"pub",				required_argument,	0,	'b'},	// public key file
+		{"xsd",				required_argument,	0,	'x'},	// xsd file for schema validation
+		
+		/* end of option list */
+		{0,			0,				0,				0}
+	};
+	
+	while (1) {
+		c = getopt_long (argc, argv, "wvsu:r:b:x:", long_options, &option_index);
+		
+		if (c == -1) { break; }
+		
+		switch (c) {				
+			case 'w':		// set the hidden debug flag
+				debugFlag = TRUE;
+				dprintf("Debug printing enabled\n");
+				break;
+				
+			case 'v':		// set the verbose flag
+				verboseFlag = TRUE;
+				break;
+				
+			case 's':		// set silent mode flag
+				silentFlag = TRUE;
+				break;
+				
+								
+			case 'u':		// set uits payload file name
+				option_value = strdup(optarg);
+				dprintf ("payload file '%s'\n", option_value);
+				cmeSetIOFileName (CME_PAYLOAD, option_value);
+				break;
+				
+			case 'x':		// set xsd file name
+				option_value = strdup(optarg);
+				dprintf ("xsd file '%s'\n", option_value);
+				cmeSetIOFileName (CME_XSD, option_value);
+				break;
+				
+			case 'r':		// set algorithm name
+				option_value = strdup(optarg);
+				cmeSetSignatureParamValue ("algorithm", option_value);
+				dprintf("algorithm '%s'\n", option_value);
+				break;
+				
+			case 'b':		// set public key file name
+				option_value = strdup(optarg);
+				cmeSetSignatureParamValue ("pubKeyFileName", option_value);
+				dprintf ("public key file '%s'\n", option_value);
+				break;
+				
+		
+			default: 
+				snprintf(errStr, ERRSTR_LEN, "Error processing options: unknown option: %c\n", c);
+				uitsHandleErrorINT(moduleName, "cmeGetOptVerify", ERROR, OK, ERR_VALUE, errStr);
 		}
 	}
 	
@@ -901,7 +1272,10 @@ int	uitsInit() {
 	
 	// initialize the paylod manager
 	uitsPayloadManagerInit();
-	
+
+	// initialize the paylod manager
+	cmePayloadManagerInit();
+
 	// initialize the openssl functions
 	uitsOpenSSLInit();
 

@@ -79,7 +79,7 @@ char *htmlGetMediaHash (char *inputFileName)
 		uitsPayloadEnd = strcasestr (inputHTMLString, "</head>");
 		uitsHandleErrorPTR(htmlModuleName, "htmlGetMediaHash", uitsPayloadEnd, ERR_FILE, 
 						   "Couldn't find end of UITS payload in input file\n");
-		printf("uitsPayloadEnd: %s", uitsPayloadEnd);
+//		printf("uitsPayloadEnd: %s", uitsPayloadEnd);
 
 		/* overwrite the payload with the contents of the original html file */
 		strcpy (uitsPayloadStart, uitsPayloadEnd);

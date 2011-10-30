@@ -44,6 +44,8 @@
 #include "uitsWAVManager.h"
 #include "uitsHTMLManager.h"
 #include "uitsGenericManager.h"
+#include "xmlManager.h"
+#include "cmePayloadManager.h"
 
 
 #define OK 0
@@ -74,6 +76,8 @@ int  uitsGetOptVerify   (int argc, const char * argv[]);
 int  uitsGetOptExtract  (int argc, const char * argv[]);
 int  uitsGetOptGenHash  (int argc, const char * argv[]); 
 int  uitsGetOptGenKey   (int argc, const char * argv[]); 
+int  cmeGetOptCreate     (int argc, const char * argv[]); 
+int  cmeGetOptVerify     (int argc, const char * argv[]);
 
 
 #endif

@@ -1,0 +1,558 @@
+#!/bin/sh
+
+# testCMEcreate - Shell script for running the UITS_Tool "cme_create" tests
+#
+# Created by Chris Angelli on 10/30/2011
+# Copyright 2010 Universal Music Group. All rights reserved.
+#
+# $Date$
+# $Revision$
+#
+# usage: testCMEcreate
+
+output_dir="../test/test-output"
+
+default_xsd="../test/cme-uits_cma.xsd"
+default_uits="$output_dir/cme_test_payload.xml"
+default_algorithm="RSA2048"
+default_priv="../test/privateRSA2048.pem"
+default_pub="../test/pubRSA2048.pem"
+default_pubID="33dce5a4f8b67303a290dc5145037569ca38036d"
+default_nonce="QgYnkgYS"
+default_Distributor="A Distributor"
+default_ProductID="My product"
+default_ProductID_type="UPC"
+default_ProductID_completed_type="true"
+default_AssetID="ES1700800500"
+default_AssetID_type="ISRC"
+default_TID="Transaction ID"
+default_TID_version="1"
+default_UID="User ID"
+default_UID_version="1"
+default_URL="http://www.umusic.com"
+default_PA="explicit"
+default_Copyright="allrightsreserved"
+default_Extra="extra content"
+default_Extra_type="blah"
+default_Time="2008-08-30T13:15:04Z"
+
+#
+# Test 1	All arguments correct, embed payload	
+#
+
+echo "CME Test 1 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+
+# Test 2   Silent mode	Verify that silent mode only displays an exit code
+echo "CME Test 2 ... \c"
+return_string=`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ "$return_string" == "" ]; then
+ echo "PASS"
+else
+ echo "FAIL"
+fi
+
+# Test 3	uits missing				Should fail
+echo "CME Test 3 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 132 ]; then	# should fail with an exit status of 132
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 4	pub missing					Should fail
+echo "CME Test 4 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 132 ]; then	# should fail with an exit status of 132
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 5	priv missing				Should fail
+echo "CME Test 5 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 132 ]; then	# should fail with an exit status of 132
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 6	pubID missing				Should fail
+echo "CME Test 6 ... \c"
+
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 132 ]; then	# should fail with an exit status of 132
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 7	nonce missing				Should fail
+echo "CME Test 7 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time 2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 8	Distributor missing			Should fail
+echo "CME Test 8 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time 2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 9	Time missing				If missing, should be auto-generated
+echo "CME Test 9 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 10	ProductID missing			Should fail
+echo "CME Test 10 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time 2>/dev/null`
+exit_status=$?
+if [ $exit_status != 144 ]; then	# should fail with an exit status of 144
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 11	ProductID_type missing		if missing, should default to UPC
+echo "CME Test 11 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 12	ProductID_completed present. should fail
+echo "CME Test 12 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--ProductID_completed $default_ProductID_completed \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 130 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 13	AssetID present				Should fail
+echo "CME Test 13 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--AssetID $default_AssetID \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time $2>/dev/null`
+exit_status=$?
+if [ $exit_status != 130 ]; then	# should fail with an exit status of 130
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 14	AssetID_type present. should fail
+echo "CME Test 14 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--AssetID_type $default_AssetID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 130 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 15	TID missing	should fail
+echo "CME Test 15 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID_version $default_TID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 144 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 16	TID_version missing should fail
+echo "CME Test 16 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 0 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 17	UID version present. Should fail.
+echo "CME Test 17 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID_version $default_UID_version \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 130 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
+
+# Test 18 UID present. should fail
+echo "CME Test 18 ... \c"
+`./UITS_Tool cme_create \
+--silent \
+--xsd $default_xsd \
+--cme_uits $default_uits \
+--algorithm $default_algorithm \
+--priv  $default_priv \
+--pub $default_pub \
+--pubID $default_pubID \
+--nonce $default_nonce \
+--Distributor $default_Distributor \
+--ProductID $default_ProductID \
+--ProductID_type $default_ProductID_type \
+--TID $default_TID \
+--TID_version $default_TID_version \
+--UID $default_UID \
+--URL $default_URL\
+--PA $default_PA \
+--Copyright $default_Copyright \
+--Extra $default_Extra \
+--Extra_type $default_Extra_type \
+--Time $default_Time`
+exit_status=$?
+if [ $exit_status != 130 ]; then
+ echo "FAIL"
+else
+ echo "PASS"
+fi
