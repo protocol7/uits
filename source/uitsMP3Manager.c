@@ -111,7 +111,7 @@ char *mp3GetMediaHash (char *audioFileName)
 	FILE *audioFP;
 	MP3_ID3_HEADER		   *mp3ID3Header;
 	MP3_AUDIO_FRAME_HEADER *mp3AudioFrameHeader;
-	int audioFrameStart, audioFrameEnd, audioFrameLength;
+	int audioFrameStart, audioFrameEnd, audioFrameLength, digestStart;
 	UITS_digest *mediaHash;
 	char *mediaHashString;
 	int foundPadBytes;
@@ -151,24 +151,33 @@ char *mp3GetMediaHash (char *audioFileName)
 	/* if the first frame of audio is a VBR frame (XING, Info, VBR), skip it */
 	if (mp3AudioFrameHeader->vbrHeaderflag) {
 		vprintf("Skipping XING Frame\n");
-		fseeko(audioFP, mp3AudioFrameHeader->frameLength, SEEK_CUR);
+    audioFrameStart = audioFrameStart + mp3AudioFrameHeader->frameLength;
+
+    fseeko(audioFP, audioFrameStart, SEEK_SET);
 	}
-	
-	audioFrameStart = ftello(audioFP);
 	
 	/* calculate how long the audio frame data is by seeking to EOF and saving size  */
 	fseeko(audioFP, 0L, SEEK_END);
 	audioFrameEnd = ftello(audioFP);	
 	fseeko(audioFP, audioFrameStart, SEEK_SET);
 	
-	/* skip the 128 byte ID3v1 tag at the end of the file, if it's there */
-	/* note that some files have been found to have more than 1 ID3V1 tag, so don't include any of them */
-	id3v1TagCount = mp3GetID3V1TagCount(audioFP);
-	
-	audioFrameEnd -= (id3v1TagCount * id3v1TagSize);
-	
-	
-	audioFrameLength = audioFrameEnd - audioFrameStart;
+
+  digestStart = audioFrameStart;
+
+  while(audioFrameStart + 4 < audioFrameEnd) {
+    mp3AudioFrameHeader = mp3ReadAudioFrameHeader(audioFP);
+    if(mp3AudioFrameHeader) {
+      audioFrameStart = audioFrameStart + mp3AudioFrameHeader->frameLength;
+
+      fseeko(audioFP, audioFrameStart, SEEK_SET);
+    } else {
+      break;
+    }
+  }
+  audioFrameEnd = audioFrameStart;
+
+  audioFrameLength = audioFrameEnd - digestStart;
+  fseeko(audioFP, digestStart, SEEK_SET);
 	
 	mediaHash = uitsCreateDigestBuffered (audioFP, audioFrameLength, "SHA256") ;
 	
@@ -859,6 +868,7 @@ MP3_AUDIO_FRAME_HEADER *mp3ReadAudioFrameHeader (FILE *fpin)
 {
 	MP3_AUDIO_FRAME_HEADER *frameHeader = calloc(sizeof(MP3_AUDIO_FRAME_HEADER), 1);
 	int saveSeek;		// always leave the file pointer where it was when the function was called
+  int pad;
 	unsigned char header[3];
 	unsigned char bytebuf;
 
@@ -866,12 +876,14 @@ MP3_AUDIO_FRAME_HEADER *mp3ReadAudioFrameHeader (FILE *fpin)
 	
 	saveSeek = ftello(fpin);
 	err = fread(header, 1L, 4L, fpin);
-	uitsHandleErrorINT(mp3ModuleName, "mp3ReadAudioFrame", err, 4L, ERR_FILE, "Couldn't read mp3 audio frame header\n");
+  if(err != 4L) {
+    return 0;
+  }
 	
 	// Make sure this is an audio frame header
 	// Sync bytes - start of an MP3 audio frame, always eleven 1's.
 	if (!((header[0] == 0xff) && ((header[1] & 0xe0) == 0xe0))){
-		uitsHandleErrorINT(mp3ModuleName, "mp3ReadAudioFrameHeader", ERROR, OK, ERR_MP3, "Couldn't read audio frame header\n");
+    return 0;
 	}
 
 	bytebuf = (header[1] >> 3) & 0x03;
@@ -918,8 +930,12 @@ MP3_AUDIO_FRAME_HEADER *mp3ReadAudioFrameHeader (FILE *fpin)
 	bytebuf = (header[3]& 0x03);
 	frameHeader->emphasis = emphasis[(int) bytebuf];
 		
-	frameHeader->frameLength = ((144L * frameHeader->bitrate) / frameHeader->samplerate) + frameHeader->paddedFlag;
-		
+  pad = 0;
+	if(frameHeader->paddedFlag) {
+		pad = 1;
+	}
+	frameHeader->frameLength = ((144L * frameHeader->bitrate) / frameHeader->samplerate) + pad;
+
 //	next_frame = (ftello(fpin)) + frame_length - 4L;
 	
 	frameHeader->vbrHeaderflag = mp3IsVBRFrame (fpin, frameHeader);
